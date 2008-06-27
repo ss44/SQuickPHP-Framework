@@ -9,6 +9,11 @@
  */
 
 class SimpleQuery{
+	class Where{
+		public $field = '';
+		public $value = '';
+		public $operator = '';
+	}
 	
 	public function addColumn($columnName){}
 	

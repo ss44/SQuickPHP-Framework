@@ -6,6 +6,7 @@ require_once('../simpleQuery.class.php');
 
 $tests = array();
 $q = new SimpleQuery();
+$failed = 0;
 
 echo "\n";
 //1. Test Building SELECT statements
