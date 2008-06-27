@@ -9,35 +9,135 @@
  */
 
 class SimpleQuery{
-	class Where{
-		public $field = '';
-		public $value = '';
-		public $operator = '';
+	
+	public $tables = array();
+	public $columns = array();
+	public $fields = array();
+	public $joins = array();
+	public $wheres = array();
+	
+	public function addColumn($columnName){
+		$this->columns[] = $columnName;
 	}
 	
-	public function addColumn($columnName){}
+	public function addColumns($columns){
+		if (is_array($columns)){
+			$this->columns = array_merge($this->columns, $columns);
+		}else{
+			$this->addColumn($columns);
+		}
+		
+	}
 	
-	public function addColumns($columns){}
+	public function addField($fieldName, $value = ''){
+		$pair = array();
+		$pair['field'] = $fieldName;
+		$pair['value'] = $value;
+		
+		$this->fields[] = $pair;
+	}
 	
-	public function addField($fieldName, $value){}
+	public function addFields( $fields ){
+		if (is_array($fields)){
+			foreach ($fields as $field=>$value){
+				$pair = array();
+				$pair['field'] = $field;
+				$pair['value'] = $value;
+				
+				$this->fields[] = $pair;
+			}
+		}
+	}
 	
-	public function addFields( $fields ){}
+	public function addTable( $table ){
+		$this->tables[] = $table;
+	}
 	
-	public function addTable( $table ){}
+	public function addLeftJoin( $table, $onClause = ''){
+		$pair = array();
+		$pair['table'] = $table;
+		$pair['on'] = $onClause;
+		$pair['type'] = 'left';
+		$this->joins[] = $pair;
+	}
 	
-	public function addLeftJoin( $table, $onClause){}
+	public function addRightJoin( $table, $onClause){
+		$pair = array();
+		$pair['table'] = $table;
+		$pair['on'] = $onClause;
+		$pair['type'] = 'right';
+		$this->rightJoins[] = $pair;
+	}
 	
-	public function addRightJoin( $table, $onClause){}
+	public function addJoin( $table, $onClause){
+		$pair = array();
+		$pair['table'] = $table;
+		$pair['on'] = $onClause;
+		$pair['type'] = 'inner';
+		$this->rightJoins[] = $pair;
+	}
 	
-	public function addJoin( $table, $onClause){}
+	public function addWhere( $field, $value = '', $operator = '='){
+		$pair = array();
+		$pair['field'] = $field;
+		$pair['value'] = $value;
+		$pair['operator'] = $operator;
+		$this->wheres[] = $pair;
+	}
 	
-	public function addWhere( $field, $value = '', $operator = ''){}
-	
-	public function getSelect(){}
+	public function getSelect(){
+		$str = 'SELECT ';
+		
+		if (!$this->columns){
+			$str .= '* ';
+		}else{
+			$str .= $this->prepareColumns();
+		}
+		
+		if (!$this->tables){
+			return false;
+		}else{
+			$str .= $this->prepareTables();
+		}
+		
+		if ($this->wheres){
+			$str .= $this->prepareWhere();
+		}
+		
+		return $str;
+	}
 	
 	public function getInsert(){}
 	
 	public function getUpdate(){}
 	
+	function prepareColumns(){
+		return join(', ', $this->columns).' ';
+	}
+	
+	function prepareWhere(){
+		$str = ' WHERE ';
+		
+		$numberOfItems = count($this->wheres);
+		$counter = 0;
+		var_dump($numberOfItems);
+		foreach ($this->wheres as $where){
+			$str .= '('.$where['field'] . ' '. $where['operator'] . " '" . $where['value'] . "') ";
+			$counter++;
+			if ($counter != $numberOfItems){
+				$str .= ' AND ';		
+			}
+		}
+		
+		return $str;
+	}
+	
+	function prepareTables(){
+		return 'FROM '.join(', ', $this->tables);
+	}
+	
+	function prepareJoins(){}
+	
+	function prepareFields(){}
 }
 ?>
