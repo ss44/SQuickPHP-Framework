@@ -10,29 +10,29 @@
 
 class SimpleQuery{
 	
-	public function addColumn($columnName);
+	public function addColumn($columnName){}
 	
-	public function addColumns($columns);
+	public function addColumns($columns){}
 	
-	public function addField($fieldName, $value);
+	public function addField($fieldName, $value){}
 	
-	public function addFields( $fields );
+	public function addFields( $fields ){}
 	
-	public function addTable( $table );
+	public function addTable( $table ){}
 	
-	public function addLeftJoin( $table, $onClause);
+	public function addLeftJoin( $table, $onClause){}
 	
-	public function addRightJoin( $table, $onClause);
+	public function addRightJoin( $table, $onClause){}
 	
-	public function addJoin( $table, $onClause);
+	public function addJoin( $table, $onClause){}
 	
-	public function addWhere( $field, $value = '', $operator = '');
+	public function addWhere( $field, $value = '', $operator = ''){}
 	
-	public function getSelect();
+	public function getSelect(){}
 	
-	public function getInsert();
+	public function getInsert(){}
 	
-	public function getUpdate();
+	public function getUpdate(){}
 	
 }
 ?>
