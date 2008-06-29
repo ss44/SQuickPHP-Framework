@@ -20,7 +20,7 @@ class Tester{
 		
 		foreach ($this->tests as $case=>$test){
 			if ($test['expected'] !== $test['result']){
-				echo "Failed Test " . ($case + 1) . "\n";
+				echo "\nFailed Test " . ($case + 1) . "\n";
 				var_dump($test['expected']);
 				var_dump($test['result']);
 				$failed++; 

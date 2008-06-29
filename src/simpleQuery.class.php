@@ -66,7 +66,7 @@ class SimpleQuery{
 		$pair['table'] = $table;
 		$pair['on'] = $onClause;
 		$pair['type'] = 'right';
-		$this->rightJoins[] = $pair;
+		$this->joins[] = $pair;
 	}
 	
 	public function addJoin( $table, $onClause){
@@ -74,7 +74,7 @@ class SimpleQuery{
 		$pair['table'] = $table;
 		$pair['on'] = $onClause;
 		$pair['type'] = 'inner';
-		$this->rightJoins[] = $pair;
+		$this->joins[] = $pair;
 	}
 	
 	public function addWhere( $field, $value = '', $operator = '='){
@@ -85,26 +85,30 @@ class SimpleQuery{
 		$this->wheres[] = $pair;
 	}
 	
+	public function addGroup($group){}
+	
+	public function addGroups($groups){}
+	
+	public function addHaving($field, $values, $operator){}
+	
+	public function addHavings($fields){}
+	
+	public function addOrderBy($field){}
+	
 	public function getSelect(){
 		$str = 'SELECT ';
 		
-		if (!$this->columns){
-			$str .= '* ';
-		}else{
-			$str .= $this->prepareColumns();
-		}
+		if (!$this->columns) $str .= '* ';
+		else $str .= $this->prepareColumns();
 		
-		if (!$this->tables){
-			return false;
-		}else{
-			$str .= $this->prepareTables();
-		}
+		if (!$this->tables) return false;
+		else $str .= $this->prepareTables();
 		
-		if ($this->wheres){
-			$str .= $this->prepareWhere();
-		}
+		if ($this->joins) $str .= ' '.$this->prepareJoins();
+
+		if ($this->wheres) $str .= ' '.$this->prepareWhere();
 		
-		return $str;
+		return trim($str);
 	}
 	
 	public function getInsert(){}
@@ -116,13 +120,14 @@ class SimpleQuery{
 	}
 	
 	function prepareWhere(){
-		$str = ' WHERE ';
+		$str = 'WHERE ';
 		
 		$numberOfItems = count($this->wheres);
 		$counter = 0;
 		var_dump($numberOfItems);
 		foreach ($this->wheres as $where){
-			$str .= '('.$where['field'] . ' '. $where['operator'] . " '" . $where['value'] . "') ";
+			if (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
+			else $str .= $where['field'] . $where['operator'] . "'" . mysql_escape_string($where['value'])."'";
 			$counter++;
 			if ($counter != $numberOfItems){
 				$str .= ' AND ';		
@@ -136,7 +141,32 @@ class SimpleQuery{
 		return 'FROM '.join(', ', $this->tables);
 	}
 	
-	function prepareJoins(){}
+	function prepareJoins(){
+		$str = '';
+
+		foreach ($this->joins as $join){
+			switch ($join['type']){
+				case 'left':
+					$str .= 'LEFT ';
+					break;
+				case 'right':
+					$str .= 'RIGHT ';
+					break;
+				case 'outer':
+					$str .= 'OUTER ';
+					break;
+				case 'inner':
+				case 'default':
+					$str .= 'INNER ';
+					break;
+			}
+			
+			$str .= 'JOIN '. $join['table']. ' ON (' .$join['on'] . ') ';
+
+		}
+		
+		return trim($str);
+	}
 	
 	function prepareFields(){}
 }
