@@ -9,7 +9,7 @@ $tests = new Tester();
 
 
 echo "\n";
-
+/*
 //1. Test Building SELECT statements
 $q = new SimpleQuery();
 $q->addTable('test');
@@ -61,6 +61,7 @@ $q->addTable('test');
 $q->addGroup('c');
 $q->addGroup('d');
 $q->addGroup('e');
+$q->addColumn('a');
 $expected = "SELECT a FROM test WHERE a=5 GROUP BY c, d, e";
 $tests->addTest($expected, $q->getSelect());
 
@@ -70,27 +71,50 @@ $q->addWhere('a', 5);
 $q->addGroup('c');
 $q->addHaving('a', 5);
 $q->addHaving('b', 6);
+$q->addColumn('a');
 $expected = "SELECT a FROM test WHERE a=5 GROUP BY c HAVING a=5 AND b=6";
 $tests->addTest($expected, $q->getSelect());
-
+*/
 $q = new SimpleQuery();
 $q->addTable('test');
 $q->addColumn('a');
-$q->addGroup('or');
+$q->startWhereGroup('OR');
 $q->addWhere('a', 5);
 $q->addWhere('b', 6);
+$q->endWhereGroup();
+$q->startWhereGroup('OR');
+$q->addWhere('c',8);
+$q->addWhere('d', 9);
+$q->endWhereGroup();
 $expected = "SELECT a FROM test WHERE (a=5 OR b=6) AND (c=8 OR d=9)";
 $tests->addTest($expected, $q->getSelect());
 
 $expected = "SELECT a FROM test WHERE (a=5 AND c=6) OR (b=7 OR f=10)";
 $tests->addTest($expected, $q->getSelect());
 
-$expected = "SELECT a FROM test WHERE a IN (5, 1, 4, 7)";
+$q = new simpleQuery();
+$q->addTable('test');
+$q->addWhere('a', array(5, 1, 4, 7));
+$q->addColumn('a');
+$expected = "SELECT a FROM test WHERE a IN ('5', '1', '4', '7')";
 $tests->addTest($expected, $q->getSelect());
 
+
+$q = new simpleQuery();
+$q->addTable('test');
+$q1 = new simpleQuery();
+$q1->addTable('b');
+$q1->addColumn('a');
+$q->addWhere('a', $q1);
+$q->addColumn('a');
 $expected = "SELECT a FROM test WHERE a IN (SELECT a FROM b)";
 $tests->addTest($expected, $q->getSelect());
 
 
 $tests->run();
+
+var_dump( getType($q));
+var_dump( getType('5'));
+var_dump( getType(5));
+var_dump( is_numeric('5'));
 ?>

@@ -15,6 +15,14 @@ class SimpleQuery{
 	public $fields = array();
 	public $joins = array();
 	public $wheres = array();
+	public $groups = array(); 
+	public $havings = array(); 
+	public $whereGroups = array();
+	public $whereGroupCounter = 0;
+	
+	public function __construct(){
+		$this->whereGroups[0] = 'AND';
+	}
 	
 	public function addColumn($columnName){
 		$this->columns[] = $columnName;
@@ -82,14 +90,32 @@ class SimpleQuery{
 		$pair['field'] = $field;
 		$pair['value'] = $value;
 		$pair['operator'] = $operator;
+		$pair['group'] = $this->whereGroupCounter;
 		$this->wheres[] = $pair;
 	}
 	
-	public function addGroup($group){}
+	public function startWhereGroup( $type = 'OR' ){
+		$this->whereGroupCounter++;
+		$this->whereGroups[$this->whereGroupCounter] = $type;
+	}
+	
+	public function endWhereGroup(){
+		$this->whereGroupCounter = $this->whereGroupCounter == 0 ? 0 : $this->whereGroupCounter-1;
+	}
+	
+	public function addGroup($group){
+		$this->groups[] = $group;
+	}
 	
 	public function addGroups($groups){}
 	
-	public function addHaving($field, $values, $operator){}
+	public function addHaving($field, $value, $operator = '='){
+		$pair = array();
+		$pair['field'] = $field;
+		$pair['value'] = $value;
+		$pair['operator'] = $operator;
+		$this->havings[] = $pair;
+	}
 	
 	public function addHavings($fields){}
 	
@@ -108,12 +134,14 @@ class SimpleQuery{
 
 		if ($this->wheres) $str .= ' '.$this->prepareWhere();
 		
+		if ($this->groups) $str .= ' '.$this->prepareGroup();
+		if ($this->havings) $str .= ' '.$this->prepareHaving();
 		return trim($str);
 	}
 	
-	public function getInsert(){}
+	function getInsert(){}
 	
-	public function getUpdate(){}
+	function getUpdate(){}
 	
 	function prepareColumns(){
 		return join(', ', $this->columns).' ';
@@ -121,16 +149,35 @@ class SimpleQuery{
 	
 	function prepareWhere(){
 		$str = 'WHERE ';
-		
+		$boolType = 'AND';
 		$numberOfItems = count($this->wheres);
 		$counter = 0;
-		var_dump($numberOfItems);
+		$currentGroup = 0;
+		print_r($this->wheres);
 		foreach ($this->wheres as $where){
+			if ($where['group'] > $currentGroup){
+				$str .= '(';
+				$boolType = $this->whereGroups[ $where['group'] ];
+				$currentGroup = $where['group'];
+			}elseif($where['group'] < $currentGroup){
+				$str .= ')';
+				$boolType = $this->whereGroups[ $where['group']]; 
+				$currentGroup = $where['group'];
+			}
 			if (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
+			elseif (is_array($where['value'])){
+				//array_walk($where, 'mysql_escape_string');
+				//TODO do a type check using typeof() to determine if is a real int instead checking if is numeric
+				$str .= $where['field'] . ' IN (\'' . implode("', '", $where['value'] ) . '\')';
+			}
+			elseif (is_a($where['value'], SimpleQuery)){
+				$obj = $where['value'];
+				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
+			}
 			else $str .= $where['field'] . $where['operator'] . "'" . mysql_escape_string($where['value'])."'";
 			$counter++;
 			if ($counter != $numberOfItems){
-				$str .= ' AND ';		
+				$str .= " $boolType ";		
 			}
 		}
 		
@@ -168,6 +215,23 @@ class SimpleQuery{
 		return trim($str);
 	}
 	
+	function prepareGroup(){
+		return 'GROUP BY '. join(', ', $this->groups);
+		
+	}
+	
+	function prepareHaving(){
+		$str = 'HAVING ';
+		$numberOfItems = count($this->havings);
+		$counter = 0;
+		
+		foreach ($this->havings as $having){
+			$str .= $having['field'] . $having['operator'] . (is_numeric($having['value']) ? $having['value'] : "'" . mysql_escape_string($having['value']) . "'") ;
+			$counter ++;
+			if ($numberOfItems != $counter) $str .= ' AND ';
+		}
+		return $str;
+	}
 	function prepareFields(){}
 }
 ?>
