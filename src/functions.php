@@ -12,6 +12,8 @@
  */
 function oops( $var, $showVarDump = false){
 	echo '<pre>';
+	$info = debug_backtrace();
+	echo "<h2>".$info[0]['file']." @ line ". $info[0]['line'] . "</h2>";
 	if ($showVarDump){
 		var_dump($var);
 	}else{

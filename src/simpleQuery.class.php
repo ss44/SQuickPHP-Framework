@@ -153,7 +153,7 @@ class SimpleQuery{
 		$numberOfItems = count($this->wheres);
 		$counter = 0;
 		$currentGroup = 0;
-		print_r($this->wheres);
+		//print_r($this->wheres);
 		foreach ($this->wheres as $where){
 			if ($where['group'] > $currentGroup){
 				$str .= '(';

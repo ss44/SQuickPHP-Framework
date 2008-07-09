@@ -112,7 +112,7 @@ $tests->addTest($expected, $q->getSelect());
 
 
 $tests->run();
-
+oops( 'test ');
 var_dump( getType($q));
 var_dump( getType('5'));
 var_dump( getType(5));

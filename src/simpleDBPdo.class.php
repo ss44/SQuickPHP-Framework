@@ -22,6 +22,32 @@ class simpleDBPdo extends PDO{
 		$statement = $this->query($sql);
 		return $statement->fetchAll();
 	}
+	
+	/**
+	 * Loops through all results and returns results as an associtive array based on the $field, $value
+	 * pair. If no value is given then returns all results.
+	 *
+	 * @param simpleQuery | string  $query
+	 * @param string $field
+	 * @param string $value 
+	 * @return array | mixed
+	 * 
+	 */
+	public function getAssoc($query, $field, $value = ''){
+		//Get all records 
+		$results = $this->getAll($query);
+		$assocArray = array();
+		
+		//Loop through the records and reindex
+		foreach ($results as $result){
+			if (isset($result[ $field ] )){
+				if ($value && isset($result[ $value ])) $assocArray[ $result[$field] ] = $result[$value];
+				else $assocArray[ $result[$field] ][] = $result;
+			}
+		}
+		
+		return $assocArray;
+	}
 }
 
 ?>
