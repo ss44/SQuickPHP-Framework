@@ -100,6 +100,12 @@ class simpleImageGD2{
 				
 		}
 	}
+	
+	public function outputToScreen(){
+		//Outputs an image to the screen
+		header("Content-Type: image/png");
+		imagepng($this->image);
+	}
 
 }
 

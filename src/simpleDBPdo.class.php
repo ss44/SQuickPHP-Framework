@@ -48,6 +48,17 @@ class simpleDBPdo extends PDO{
 		
 		return $assocArray;
 	}
+	/**
+	 * Returns a single row
+	 *	TODO: error checking
+	 * @param string|simpleQuery $query
+	 */
+	public function getRow($query){
+		$sql = is_string($query) ? $query : $query->getSelect();
+		//oops($sql);
+		$statement = $this->query( $sql );
+		return $statement->fetch();
+	}
 }
 
 ?>
