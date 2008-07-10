@@ -20,7 +20,8 @@ class simpleImageGD2{
 	 */
 	public function __construct($imagePath = ''){
 		if ($imagePath){
-			$this->loadImage($imagePath);
+			
+			return $this->loadImage($imagePath);
 		}
 	}
 
@@ -52,7 +53,12 @@ class simpleImageGD2{
 			case 'image/png':
 				$this->imagecreatefrompng($imagePath);
 				break;
+			default :
+				return false;//throw new Exception('Unrecognized image file: '. $imagePath);
+				break;
 		}
+		
+		return true;
 	}
 
 	public function resizeImage($newWidth, $newHeight, $constrain = true, $magnify = false){
