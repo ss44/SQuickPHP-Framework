@@ -21,4 +21,29 @@ function oops( $var, $showVarDump = false){
 	};
 	echo "</pre>";
 }
+/**
+ * Validates a variable against a given type giving options for more advanced validation.
+ *
+ * @param mixed $var The variable to validate
+ * @param string $type Can be int, str, float, double, bool, appending array will mean array of int, string etc.
+ * @param mixed $arg1 The first argument to compare against, for numeric values this is a min. If this value is an array,
+ * then its taken to mean that the variable must be a value in the array.
+ * @param mixed $agr2 If applied will be the max value to compare against. For strings if both values are ints will take it
+ * to mean the 
+ */
+function qValidate($var, $type = 'str', $arg1 = null, $agr2 = null){
+
+	switch ($type){
+		case 'str':
+			if (!is_a($var, 'String')) return false;
+			
+			
+			break;
+		case 'float':
+		case 'double':
+		case 'int':
+		case 'bool':
+	
+	}
+}
 ?>
