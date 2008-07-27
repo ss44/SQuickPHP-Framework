@@ -28,15 +28,21 @@ class simpleScrape{
 	}
 	
 	public function getPage(){
+		var_dump($this->host);
 		$fp = fsockopen($this->host, 80);
-		//return file_get_contents($this->uri);
+		//$fp = fsockopen('shindasingh.com', 80);
+		exit;
+		return file_get_contents($this->uri);
 	}
 	
-	protected function parseUri( $uri ){
-		oops($uri);
-		preg_match('/(^https?:\/\/)?([a-z0-9\.\-\/])(\?.*)?$/i', $uri, $temp);
-		oops($uri);
-		oops($temp);
+	protected function parseUri( $url ){
+
+		preg_match('/(^https?:\/\/)?([a-z0-9\.\-\/]+)(\?.*)?$/i', $url, $temp);
+		$protocol = isset($temp[1]) ? $temp[1] : 'http://';
+		$path = isset($temp[2]) ? $temp[2] : '';
+		$request = isset($temp[3]) ? $temp[3] : '';
+
+		$this->host = $path;
 	}
 }
 ?>
