@@ -34,7 +34,6 @@ class SimpleQuery{
 		}else{
 			$this->addColumn($columns);
 		}
-		
 	}
 	
 	public function addField($fieldName, $value = ''){
@@ -139,15 +138,75 @@ class SimpleQuery{
 		return trim($str);
 	}
 	
-	function getInsert(){}
+	public function getInsert(){
+		if (!$this->tables) throw new Exception('Must set a table first.');
+		if (!$this->fields) throw new Exception('No fields set');
+		
+		$str = 'INSERT INTO ';
+		
+		//Can only insert into one table at a time so grab the last table we tried to insert
+		$lastTable = end($this->tables);
+		$str .= $lastTable;
+		
+		$fields = '';
+		$values = '';
+		
+		$counter = count($this->fields);
+		$x = 0;
+		foreach ($this->fields as $pair){
+			$x++;
+			$field = $pair['field'];
+			$value = $pair['value'];
+			
+			$fields .= '`'.mysql_real_escape_string($field).'`';
+			$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.mysql_real_escape_string($value).'\'';
+			 
+			if ($x < $counter){ 
+				$fields .= ', ';
+				$values .= ', ';
+			}
+		}
+		
+		$str .= "($fields) VALUES($values)";
+		return $str;
+	}
 	
-	function getUpdate(){}
+	public function getUpdate(){
+		if (!$this->tables) throw new Exception("Must set a table.");
+		if (!$this->fields) throw new Exception("Must select fields.");
+		
+		$str = 'UPDATE ';
+		$str .= join(', ', $this->tables);
+		$str .= ' SET ';
+		
+		$count = count($this->fields);
+		$x = 0;
+		
+		foreach($this->fields as $pair){
+			$x++;
+			
+			$field = $pair['field'];
+			$value = $pair['value'];
+			
+			if (!$value)  $str .= $field;
+			elseif (is_numeric($value)) $str .= $field.'='.$value;
+			else $str .= $field.'='.'\''.mysql_real_escape_string($value).'\'';
+			
+			if ($x < $count){
+				$str .= ', ';
+			}
+		}
+		
+		if ($this->wheres) $str .= ' '.$this->prepareWhere();
+		
+		return $str;
+	}
 	
-	function prepareColumns(){
+	public function prepareColumns(){
 		return join(', ', $this->columns).' ';
 	}
 	
-	function prepareWhere(){
+	protected function prepareWhere(){
 		$str = 'WHERE ';
 		$boolType = 'AND';
 		$numberOfItems = count($this->wheres);
@@ -164,7 +223,8 @@ class SimpleQuery{
 				$boolType = $this->whereGroups[ $where['group']]; 
 				$currentGroup = $where['group'];
 			}
-			if (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
+			if (!$where['value']) $str .= $where['field'];
+			elseif (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
 			elseif (is_array($where['value'])){
 				//array_walk($where, 'mysql_escape_string');
 				//TODO do a type check using typeof() to determine if is a real int instead checking if is numeric
@@ -174,7 +234,7 @@ class SimpleQuery{
 				$obj = $where['value'];
 				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
 			}
-			else $str .= $where['field'] . $where['operator'] . "'" . mysql_escape_string($where['value'])."'";
+			else $str .= $where['field'] . $where['operator'] . "'" . mysql_real_escape_string($where['value'])."'";
 			$counter++;
 			if ($counter != $numberOfItems){
 				$str .= " $boolType ";		
@@ -184,11 +244,11 @@ class SimpleQuery{
 		return $str;
 	}
 	
-	function prepareTables(){
+	protected function prepareTables(){
 		return 'FROM '.join(', ', $this->tables);
 	}
 	
-	function prepareJoins(){
+	protected function prepareJoins(){
 		$str = '';
 
 		foreach ($this->joins as $join){
@@ -215,12 +275,12 @@ class SimpleQuery{
 		return trim($str);
 	}
 	
-	function prepareGroup(){
+	protected function prepareGroup(){
 		return 'GROUP BY '. join(', ', $this->groups);
 		
 	}
 	
-	function prepareHaving(){
+	protected function prepareHaving(){
 		$str = 'HAVING ';
 		$numberOfItems = count($this->havings);
 		$counter = 0;
@@ -232,6 +292,6 @@ class SimpleQuery{
 		}
 		return $str;
 	}
-	function prepareFields(){}
+	protected function prepareFields(){}
 }
 ?>

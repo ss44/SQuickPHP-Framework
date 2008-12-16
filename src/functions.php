@@ -11,15 +11,24 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 function oops( $var, $showVarDump = false){
-	echo '<pre>';
+	global $args;
+	
+	//oops($args);
+	
+	echo (array_key_exists('SHELL', $_SERVER)) ? '' : '<pre>';
 	$info = debug_backtrace();
-	echo "<h2>".$info[0]['file']." @ line ". $info[0]['line'] . "</h2>";
+	echo ((array_key_exists('SHELL', $_SERVER)) ? '' :"<h2>").$info[0]['file']." @ line ". $info[0]['line'] . ((array_key_exists('SHELL', $_SERVER)) ? "\n" :"</h2>");
 	if ($showVarDump){
 		var_dump($var);
 	}else{
 		print_r($var);
 	};
-	echo "</pre>";
+	echo (array_key_exists('SHELL', $_SERVER)) ? '' :"</pre>";
+}
+
+function dim($var, $showVarDump = false){
+	oops($var, $showVarDump); 
+	exit;
 }
 /**
  * Validates a variable against a given type giving options for more advanced validation.

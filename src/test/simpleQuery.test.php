@@ -9,7 +9,7 @@ $tests = new Tester();
 
 
 echo "\n";
-/*
+
 //1. Test Building SELECT statements
 $q = new SimpleQuery();
 $q->addTable('test');
@@ -74,7 +74,7 @@ $q->addHaving('b', 6);
 $q->addColumn('a');
 $expected = "SELECT a FROM test WHERE a=5 GROUP BY c HAVING a=5 AND b=6";
 $tests->addTest($expected, $q->getSelect());
-*/
+
 $q = new SimpleQuery();
 $q->addTable('test');
 $q->addColumn('a');
@@ -99,7 +99,6 @@ $q->addColumn('a');
 $expected = "SELECT a FROM test WHERE a IN ('5', '1', '4', '7')";
 $tests->addTest($expected, $q->getSelect());
 
-
 $q = new simpleQuery();
 $q->addTable('test');
 $q1 = new simpleQuery();
@@ -110,11 +109,65 @@ $q->addColumn('a');
 $expected = "SELECT a FROM test WHERE a IN (SELECT a FROM b)";
 $tests->addTest($expected, $q->getSelect());
 
+$q = new simpleQuery();
+$q->addTable('t');
+$q->addTable('t2');
+$q->addColumn('a');
+$q->addColumn('b');
+$q->addWhere('t.c=t2.c');
+$expected = "SELECT a, b FROM t, t2 WHERE t.c=t2.c";
+$tests->addTest($expected, $q->getSelect());
+
+//Test Insert Commands
+$q = new simpleQuery();
+$q->addTable('table');
+$q->addField('a', 1);
+$q->addField('b', 2);
+$q->addField('c', 'test');
+$q->addField('d', 'testes');
+$expected = "INSERT INTO table(`a`, `b`, `c`, `d`) VALUES(1, 2, 'test', 'testes')";
+$tests->addTest($expected, $q->getInsert());
+
+$exepected = "INSERT INTO table(`a`, `b`) VALUES('test11', 5)";
+$tests->addTest($expected, $q->getInsert());
+
+//Update commands
+$q = new simpleQuery();
+$q->addTable('table');
+$q->addField('a', 'test');
+$q->addField('b', 3);
+$expected = "UPDATE table SET a='test', b=3";
+$tests->addTest($expected, $q->getUpdate());
+
+$q = new simpleQuery();
+$q->addTable('table1');
+$q->addTable('table2');
+$q->addField('a', 'test');
+$q->addField('b', 3);
+$q->addField('c', 'testes');
+$expected = "UPDATE table1, table2 SET a='test', b=3, c='testes'";
+$tests->addTest($expected, $q->getUpdate());
+
+$q = new simpleQuery();
+$q->addTable('t1');
+$q->addTable('t2');
+$q->addTable('t3');
+$q->addField('t1.a','test');
+$q->addField('t2.b', 3);
+$q->addField('t3.c', 'data');
+$q->addWhere('t1.b=t2.a');
+$q->addWhere('t2.c=t3.a');
+$expected = "UPDATE t1, t2, t3 SET t1.a='test', t2.b=3, t3.c='data' WHERE t1.b=t2.a AND t2.c=t3.a";
+$tests->addTest($expected, $q->getUpdate());
+
+$q = new simpleQuery();
+$q->addTable('table');
+$q->addField('a', 'test');
+$q->addField('b', 3);
+$expected = "UPDATE table SET a='test', b=3";
+$tests->addTest($expected, $q->getUpdate());
 
 $tests->run();
-oops( 'test ');
-var_dump( getType($q));
-var_dump( getType('5'));
-var_dump( getType(5));
-var_dump( is_numeric('5'));
+
+
 ?>
