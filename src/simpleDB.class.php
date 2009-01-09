@@ -109,6 +109,7 @@ class SimpleDB{
 			case 'sqlite':
 		}
 	}
+	
 	/**
 	 * Returns the table structure for a given table as an associtive array.
 	 * 
@@ -117,11 +118,12 @@ class SimpleDB{
 	 */
 	public function getTableStructure($tableName){
 		$result = array();
-		
+
 		switch ($this->_dbType){
 			case 'mysql':
-				$r = mysql_query('Describe '.mysql_real_escape($tableName), $this->connection);
-				while ($row = mysql_fetch_assoc($r)){
+				$r = mysql_query('Describe '.mysql_real_escape_string($tableName), $this->connection);
+				
+				while ($r == true && $row = mysql_fetch_assoc($r)){
 					$result[ $row['Field'] ] = $row;
 				}
 				
