@@ -10,26 +10,52 @@
  * @param mixed $var  The variable to output.
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
-function oops( $var, $showVarDump = false){
-	global $args;
-	
-	//oops($args);
-	
-	echo (array_key_exists('SHELL', $_SERVER)) ? '' : '<pre>';
-	$info = debug_backtrace();
-	echo ((array_key_exists('SHELL', $_SERVER)) ? '' :"<h2>").$info[0]['file']." @ line ". $info[0]['line'] . ((array_key_exists('SHELL', $_SERVER)) ? "\n" :"</h2>");
-	if ($showVarDump){
-		var_dump($var);
-	}else{
-		print_r($var);
-	};
-	echo (array_key_exists('SHELL', $_SERVER)) ? '' :"</pre>";
+/**
+ * Debug tools
+ */
+function oops( $vars, $varDump = false, $level = 0 ){
+        $dbg = debug_backtrace();
+
+        $file = $dbg[0]['file'];
+        $line = $dbg[0]['line'];
+        echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+
+        for ($x = 1; $x < $level; $x++){
+                if (isset($dbg[$x])){
+                        $file = $dbg[$x]['file'];
+                        $line = $dbg[$x]['line'];
+                        echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+                }
+        }
+
+        if ($varDump) var_dump($vars);
+        else print_r($vars);
+        echo "</pre>";
 }
 
-function dim($var, $showVarDump = false){
-	oops($var, $showVarDump); 
+//Die improved merges oops with die
+function dim( $vars, $varDump = false, $level = 0 ){
+	$dbg = debug_backtrace();
+
+	$file = $dbg[0]['file'];
+	$line = $dbg[0]['line'];
+	echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+
+	for ($x = 1; $x < $level; $x++){
+			if (isset($dbg[$x])){
+					$file = $dbg[$x]['file'];
+					$line = $dbg[$x]['line'];
+					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+			}
+	}
+
+	if ($varDump) var_dump($vars);
+	else print_r($vars);
+	echo "</pre>";
+
 	exit;
 }
+
 /**
  * Validates a variable against a given type giving options for more advanced validation.
  *
@@ -38,11 +64,11 @@ function dim($var, $showVarDump = false){
  * @param mixed $arg1 The first argument to compare against, for numeric values this is a min. If this value is an array,
  * then its taken to mean that the variable must be a value in the array.
  * @param mixed $agr2 If applied will be the max value to compare against. For strings if both values are ints will take it
- * to mean the 
+ * to mean the
  */
 function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	$checks = false;
-	
+
 	switch ($type){
 		case 'str':
 			if (!is_a($var, 'String')) return null;
@@ -68,7 +94,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanREQUEST($field){
-	
+
 	$args = func_get_args();
 
 	$type = isset($args[1]) ? $args[1] : null;
@@ -76,11 +102,11 @@ function cleanREQUEST($field){
 	$arg2 = isset($args[3]) ? $args[3] : null;
 
 	if (array_key_exists($field, $_REQUEST)){
-		return cleanVar( $_REQUEST[$field], $type, $arg1, $arg2); 
+		return cleanVar( $_REQUEST[$field], $type, $arg1, $arg2);
 	}
-	
+
 	return null;
-	
+
 }
 
 
