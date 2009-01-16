@@ -241,7 +241,7 @@ class SimpleQuery{
 				//TODO do a type check using typeof() to determine if is a real int instead checking if is numeric
 				$str .= $where['field'] . ' IN (\'' . implode("', '", $where['value'] ) . '\')';
 			}
-			elseif (is_a($where['value'], SimpleQuery)){
+			elseif (is_a($where['value'], 'simpleQuery')){
 				$obj = $where['value'];
 				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
 			}
