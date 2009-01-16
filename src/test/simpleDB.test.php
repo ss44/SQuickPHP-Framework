@@ -7,12 +7,12 @@
 
 require_once('../simpleDB.class.php');
 require_once('../simpleQuery.class.php');
-require_once('../functions.php');
+require_once('../SimpleFunctions.php');
 //mysql database test cases:
 $db = new SimpleDB( array('type'=>'mysql', 'path'=>'localhost:3306', 'name'=>'world', 'user'=>'shinda', 'pass'=>'ziggy'));
 
-$q = new SimpleQuery();
-$q->addTable('City');
+//$q = new SimpleQuery();
+//$q->addTable('City');
 
 //1. Get Row
 //oops ( $db->getRow($q) );
@@ -25,4 +25,6 @@ $q->addTable('City');
 
 //4. Get Assoc without value.
 //oops ($db->getAssoc($q, 'CountryCode'));
+
+oops( $db->getTableStructure('City') );
 ?>

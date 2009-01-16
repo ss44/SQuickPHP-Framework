@@ -102,8 +102,12 @@ class SimpleDB{
 	 * 	This is just added protection from accidently deleting all rows in a table.
 	 */
 	public function delete(simpleQuery $q, $overRide = false){
-		switch ($this->_db_Type){
+		if ( !$overRide && empty($q->wheres) ) throw new Exception ("No where set for delete. Must set override to continue.");
+		
+		switch ($this->_dbType){
 			case 'mysql':
+				$result = mysql_query( $q->getDelete(), $this->connection);
+				return $result;
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -121,8 +125,7 @@ class SimpleDB{
 
 		switch ($this->_dbType){
 			case 'mysql':
-				$r = mysql_query('Describe '.mysql_real_escape_string($tableName), $this->connection);
-				
+				$r = mysql_query('Describe '.mysql_real_escape_string($tableName), $this->connection);				
 				while ($r == true && $row = mysql_fetch_assoc($r)){
 					$result[ $row['Field'] ] = $row;
 				}
@@ -184,6 +187,7 @@ class SimpleDB{
 			case 'sqlite':
 			
 		}
+		return $result;
 	}
 	
 	/**

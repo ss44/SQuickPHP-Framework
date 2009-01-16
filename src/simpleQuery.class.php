@@ -202,6 +202,17 @@ class SimpleQuery{
 		return $str;
 	}
 	
+	public function getDelete(){
+		if (!$this->tables) throw new Exception("Must set a table.");
+		
+		$str = 'DELETE FROM ';
+		$str .= join(', ', $this->tables);
+		
+		if ($this->wheres) $str .= ' '.$this->prepareWhere();
+		
+		return $str;
+	}
+	
 	public function prepareColumns(){
 		return join(', ', $this->columns).' ';
 	}

@@ -71,8 +71,12 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 
 	switch ($type){
 		case 'str':
-			if (!is_a($var, 'String')) return null;
-			break;
+			//if (!is_a($var, 'String')) return null;
+			
+			if ( is_int($arg1) && ( strlen($var) < $arg1)) return null;
+			
+			return $var;
+			
 		case 'float':
 		case 'double':
 		case 'int':
@@ -84,6 +88,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	}
 }
 
+
 /**
  * Convience function that passes a variable to cleanVar which validates a given value. This method is specific
  * to REQUEST vars where you pass the post field name instead of the var, the rest of the arguments follow
@@ -94,7 +99,8 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanREQUEST($field){
-
+	if (!array_key_exists($field, $_REQUEST) ) return null;
+	
 	$args = func_get_args();
 
 	$type = isset($args[1]) ? $args[1] : null;
@@ -102,13 +108,34 @@ function cleanREQUEST($field){
 	$arg2 = isset($args[3]) ? $args[3] : null;
 
 	if (array_key_exists($field, $_REQUEST)){
-		return cleanVar( $_REQUEST[$field], $type, $arg1, $arg2);
+		return cleanVar( $_REQUEST[$field], $type, $arg1, $arg2); 
+	}
+	
+	return null;
+	
+}
+
+/**
+ * Convience function that passes a POST variable through cleanVar, and returns the results.
+ * @param string $field Field name from the post which you want to clean
+ * @param See Param lsit of cleanVar from the second argument on for the rest.
+ * @return mixed Returns the variable cleaned or null if not loaded.
+ */
+function cleanPOST($field){
+	if (!array_key_exists($field, $_POST) ) return null;
+	
+	$args = func_get_args();
+
+	$type = isset($args[1]) ? $args[1] : null;
+	$arg1 = isset($args[2]) ? $args[2] : null;
+	$arg2 = isset($args[3]) ? $args[3] : null;
+
+	if (array_key_exists($field, $_REQUEST)){
+		return cleanVar( $_POST[$field], $type, $arg1, $arg2); 
 	}
 
 	return null;
 
 }
-
-
 
 ?>
