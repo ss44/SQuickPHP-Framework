@@ -150,7 +150,7 @@ class SimpleDB{
 			case 'mysql':
 				$r = mysql_query($q->getSelect(), $this->connection);
 				
-				if (mysql_num_rows($r) > 0){
+				if (@mysql_num_rows($r) > 0){
 					$result = mysql_fetch_assoc( $r );
 					return $result;
 				}
