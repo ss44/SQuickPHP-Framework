@@ -138,4 +138,33 @@ function cleanPOST($field){
 
 }
 
+
+function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
+	$msg = '';
+	$bgColor = 'yellow';
+	
+	switch ($errNo){
+		case E_USER_WARNING:
+			$msg = "<b>Warning : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$bgColor = 'red';
+			break;
+		case E_USER_NOTICE:
+			$msg = "<b>Notice : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			break;
+		case E_USER_ERROR:
+		default:
+			$msg = "<b>Error : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			break;
+	}
+	
+	//@TODO - have some sort of check here so that if we are in cli mode these errors are not handled like this.
+	echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor'>";
+	echo "$msg";
+	echo "</pre>";
+	
+	return true;
+}
+
+$tmp = set_error_handler ('simpleCleanError');
+
 ?>
