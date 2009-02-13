@@ -177,6 +177,9 @@ class SimpleQuery{
 		
 		$str = 'UPDATE ';
 		$str .= join(', ', $this->tables);
+		
+		if ($this->joins) $str .= ' '.$this->prepareJoins();
+		
 		$str .= ' SET ';
 		
 		$count = count($this->fields);
