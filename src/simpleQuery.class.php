@@ -191,7 +191,7 @@ class SimpleQuery{
 			$field = $pair['field'];
 			$value = $pair['value'];
 			
-			if (!$value)  $str .= $field;
+			if (!$value)  $str .= "$field = NULL";
 			elseif (is_numeric($value)) $str .= $field.'='.$value;
 			else $str .= $field.'='.'\''.mysql_real_escape_string($value).'\'';
 			
