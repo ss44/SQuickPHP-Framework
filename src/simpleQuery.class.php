@@ -159,7 +159,13 @@ class SimpleQuery{
 			$value = $pair['value'];
 			
 			$fields .= '`'.mysql_real_escape_string($field).'`';
-			$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.mysql_real_escape_string($value).'\'';
+			
+			if (is_numeric($value))
+				$values .= $value;
+			elseif (is_bool($value))
+				$values .= $value === true ? 1 : 0;
+			else 
+				$values .= '\''.mysql_real_escape_string($value).'\'';
 			 
 			if ($x < $counter){ 
 				$fields .= ', ';
