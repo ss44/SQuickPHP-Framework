@@ -3,6 +3,7 @@
  * Collection of commonly used functions to be included in our project.
  * @author Shajinder Padda <shajinder@gmail.com
  * @created 28-June-2008
+ * @modified 29-May-2009
  */
 
 /**
@@ -10,52 +11,55 @@
  * @param mixed $var  The variable to output.
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
+
 /**
  * Debug tools
  */
-function oops( $vars, $varDump = false, $level = 0 ){
-        $dbg = debug_backtrace();
-
-        $file = $dbg[0]['file'];
-        $line = $dbg[0]['line'];
-        echo "<pre><H1>". $file ." @ ". $line ."</H1>";
-
-        for ($x = 1; $x < $level; $x++){
-                if (isset($dbg[$x])){
-                        $file = $dbg[$x]['file'];
-                        $line = $dbg[$x]['line'];
-                        echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
-                }
-        }
-
-        if ($varDump) var_dump($vars);
-        else print_r($vars);
-        echo "</pre>";
-}
-
-//Die improved merges oops with die
-function dim( $vars, $varDump = false, $level = 0 ){
-	$dbg = debug_backtrace();
-
-	$file = $dbg[0]['file'];
-	$line = $dbg[0]['line'];
-	echo "<pre><H1>". $file ." @ ". $line ."</H1>";
-
-	for ($x = 1; $x < $level; $x++){
-			if (isset($dbg[$x])){
-					$file = $dbg[$x]['file'];
-					$line = $dbg[$x]['line'];
-					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
-			}
+if (!function_exists('oops')){
+	function oops( $vars, $varDump = false, $level = 0 ){
+	        $dbg = debug_backtrace();
+	
+	        $file = $dbg[0]['file'];
+	        $line = $dbg[0]['line'];
+	        echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+	
+	        for ($x = 1; $x < $level; $x++){
+	                if (isset($dbg[$x])){
+	                        $file = $dbg[$x]['file'];
+	                        $line = $dbg[$x]['line'];
+	                        echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+	                }
+	        }
+	
+	        if ($varDump) var_dump($vars);
+	        else print_r($vars);
+	        echo "</pre>";
 	}
-
-	if ($varDump) var_dump($vars);
-	else print_r($vars);
-	echo "</pre>";
-
-	exit;
 }
-
+if (!function_exists('dim')){
+	//Die improved merges oops with die
+	function dim( $vars, $varDump = false, $level = 0 ){
+		$dbg = debug_backtrace();
+	
+		$file = $dbg[0]['file'];
+		$line = $dbg[0]['line'];
+		echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+	
+		for ($x = 1; $x < $level; $x++){
+				if (isset($dbg[$x])){
+						$file = $dbg[$x]['file'];
+						$line = $dbg[$x]['line'];
+						echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+				}
+		}
+	
+		if ($varDump) var_dump($vars);
+		else print_r($vars);
+		echo "</pre>";
+	
+		exit;
+	}
+}
 /**
  * Validates a variable against a given type giving options for more advanced validation.
  *
@@ -74,7 +78,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 			//if (!is_a($var, 'String')) return null;
 			
 			if ( is_int($arg1) && ( strlen($var) < $arg1)) return null;
-			
+			if ( is_int($arg2) && ( strlen($var) > $arg2)) $var = trim($str, $arg2); 
 			return $var;
 			
 		case 'float':
@@ -130,8 +134,31 @@ function cleanPOST($field){
 	$arg1 = isset($args[2]) ? $args[2] : null;
 	$arg2 = isset($args[3]) ? $args[3] : null;
 
-	if (array_key_exists($field, $_REQUEST)){
+	if (array_key_exists($field, $_POST)){
 		return cleanVar( $_POST[$field], $type, $arg1, $arg2); 
+	}
+
+	return null;
+
+}
+
+/**
+ * Convience function that passes a GET variable through cleanVar, and returns the results.
+ * @param string $field Field name from the post which you want to clean
+ * @param See Param lsit of cleanVar from the second argument on for the rest.
+ * @return mixed Returns the variable cleaned or null if not loaded.
+ */
+function cleanGET($field){
+	if (!array_key_exists($field, $_GET) ) return null;
+	
+	$args = func_get_args();
+
+	$type = isset($args[1]) ? $args[1] : null;
+	$arg1 = isset($args[2]) ? $args[2] : null;
+	$arg2 = isset($args[3]) ? $args[3] : null;
+
+	if (array_key_exists($field, $_GET)){
+		return cleanVar( $_GET[$field], $type, $arg1, $arg2); 
 	}
 
 	return null;

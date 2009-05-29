@@ -19,6 +19,7 @@ class SimpleQuery{
 	public $havings = array(); 
 	public $whereGroups = array();
 	public $whereGroupCounter = 0;
+	protected $limit = null;
 	
 	public function __construct(){
 		$this->whereGroups[0] = 'AND';
@@ -36,11 +37,11 @@ class SimpleQuery{
 		}
 	}
 	
-	public function addField($fieldName, $value = ''){
+	public function addField($fieldName, $value = '', $escape = true){
 		$pair = array();
 		$pair['field'] = $fieldName;
 		$pair['value'] = $value;
-		
+		$pair['escape'] = (bool) $escape;
 		$this->fields[] = $pair;
 	}
 	
@@ -120,6 +121,10 @@ class SimpleQuery{
 	
 	public function addOrderBy($field){}
 	
+	public function addLimit( $value ){
+		$this->limit = (is_int($value)) ? $value : null;
+	}
+	
 	public function getSelect(){
 		$str = 'SELECT ';
 		
@@ -135,6 +140,9 @@ class SimpleQuery{
 		
 		if ($this->groups) $str .= ' '.$this->prepareGroup();
 		if ($this->havings) $str .= ' '.$this->prepareHaving();
+		
+		if (!is_null($this->limit)) $str .= ' LIMIT '.$this->limit; 
+		
 		return trim($str);
 	}
 	
@@ -160,6 +168,11 @@ class SimpleQuery{
 			
 			$fields .= '`'.mysql_real_escape_string($field).'`';
 			
+			if ($pair['escape'])
+				$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.mysql_real_escape_string($value).'\'';
+			else
+				$values .= $value;
+				
 			if (is_numeric($value))
 				$values .= $value;
 			elseif (is_bool($value))
@@ -312,6 +325,7 @@ class SimpleQuery{
 		}
 		return $str;
 	}
+	
 	protected function prepareFields(){}
 }
 ?>
