@@ -30,56 +30,99 @@ class simpleFileParse{
 	protected $includeTypes = array();
 	protected $excludeTypes = array();
 
-	protected $rootFolder = null;
-	protected $folder = null;
+	protected $_rootFolder = null;
+	protected $_folder = null;
 	
 	protected $useCache = false;
+	
+	protected $_mode = 'simple';
 	
 	public function __construct($rootFolder = '.', $folder = null){
 		if ($rootFolder) $this->root = $rootFolder;
 		if ($folder) $this->folder = $folder;
 	}
 	
-	
 	/**
 	 * Process the directory. We use a cache to prevent whether or not we should do this again.
 	 *
 	 */
 	public function process(){
-		if (!$this->rootFolder || !$this->folder) throw new Exception("Folder to parse not set.");
+		if (!$this->_rootFolder || !$this->_folder) throw new Exception("Folder to parse not set.");
 		
 		//Open the parse 
-		$dir = opendir( $this->folder );
+		$dir = opendir( $this->_folder );
+		$fullPath = null;
 		
 		while( $file = readdir( $dir )){
 			
 			//Ignore the back directories
-			if ( ($file == '.' || $file == '..') ) continue;
+			if (($file == '.' || $file == '..')) continue;
 			
-			if (is_dir($this->folder.'/'.$file)){
-				$this->folders[] = $file;
+			$fullPath = $this->_folder .'/'.$file;
+			
+			if (is_dir($fullPath)){
+				
+				if ($this->_mode == 'simple'){
+					$this->folders[] = $file;
+				}else{
+					$listing = scandir( $fullPath );
+					$tmp = array('folders'=>0, 'files'=>0, 'total'=>0);
+					
+					foreach ($listing as $item){
+						if ($item != '.' || $item != '..'){
+							if ( is_dir( $fullPath.'/'.$item )) $tmp['folders']++;
+							else $tmp['files']++;
+						}
+					}
+					
+					$tmp['total'] = $tmp['files'] + $tmp['folders'];
+					$this->folders[$file] = $tmp;
+				}
 			}else{
 				//Run the include filters
+				$matchedInclude = false;
 				foreach ($this->includeTypes as $include){
-					echo "Didn't match $include on $file<br>";
+					//If it doesn't match this filter then find the next filter
 					if (!preg_match($include, $file)){
-						
-						continue 2;
+						continue;
 					}
-				}
-
-				echo "file matched filters".$file."\n";
-				
-				//Run the exclude filters
-				foreach( $this->excludeTypes as $exclude ){
-					if (preg_match($exclude, $file)){
-						continue 2;
-					}else{
+					//File matches our filter break the loop 
+					else{
+						$matchedInclude = true;
 						break;
 					}
 				}
 				
-				$this->files[] = $file;
+				//If we had an include filters and this didn't match one of them then go to the next file.
+				if ( $this->includeTypes && !$matchedInclude ) continue;
+				
+				//Run the exclude filters
+				foreach( $this->excludeTypes as $exclude ){
+					//File matches one of our exclude filters so skip the file 
+					if (preg_match($exclude, $file)){
+						//File doesn't match should exclude
+						continue 2;
+					}
+				}
+				
+				if ($this->_mode == 'simple'){
+					$this->files[] = $file;
+				}else{
+					$advancedInfo = null;
+
+					//Run any filters that may exist on the file based on its extension or just on the file
+					if ( method_exists($this, 'filter_file' )){
+						$advancedInfo = call_user_func( array($this, 'filter_file'), $fullPath );
+					}
+					//if they have any type of extension on the file ie .extension then handle those also
+					elseif( strpos($file, '.') !== FALSE && method_exists($this, 'filter_file_'.strtoupper( substr($file, strrpos($file, '.')+1))) ){
+						$advancedInfo = call_user_func( array($this, 'filter_file_'.strtoupper( substr($file, strrpos($file, '.')+1))), $fullPath );
+					}else{
+						$advancedInfo = stat( $fullPath );
+					}
+					
+					$this->files[$file] = $advancedInfo;
+				}
 			}
 			
 			$this->listing[] = $file;
@@ -153,37 +196,54 @@ class simpleFileParse{
 			case 'rootFolder':
 			case 'root':
 				$rootFolder = realpath( $value );
+				$before = $this->_rootFolder;
+				
 				if (file_exists( $rootFolder ) && is_dir( $rootFolder )){
-					$this->rootFolder = $rootFolder;
-					if (!$this->folder){
-						$this->folder = $rootFolder; 
+					$this->_rootFolder = $rootFolder;
+					if (!$this->_folder){
+						$this->_folder = $rootFolder; 
 					}
 					
+					if ($this->_rootFolder != $before)	$this->useCache = false;
+					
 				}else{
-					$this->rootFolder = null;
+					$this->_rootFolder = null;
 					throw new Exception( "Invalid directory. $value");
 				}
 				break; 
 
 			case 'folder':
-				$folder = realpath( $this->rootFolder. '/' . $value ) ;
-				
+				$folder = realpath( $this->_rootFolder. '/' . $value ) ;
+				$before = $this->_folder;
 				//If the folder is less then the root folder we have problems
-				if ( strlen($folder < $this->rootFolder) ){
-					$this->folder = null;
+				if ( strlen($folder < $this->_rootFolder) ){
+					$this->_folder = null;
 					throw new Exception("You do not have permission to access that folder");
 				}
 				elseif ( file_exists( $folder ) && is_dir( $folder) ){
-					$this->folder = $folder;
+					$this->_folder = $folder;
+					if ($this->_folder != $before)	$this->useCache = false;
 				}else{
-					$this->folder = null;
+					$this->_folder = null;
 					throw new Exception( "Invalid directory: $value");
 				}
 				break;
+
+			case 'mode':
+				if (!preg_match('/^(simple|advanced)$/i', $value)) throw new Exception("Mode can only be simple or advanced");
+				$before = $this->_mode;
+				$this->_mode = strtolower($value);
+				if ($before != $this->_mode) $this->useCache = false;
+				break;
+				
 			default:
 				throw new Exception("Invalid property $key set.");
 		}
 	}
-	
+
+	public function clearFilters(){
+		$this->includeTypes = array();
+		$this->excludeTypes = array();
+	}
 }
 ?>
