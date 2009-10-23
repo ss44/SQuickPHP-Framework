@@ -43,6 +43,11 @@ class simpleImageGD2{
 		$this->imageInfo = $info;
 		//oops($info);
 		
+		@$this->image = imagecreatefromstring( file_get_contents($imagePath) );
+		
+		if ($this->image === FALSE) throw new Exception("Invalid image file $imagePath. Not supported.");
+		
+		/*
 		switch ($info['mime']){
 			case 'image/jpeg':
 				$this->image = imagecreatefromjpeg( $imagePath );
@@ -51,12 +56,12 @@ class simpleImageGD2{
 				$this->image = imagecreatefromgif( $imagePath );
 				break;
 			case 'image/png':
-				$this->imagecreatefrompng($imagePath);
+				$this->image = imagecreatefrompng($imagePath);
 				break;
 			default :
 				return false;//throw new Exception('Unrecognized image file: '. $imagePath);
 				break;
-		}
+		}*/
 		
 		return true;
 	}
