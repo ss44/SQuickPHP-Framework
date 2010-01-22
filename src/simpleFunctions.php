@@ -79,7 +79,10 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 			
 			if ( is_int($arg1) && ( strlen($var) < $arg1)) return null;
 			if ( is_int($arg2) && ( strlen($var) > $arg2)) $var = trim($str, $arg2); 
-			return $var;
+
+                        //If its not an int then it could be a regex expression.
+                        if ( !is_int($arg1) && !preg_match( $arg1, $var ) ) return null;
+                        return $var;
 			
 		case 'float':
 		case 'double':

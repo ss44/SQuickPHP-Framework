@@ -16,7 +16,8 @@ class SimpleQuery{
 	public $joins = array();
 	public $wheres = array();
 	public $groups = array(); 
-	public $havings = array(); 
+	public $havings = array();
+    public $orders = array();
 	public $whereGroups = array();
 	public $whereGroupCounter = 0;
 	protected $limit = null;
@@ -118,8 +119,19 @@ class SimpleQuery{
 	}
 	
 	public function addHavings($fields){}
-	
-	public function addOrderBy($field){}
+
+        /**
+         * The order by fields to add to the select statement.
+         *
+         * @param String $field Field you want to sort by.
+         * @param Direction $direction  Direction to sort by, should be either ASC or DESC.
+         */
+	public function addOrderBy($field, $direction = "ASC"){
+            $order = arraY();
+            $order['field'] = $field;
+            $order['direction'] = $direction;
+            $this->orders[] = $order;
+        }
 	
 	public function addLimit( $value ){
 		$this->limit = (is_int($value)) ? $value : null;
@@ -140,14 +152,15 @@ class SimpleQuery{
 		
 		if ($this->groups) $str .= ' '.$this->prepareGroup();
 		if ($this->havings) $str .= ' '.$this->prepareHaving();
-		
+		if ($this->orders) $str .= ' ' . $this->prepareOrders();
+                
 		if (!is_null($this->limit)) $str .= ' LIMIT '.$this->limit; 
 		
 		return trim($str);
 	}
 	
 	public function getInsert(){
-		if (!$this->tables) throw new Exception('Must set a table first.');
+                if (!$this->tables) throw new Exception('Must set a table first.');
 		if (!$this->fields) throw new Exception('No fields set');
 		
 		$str = 'INSERT INTO ';
@@ -161,7 +174,8 @@ class SimpleQuery{
 		
 		$counter = count($this->fields);
 		$x = 0;
-		foreach ($this->fields as $pair){
+
+                foreach ($this->fields as $pair){
 			$x++;
 			$field = $pair['field'];
 			$value = $pair['value'];
@@ -172,14 +186,14 @@ class SimpleQuery{
 				$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.mysql_real_escape_string($value).'\'';
 			else
 				$values .= $value;
-				
+			/*
 			if (is_numeric($value))
 				$values .= $value;
 			elseif (is_bool($value))
 				$values .= $value === true ? 1 : 0;
 			else 
 				$values .= '\''.mysql_real_escape_string($value).'\'';
-			 
+			*/
 			if ($x < $counter){ 
 				$fields .= ', ';
 				$values .= ', ';
@@ -245,16 +259,19 @@ class SimpleQuery{
 		$numberOfItems = count($this->wheres);
 		$counter = 0;
 		$currentGroup = 0;
+		$endedGroup = true;
 		//print_r($this->wheres);
 		foreach ($this->wheres as $where){
 			if ($where['group'] > $currentGroup){
 				$str .= '(';
 				$boolType = $this->whereGroups[ $where['group'] ];
 				$currentGroup = $where['group'];
+				$endedGroup = false;
 			}elseif($where['group'] < $currentGroup){
 				$str .= ')';
 				$boolType = $this->whereGroups[ $where['group']]; 
 				$currentGroup = $where['group'];
+				$endedGroup = true;
 			}
 			if (!$where['value']) $str .= $where['field'];
 			elseif (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
@@ -267,12 +284,14 @@ class SimpleQuery{
 				$obj = $where['value'];
 				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
 			}
-			else $str .= $where['field'] . $where['operator'] . "'" . mysql_real_escape_string($where['value'])."'";
+			else $str .= $where['field'] . ' ' . $where['operator'] . " '" . mysql_real_escape_string($where['value'])."'";
 			$counter++;
 			if ($counter != $numberOfItems){
 				$str .= " $boolType ";		
 			}
 		}
+		
+		if (!$endedGroup) $str .= ')';
 		
 		return $str;
 	}
@@ -325,7 +344,21 @@ class SimpleQuery{
 		}
 		return $str;
 	}
-	
+
+        protected function prepareOrders(){
+            $str = 'ORDER BY ';
+            $numberOfItems = count($this->orders);
+            $counter = 0;
+
+            foreach ($this->orders as $order){
+                $str .= "$order[field] $order[direction]";
+                $counter++;
+                if ( $numberOfItems != $counter) $str .= ', ';
+            }
+            
+            return $str;
+        }
+
 	protected function prepareFields(){}
 }
 ?>

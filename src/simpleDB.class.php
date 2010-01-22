@@ -8,7 +8,7 @@
  * @created 13-Dec-2008
  */
 
-require_once('simpleQuery.class.php');
+//require_once('simpleQuery.class.php');
 
 class SimpleDB{
 	
@@ -29,9 +29,11 @@ class SimpleDB{
 			$this->_dbUser = array_key_exists('user', $_CONFIG) ? $_CONFIG['user'] : null;
 			$this->_dbPass = array_key_exists('pass', $_CONFIG) ? $_CONFIG['pass'] : null;
 			
-		}elseif(file_exists('site.ini')){	
+		}elseif(file_exists('site.ini') || (defined(SIMPLE_INI_FILE) && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
-			$config =  parse_ini_file('site.ini');
+                        $siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
+
+                        $config =  parse_ini_file( $siteIni );
 			
 			if (array_key_exists('DB_TYPE', $config)) $this->_dbType = $config['DB_TYPE'];
 			if (array_key_exists('DB_PATH', $config)) $this->_dbPath = $config['DB_PATH'];
@@ -190,6 +192,30 @@ class SimpleDB{
 		return $result;
 	}
 	
+        /**
+         * Gets the column from a result set.
+         * 
+         * @param SimpleQuery $q The simple query object that we want to iterate.
+         * @param String $column The column that we want to retrieve.
+         */
+        public function getColumn( SimpleQuery $q, $column ){
+            $q->addColumn( $column );
+            
+            $result = array();
+
+            switch ($this->_dbType){
+                case 'mysql':
+                    $r = mysql_query($q->getSelect(), $this->connection);
+
+                    if (mysql_num_rows($r) > 0){
+                        while ($row = mysql_fetch_assoc($r)){
+                            $result[] = $row[ $column ];
+                        }
+                    }
+
+                    return $result;
+            }
+        }
 	/**
 	 * Returns an associative array from the current result set.
 	 * 

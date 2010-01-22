@@ -20,7 +20,6 @@ class simpleImageGD2{
 	 */
 	public function __construct($imagePath = ''){
 		if ($imagePath){
-			
 			return $this->loadImage($imagePath);
 		}
 	}
@@ -40,28 +39,14 @@ class simpleImageGD2{
 		
 		//File exists try reading it
 		$info = getimagesize($imagePath);
-		$this->imageInfo = $info;
-		//oops($info);
 		
-		@$this->image = imagecreatefromstring( file_get_contents($imagePath) );
+                if (!$info) throw new Exception("Invalid Image. Not a valid image file.");
+
+                $this->imageInfo = $info;
 		
-		if ($this->image === FALSE) throw new Exception("Invalid image file $imagePath. Not supported.");
-		
-		/*
-		switch ($info['mime']){
-			case 'image/jpeg':
-				$this->image = imagecreatefromjpeg( $imagePath );
-				break;
-			case 'image/gif':
-				$this->image = imagecreatefromgif( $imagePath );
-				break;
-			case 'image/png':
-				$this->image = imagecreatefrompng($imagePath);
-				break;
-			default :
-				return false;//throw new Exception('Unrecognized image file: '. $imagePath);
-				break;
-		}*/
+		$imageContents = file_get_contents( $imagePath );
+
+                $this->image = imagecreatefromstring( $imageContents );
 		
 		return true;
 	}
@@ -112,6 +97,9 @@ class simpleImageGD2{
 		imagepng($this->image);
 	}
 
+        public function getImageInfo(){
+            return $this->imageInfo;
+        }
 }
 
 ?>
