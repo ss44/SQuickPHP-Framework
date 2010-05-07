@@ -236,6 +236,28 @@ function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
 	return true;
 }
 
+
+
 $tmp = set_error_handler ('simpleCleanError');
+
+/**
+ * Displays the hedaer and footer.
+ * @param <type> $page
+ */
+function callTemplateWrapper($temp = null){
+	global $template;
+
+	try{
+		if (isset($_GET['overlay'])){
+			$template->display( $temp );
+		}else{
+			$value = $template->fetch( $temp ) ;
+			$template->content = $value;
+			$template->display( 'wrapper.tpl.php' );
+		}
+	}catch( Exception $e ){
+		die( $e->getMessage() );
+	}
+}
 
 ?>
