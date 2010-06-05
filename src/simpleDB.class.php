@@ -8,7 +8,7 @@
  * @created 13-Dec-2008
  */
 
-//require_once('simpleQuery.class.php');
+require_once(dirname(__FILE__).'/simpleQuery.class.php');
 
 class SimpleDB{
 
@@ -18,46 +18,16 @@ class SimpleDB{
 	protected $_dbPass = '';
 	protected $_dbPath = '';
 	protected $connection = null;
+	protected $_CONFIG = null;
 
+	//Some db engines use objects for thease cases we can store those classes in here.
+	protected $_dbObj = null;
+	
 	public function __construct( $_CONFIG = null){
+		global $__SIMPLE_CONFIG;
 
-		if (is_array($_CONFIG)){
-			//Try to load settings from array
-			$this->_dbType = array_key_exists('type', $_CONFIG) ? $_CONFIG['type'] : null;
-			$this->_dbPath = array_key_exists('path', $_CONFIG) ? $_CONFIG['path'] : null;
-			$this->_dbName = array_key_exists('name', $_CONFIG) ? $_CONFIG['name'] : null;
-			$this->_dbUser = array_key_exists('user', $_CONFIG) ? $_CONFIG['user'] : null;
-			$this->_dbPass = array_key_exists('pass', $_CONFIG) ? $_CONFIG['pass'] : null;
-				
-		}elseif(file_exists('site.ini') || (defined(SIMPLE_INI_FILE) && file_exists(SIMPLE_INI_FILE))){
-			//If not found then check settings from config file
-			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
-
-			$config =  parse_ini_file( $siteIni );
-				
-			if (array_key_exists('DB_TYPE', $config)) $this->_dbType = $config['DB_TYPE'];
-			if (array_key_exists('DB_PATH', $config)) $this->_dbPath = $config['DB_PATH'];
-			if (array_key_exists('DB_NAME', $config)) $this->_dbName = $config['DB_NAME'];
-			if (array_key_exists('DB_USER', $config)) $this->_dbUser = $config['DB_USER'];
-			if (array_key_exists('DB_PASS', $config)) $this->_dbPass = $config['DB_PASS'];
-		}else{
-			throw SimpleDBException('No db settings provided.');
-		}
-
-		//@TODO: Try loading db if unable to load throw an exception.
-		switch ($this->_dbType){
-			case 'mysql':
-				$this->connection = mysql_connect($this->_dbPath, $this->_dbUser, $this->_dbPass);
-				mysql_select_db($this->_dbName, $this->connection);
-				break;
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-			default:
-				throw new SimpleDBException('Invalid/Unsupported database type.');
-		}
-
-		if (!$this->connection) throw new SimpleDBException("Unable to connect to DB.");
+		$this->_CONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleDB', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleDB'] : $_CONFIG; 
+		
 	}
 
 	/**
@@ -68,12 +38,20 @@ class SimpleDB{
 	 * @TODO: Set the insert_id in the simpleQuery object.
 	 */
 	public function insert(SimpleQuery $q){
+		if (is_null($this->connection)) $this->connect();
+		
 		switch ($this->_dbType){
 			case 'mysql':
 				$result = mysql_query($q->getInsert(), $this->connection);
 				$lastId = mysql_insert_id($this->connection);
 				return $lastId;
-				break;
+			
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				$r = $this->_dbObj->exec( $q->getInsert() );
+				$lastId = $this->_dbObj->lastInsertRowID();
+				return $lastId;
+				
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -88,7 +66,12 @@ class SimpleDB{
 	public function update(SimpleQuery $q){
 		switch ($this->_dbType){
 			case 'mysql':
+				if (is_null($this->connection)) $this->connect();
 				$result = mysql_query($q->getUpdate(), $this->connection);
+				return $result;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				$r = $this->_dbObj->exec( $q->getUpdate() );
 				return $result;
 			case 'mysqli':
 			case 'postgres':
@@ -104,11 +87,16 @@ class SimpleDB{
 	 * 	This is just added protection from accidently deleting all rows in a table.
 	 */
 	public function delete(simpleQuery $q, $overRide = false){
+		if (is_null($this->connection)) $this->connect();
 		if ( !$overRide && empty($q->wheres) ) throw new SimpleDBException ("No where set for delete. Must set override to continue.");
 
 		switch ($this->_dbType){
 			case 'mysql':
 				$result = mysql_query( $q->getDelete(), $this->connection);
+				return $result;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				$result = $this->_dbObj->exec( $q->getDelete() );
 				return $result;
 			case 'mysqli':
 			case 'postgres':
@@ -123,17 +111,22 @@ class SimpleDB{
 	 * @return array A 2D associative of the fields with field properties.
 	 */
 	public function getTableStructure($tableName){
+		
 		$result = array();
 
 		switch ($this->_dbType){
 			case 'mysql':
+				if (is_null($this->connection)) $this->connect();
+				
 				$r = mysql_query('Describe '.mysql_real_escape_string($tableName), $this->connection);
 				while ($r == true && $row = mysql_fetch_assoc($r)){
 					$result[ $row['Field'] ] = $row;
 				}
 
 				return $result;
-				break;
+
+			case 'sqlite3':
+				
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -146,6 +139,8 @@ class SimpleDB{
 	 * @param SimpleQuery $q Query object that contains the select statement.
 	 */
 	public function getRow(simpleQuery $q){
+		if (is_null($this->connection)) $this->connect();
+		
 		$result = array();
 
 		switch ($this->_dbType){
@@ -154,10 +149,18 @@ class SimpleDB{
 
 				if (@mysql_num_rows($r) > 0){
 					$result = mysql_fetch_assoc( $r );
-					return $result;
 				}
+				return $result;
 
-				break;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				
+				$r = $this->_dbObj->query( $q->getSelect() );
+				
+				if ($r->numColumns() && $r->columnType(0) != SQLITE3_NULL) { 
+					$result = $r->fetchArray( SQLITE3_ASSOC );
+				}
+				return $result;
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -172,18 +175,37 @@ class SimpleDB{
 	 * @param SimpleQuery $q Query object that contains the update statement.
 	 */
 	public function getAll(SimpleQuery $q ){
+		
 		$result = array();
 
 		switch ($this->_dbType){
 			case 'mysql':
+				if (is_null($this->connection)) $this->connect();
+				
 				$r = mysql_query($q->getSelect(), $this->connection);
-				if (mysql_num_rows($r) > 0){
+				
+				if ($r === false ){
+					throw new SimpleDBException( "Unable to perform query: " . mysql_error() );
+				}
+				
+				if ($r !== false && mysql_num_rows($r) > 0){
 					while($row = mysql_fetch_assoc($r)){
 						$result[] = $row;
 					}
 					return $result;
 				}
 				break;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				
+				$r = $this->_dbObj->query( $q->getSelect() );
+				
+				if ($r->numColumns() && $r->columnType(0) != SQLITE3_NULL) { 
+					while( $row = $r->fetchArray( SQLITE3_ASSOC ) ){
+						$result[] = $row;
+					}
+				}
+				return $result;	
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -199,12 +221,15 @@ class SimpleDB{
 	 * @param String $column The column that we want to retrieve.
 	 */
 	public function getColumn( SimpleQuery $q, $column ){
+		
 		$q->addColumn( $column );
 
 		$result = array();
 
 		switch ($this->_dbType){
 			case 'mysql':
+				if (is_null($this->connection)) $this->connect();
+				
 				$r = mysql_query($q->getSelect(), $this->connection);
 
 				if (mysql_num_rows($r) > 0){
@@ -212,9 +237,25 @@ class SimpleDB{
 						$result[] = $row[ $column ];
 					}
 				}
-
+				return $result;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				
+				$r = $this->_dbObj->query( $q->getSelect() );
+				
+				if ($r->numColumns() && $r->columnType(0) != SQLITE3_NULL) { 
+					while( $row = $r->fetchArray( SQLITE3_ASSOC ) ){
+						if (array_key_exists($key, $row)){
+							$result[] = $row[ $column ];
+						}else{
+							throw new SimpleDBException('Invalid key. Not found in result.');
+						}
+					}
+				}
 				return $result;
 		}
+		
+		return $result;
 	}
 	/**
 	 * Returns an associative array from the current result set.
@@ -228,10 +269,28 @@ class SimpleDB{
 
 		switch ($this->_dbType){
 			case 'mysql':
+				if (is_null($this->connection)) $this->connect();
+				
 				$r = mysql_query($q->getSelect(), $this->connection);
 
 				if (mysql_num_rows($r) > 0){
 					while( $row = mysql_fetch_assoc($r)){
+						if (array_key_exists($key, $row)){
+							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
+						}else{
+							throw new SimpleDBException('Invalid key. Not found in result.');
+						}
+					}
+					return $result;
+				}
+				break;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				
+				$r = $this->_dbObj->query( $q->getSelect() );
+				
+				if ($res->numColumns() && $res->columnType(0) != SQLITE3_NULL) { 
+					while ($row = $r->fetchArray(SQLITE3_ASSOC)){
 						if (array_key_exists($key, $row)){
 							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
 						}else{
@@ -246,6 +305,58 @@ class SimpleDB{
 			case 'sqlite':
 		}
 		return $result;
+	}
+	
+	protected function connect(){
+
+		if (is_array($this->_CONFIG)){
+			//Try to load settings from array
+			$this->_dbType = array_key_exists('type', $this->_CONFIG) ? $this->_CONFIG['type'] : null;
+			$this->_dbPath = array_key_exists('path', $this->_CONFIG) ? $this->_CONFIG['path'] : null;
+			$this->_dbName = array_key_exists('name', $this->_CONFIG) ? $this->_CONFIG['name'] : null;
+			$this->_dbUser = array_key_exists('user', $this->_CONFIG) ? $this->_CONFIG['user'] : null;
+			$this->_dbPass = array_key_exists('pass', $this->_CONFIG) ? $this->_CONFIG['pass'] : null;
+			
+		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
+			//If not found then check settings from config file
+			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
+
+			$config =  parse_ini_file( $siteIni );
+				
+			if (array_key_exists('DB_TYPE', $config)) $this->_dbType = $config['DB_TYPE'];
+			if (array_key_exists('DB_PATH', $config)) $this->_dbPath = $config['DB_PATH'];
+			if (array_key_exists('DB_NAME', $config)) $this->_dbName = $config['DB_NAME'];
+			if (array_key_exists('DB_USER', $config)) $this->_dbUser = $config['DB_USER'];
+			if (array_key_exists('DB_PASS', $config)) $this->_dbPass = $config['DB_PASS'];
+		}else{
+			throw new SimpleDBException('No db settings provided.');
+		}
+
+		//@TODO: Try loading db if unable to load throw an exception.
+		switch ($this->_dbType){
+			case 'mysql':
+				$this->connection = mysql_connect($this->_dbPath, $this->_dbUser, $this->_dbPass);
+				mysql_select_db($this->_dbName, $this->connection);
+				break;
+			case 'sqlite3':
+				if (!class_exists('SQLite3')){
+					throw new SimpleDBException("SimpleDB requires SQLite3 class to exist");
+				}
+				
+				$this->_dbObj = new SQLite3( $this->_dbName );
+				
+				break;
+			case 'mysqli':
+			case 'postgres':
+			case 'sqlite':
+			
+				
+			default:
+				throw new SimpleDBException('Invalid/Unsupported database type.');
+		}
+
+		if (!$this->connection) throw new SimpleDBException("Unable to connect to DB.");
+		
 	}
 }
 

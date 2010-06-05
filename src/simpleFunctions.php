@@ -72,26 +72,66 @@ if (!function_exists('dim')){
  */
 function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	$checks = false;
-
+	
 	switch ($type){
 		case 'str':
 			//if (!is_a($var, 'String')) return null;
+				
+			if ( is_int($arg1) && ( strlen($var) < $arg1)){
+				 return null;
+			}
 			
-			if ( is_int($arg1) && ( strlen($var) < $arg1)) return null;
-			if ( is_int($arg2) && ( strlen($var) > $arg2)) $var = trim($str, $arg2); 
-
-                        //If its not an int then it could be a regex expression.
-                        if ( !is_int($arg1) && !preg_match( $arg1, $var ) ) return null;
-                        return $var;
+			if ( is_int($arg2) && ( strlen($var) > $arg2)){
+				$var = trim($var, $arg2);
+			}  
+			
+			//If the first argument is any of the following try to parse it based on rules.
+			if (!is_null($arg1) && !is_int($arg1)){
+				
+				//Treat like a regex 				
+				switch ($arg1){
+					case 'date':
+						$arg1 = '/^\d{1,2}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{2,4}\s?$/';
+						break;
+					case 'zipcode':
+						$arg1 = '/^[0-9]{5}$/';
+						break;
+					case 'email':
+						$arg1 = '/^[a-zA-Z][\w\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$/';
+						break;
+				}	
+				$valid = preg_match( $arg1, $var );
+				
+				if (!$valid){
+					oops($arg1, $var);
+					return null;
+				}
+			}
+            
+            return (string) $var;
+		case 'date':
+			$arg1 = '/^\d{1,2}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{2,4}\s?$/';
+			if (!preg_match($arg1, $var, $tmp)) return false;
+			oops($tmp);
+			return mktime(0, 0, 0, $tmp[1], $tmp[2], $tmp[3]);
+			
+			
 			
 		case 'float':
 		case 'double':
+			if (!is_numeric($var)) return null;
+			if (!is_null($arg1) && $var < $arg1) return null;
+			if (!is_null($arg2) && $var > $arg2) return null;
+			return (float) $var;
+
 		case 'int':
 			if (!is_numeric($var)) return null;
 			if (!is_null($arg1) && $var < $arg1) return null;
 			if (!is_null($arg2) && $var > $arg2) return null;
 			return (int) $var;
+
 		case 'bool':
+			return (boolean) $var;
 	}
 }
 
@@ -214,6 +254,8 @@ function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
 	$msg = '';
 	$bgColor = 'yellow';
 	
+	$dbg = debug_backtrace();
+		
 	switch ($errNo){
 		case E_USER_WARNING:
 			$msg = "<b>Warning : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
@@ -228,9 +270,21 @@ function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
 			break;
 	}
 	
+	
+	
+	
 	//@TODO - have some sort of check here so that if we are in cli mode these errors are not handled like this.
 	echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor'>";
 	echo "$msg";
+
+	if ( count($dbg > 1) ){
+		echo "\n";
+		for ($x = 1; $x < count ( $dbg); $x++){
+			if ( isset($dbg[$x]['line']) && isset($dbg[$x]['file']) )
+				echo "\t".$dbg[$x]['line']. ' @ '. $dbg[$x]['file']. "\n";
+		}
+	}
+	
 	echo "</pre>";
 	
 	return true;

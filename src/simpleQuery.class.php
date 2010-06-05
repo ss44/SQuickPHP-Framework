@@ -21,7 +21,8 @@ class SimpleQuery{
 	public $whereGroups = array();
 	public $whereGroupCounter = 0;
 	protected $limit = null;
-
+	protected $offset = null;
+	
 	public function __construct(){
 		$this->whereGroups[0] = 'AND';
 	}
@@ -137,6 +138,10 @@ class SimpleQuery{
 		$this->limit = (is_int($value)) ? $value : null;
 	}
 
+	public function addOffset( $value ){
+		$this->offset = is_int($value) ? $value : null;
+	}
+	
 	public function getSelect(){
 		$str = 'SELECT ';
 
@@ -155,7 +160,8 @@ class SimpleQuery{
 		if ($this->orders) $str .= ' ' . $this->prepareOrders();
 
 		if (!is_null($this->limit)) $str .= ' LIMIT '.$this->limit;
-
+		if (!is_null($this->offset)) $str .= ' OFFSET '. $this->offset;
+		 
 		return trim($str);
 	}
 
