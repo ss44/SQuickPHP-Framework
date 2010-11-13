@@ -71,6 +71,15 @@
  	}
  	
  	/**
+ 	 * Manually add an error to this form field.
+ 	 * 
+ 	 * @param $error String the error message to dispaly.
+ 	 */
+ 	public function addError( $error ){
+ 		$this->errors[] = $error;
+ 	}
+ 	
+ 	/**
  	 * Validates the given value against our criteria.
  	 * 
  	 * @param Mixed $value The value that we want to validate
