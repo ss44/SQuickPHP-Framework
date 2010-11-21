@@ -24,8 +24,8 @@ if (!function_exists('oops')){
 	        echo "<pre><H1>". $file ." @ ". $line ."</H1>";
 	
 	        for ($x = 1; $x < $level; $x++){
-	                if (isset($dbg[$x])){
-	                        $file = $dbg[$x]['file'];
+	                if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
+	                		$file = $dbg[$x]['file'];
 	                        $line = $dbg[$x]['line'];
 	                        echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
 	                }
@@ -103,7 +103,6 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 				$valid = preg_match( $arg1, $var );
 				
 				if (!$valid){
-					oops($arg1, $var);
 					return null;
 				}
 			}
@@ -116,7 +115,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 			return mktime(0, 0, 0, $tmp[1], $tmp[2], $tmp[3]);
 			
 			
-			
+		case 'dec':
 		case 'float':
 		case 'double':
 			if (!is_numeric($var)) return null;
