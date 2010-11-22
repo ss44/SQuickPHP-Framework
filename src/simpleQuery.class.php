@@ -365,6 +365,10 @@ class SimpleQuery{
 		return $str;
 	}
 
+	public function clearColumns(){
+		$this->columns = array();
+	}
+	
 	protected function prepareFields(){}
 }
 

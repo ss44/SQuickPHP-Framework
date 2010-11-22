@@ -25,9 +25,7 @@ class SimpleDB{
 	
 	public function __construct( $_CONFIG = null){
 		global $__SIMPLE_CONFIG;
-
 		$this->_CONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleDB', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleDB'] : $_CONFIG; 
-		
 	}
 
 	/**
@@ -175,15 +173,17 @@ class SimpleDB{
 	 * @param SimpleQuery $q Query object that contains the update statement.
 	 */
 	public function getAll(SimpleQuery $q ){
-		
+		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
+			$this->connect();
+		}
+				
 		$result = array();
 
 		switch ($this->_dbType){
 			case 'mysql':
-				if (is_null($this->connection)) $this->connect();
 				
 				$r = mysql_query($q->getSelect(), $this->connection);
-				
+
 				if ($r === false ){
 					throw new SimpleDBException( "Unable to perform query: " . mysql_error() );
 				}
@@ -221,6 +221,9 @@ class SimpleDB{
 	 * @param String $column The column that we want to retrieve.
 	 */
 	public function getColumn( SimpleQuery $q, $column ){
+		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
+			$this->connect();
+		}
 		
 		$q->addColumn( $column );
 
@@ -228,7 +231,6 @@ class SimpleDB{
 
 		switch ($this->_dbType){
 			case 'mysql':
-				if (is_null($this->connection)) $this->connect();
 				
 				$r = mysql_query($q->getSelect(), $this->connection);
 
@@ -257,6 +259,25 @@ class SimpleDB{
 		
 		return $result;
 	}
+	
+	/**
+	 * Returns a count of rows of the current query.
+	 * @param SimpleQuery $q
+	 */
+	public function getCount( SimpleQuery $q ){
+		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
+			$this->connect();
+		}
+		
+		$tmpQuery = clone $q; 
+		$tmpQuery->clearColumns();
+		$tmpQuery->addColumn( 'COUNT(*)');
+		
+		$tmpData = $this->getRow($tmpQuery);
+		
+		return reset($tmpData);
+	}
+	
 	/**
 	 * Returns an associative array from the current result set.
 	 *
@@ -308,7 +329,6 @@ class SimpleDB{
 	}
 	
 	protected function connect(){
-
 		if (is_array($this->_CONFIG)){
 			//Try to load settings from array
 			$this->_dbType = array_key_exists('type', $this->_CONFIG) ? $this->_CONFIG['type'] : null;

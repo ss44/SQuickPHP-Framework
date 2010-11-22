@@ -20,7 +20,7 @@ class SimpleResults{
 	protected $_data = array();
 	
 	//Maximum number of results we want per page.
-	protected $resultsPerPage = 25;
+	protected $_resultsPerPage = 25;
 	
 	//Rather then running the proccess method each we can track when we should run it
 	//by using this cache flag. If no changes were made then its safe to assume that we want
@@ -36,13 +36,18 @@ class SimpleResults{
 	//Instance of db that we can use.
 	protected $_db = null; 
 	
-	protected $_totalPages = array();
+	//Total Pages that were returned.
+	protected $_totalPages = 1;
+	
+	protected $_currentPage = 1;
 	
 	/**
 	 * Creates a new instance of the viewer
 	 * @return unknown_type
 	 */
 	public function __construct(){
+		global $__SIMPLE_CONFIG;
+
 		$this->_db = new SimpleDB();
 		
 	}
@@ -69,7 +74,7 @@ class SimpleResults{
 	}
 	
 	/**
-	 * Sets the data that we want to process in our results table.
+	 * Sets the data that we want to 9 in our results table.
 	 * 
 	 * @param $data Data that we want to process.
 	 * 
@@ -91,20 +96,38 @@ class SimpleResults{
 		
 		//If they are using the query then we just need to add a limit in the query
 		if ($this->_query instanceof SimpleQuery){
-			$this->_query->addLimit( $this->resultsPerPage );
-			$this->_query->addOffset( $this->resultsPerPage * $this->currentPage );
+			$this->_totalPages = ceil( $this->_db->getCount( $this->_query ) / $this->_resultsPerPage );
+			$this->_query->addLimit( $this->_resultsPerPage );
+			$this->_query->addOffset( $this->_resultsPerPage * ($this->_currentPage - 1) );
 			$this->_truncatedData = $this->_db->getAll( $this->_query );
 		}
-		
+				
 		$this->_useCache = true;
 	}
 	
 	public function __get( $key ){
 		switch ($key){
 			case 'headers':
+				return $this->_fieldMappings;
 			case 'results':
+				return null;
 			case 'totalPages':
+				return $this->_totalPages;
 			case 'currentPage':
+				return $this->_currentPage;
+		}
+	}
+	
+	public function __set( $key, $value ){
+		
+		switch ($key){
+			case 'resultsPerPage':
+				$this->_resultsPerPage = cleanVar( $value, 'int', 1, 999999999 );
+				break;
+			case 'currentPage':
+				$tmpVal = cleanVar ( $value, 'int', 1, 99999999 );
+				$this->_currentPage = is_null($tmpVal ) ? 1 : $tmpVal;
+				break;
 		}
 	}
 	
@@ -128,22 +151,6 @@ class SimpleResults{
 		return $this->_truncatedData;
 	}
 
-	public function getTotalPages(){
-		return $this->_totalPages;
-	}
-	
-	public function getCurrentPage(){
-		
-	}
-	
-	public function setResultsPerPage(){
-		
-	}
-	
-	public function setCurrentPage( $page ){
-		
-	}
-	
 	public function setOrderBy( $fieldName ){
 		
 	}
