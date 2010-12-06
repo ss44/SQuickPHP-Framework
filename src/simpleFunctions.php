@@ -273,7 +273,7 @@ function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
 	
 	
 	//@TODO - have some sort of check here so that if we are in cli mode these errors are not handled like this.
-	echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor'>";
+	echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor; color:black;'>";
 	echo "$msg";
 
 	if ( count($dbg > 1) ){
