@@ -23,18 +23,20 @@ class SimpleUser extends SimpleDB{
 	
 	//Store all user data in this array.
 	protected $_userData = array();
+	protected $_USERCONFIG = null;
 	
 	public function __construct($_CONFIG = null){
 		global $__SIMPLE_CONFIG;
+		parent::__construct($_CONFIG);
 
-		$this->_CONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleUser', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleUser'] : $_CONFIG;
+		$this->_USERCONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleUser', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleUser'] : $_CONFIG;
 
-		if (is_array($this->_CONFIG)){
+		if (is_array($this->_USERCONFIG)){
 			//Try to load settings from array
-			$this->_userTable = array_key_exists('users_table', $this->_CONFIG) ? $this->_CONFIG['users_table'] : null;
-			$this->_usernameField = array_key_exists('username_field', $this->_CONFIG) ? $this->_CONFIG['username_field'] : null;
-			$this->_passwordField = array_key_exists('password_field', $this->_CONFIG) ? $this->_CONFIG['password_field'] : null;
-			$this->_saltfield = array_key_exists('salt_field', $this->_CONFIG) ? $this->_CONFIG['salt_field'] : null;
+			$this->_userTable = array_key_exists('users_table', $this->_USERCONFIG) ? $this->_USERCONFIG['users_table'] : null;
+			$this->_usernameField = array_key_exists('username_field', $this->_USERCONFIG) ? $this->_USERCONFIG['username_field'] : null;
+			$this->_passwordField = array_key_exists('password_field', $this->_USERCONFIG) ? $this->_USERCONFIG['password_field'] : null;
+			$this->_saltfield = array_key_exists('salt_field', $this->_USERCONFIG) ? $this->_USERCONFIG['salt_field'] : null;
 		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
 			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
@@ -71,7 +73,7 @@ class SimpleUser extends SimpleDB{
 		if ($this->_saltField){
 			//$q->addWhere($this->_passwordField,)	
 		}else{
-			$q->addWhere( $this->_passwordField, md5($this->password ));
+			$q->addWhere( $this->_passwordField, md5($password ));
 		}
 		
 		$this->_userData = $this->getRow($q);

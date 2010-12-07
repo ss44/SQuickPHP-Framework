@@ -18,14 +18,15 @@ class SimpleDB{
 	protected $_dbPass = '';
 	protected $_dbPath = '';
 	protected $connection = null;
-	protected $_CONFIG = null;
+	protected $_DBCONFIG = null;
 
 	//Some db engines use objects for thease cases we can store those classes in here.
 	protected $_dbObj = null;
 	
 	public function __construct( $_CONFIG = null){
 		global $__SIMPLE_CONFIG;
-		$this->_CONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleDB', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleDB'] : $_CONFIG; 
+		$this->_DBCONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleDB', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleDB'] : $_CONFIG; 
+		$this->connect();
 	}
 
 	/**
@@ -137,14 +138,14 @@ class SimpleDB{
 	 * @param SimpleQuery $q Query object that contains the select statement.
 	 */
 	public function getRow(simpleQuery $q){
-		if (is_null($this->connection)) $this->connect();
+		if (!$this->connection) $this->connect();
 		
 		$result = array();
 
 		switch ($this->_dbType){
 			case 'mysql':
 				$r = mysql_query($q->getSelect(), $this->connection);
-
+	
 				if (@mysql_num_rows($r) > 0){
 					$result = mysql_fetch_assoc( $r );
 				}
@@ -329,13 +330,13 @@ class SimpleDB{
 	}
 	
 	protected function connect(){
-		if (is_array($this->_CONFIG)){
+		if (is_array($this->_DBCONFIG)){
 			//Try to load settings from array
-			$this->_dbType = array_key_exists('type', $this->_CONFIG) ? $this->_CONFIG['type'] : null;
-			$this->_dbPath = array_key_exists('path', $this->_CONFIG) ? $this->_CONFIG['path'] : null;
-			$this->_dbName = array_key_exists('name', $this->_CONFIG) ? $this->_CONFIG['name'] : null;
-			$this->_dbUser = array_key_exists('user', $this->_CONFIG) ? $this->_CONFIG['user'] : null;
-			$this->_dbPass = array_key_exists('pass', $this->_CONFIG) ? $this->_CONFIG['pass'] : null;
+			$this->_dbType = array_key_exists('type', $this->_DBCONFIG) ? $this->_DBCONFIG['type'] : null;
+			$this->_dbPath = array_key_exists('path', $this->_DBCONFIG) ? $this->_DBCONFIG['path'] : null;
+			$this->_dbName = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
+			$this->_dbUser = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
+			$this->_dbPass = array_key_exists('pass', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
 			
 		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
