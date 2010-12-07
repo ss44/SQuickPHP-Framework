@@ -42,6 +42,11 @@ class SimpleDB{
 		switch ($this->_dbType){
 			case 'mysql':
 				$result = mysql_query($q->getInsert(), $this->connection);
+				
+				if (!$result){
+					throw new SimpleDBException( mysql_error( $this->connection ));
+				}
+				
 				$lastId = mysql_insert_id($this->connection);
 				return $lastId;
 			

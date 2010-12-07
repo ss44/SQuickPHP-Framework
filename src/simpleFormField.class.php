@@ -89,13 +89,14 @@
  		//We need the value to be the first argument that we are supplying
  		//so need to add key to the beggining 
 		if (!empty($this->validateArguments)){
- 			$cleanParams = array_merge( (array) $value, $this->validateArguments );
- 			
+			$cleanParams = array();
+			$cleanParams[] = $value;
+			$cleanParams = array_merge( $cleanParams, $this->validateArguments );
+
  			//Set the clean value.
  			$this->clean = call_user_func_array( 'cleanVar',  $cleanParams);
 		}
 		
- 		
  		//If clean is null and this was a required field
  		if ( is_null($this->clean) && $this->isRequired){
  			$this->errors[] = "Value is required.";
