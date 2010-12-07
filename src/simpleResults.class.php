@@ -84,7 +84,7 @@ class SimpleResults{
 		//If its an instance of simple query then load data from that object
 		if ( $data instanceof SimpleQuery ){
 			$this->_data = null;
-			$this->_query = clone $data;	
+			$this->_query = clone $data;
 		}else{
 			$this->_query = null;
 			$this->_data = $data;
@@ -110,7 +110,10 @@ class SimpleResults{
 			case 'headers':
 				return $this->_fieldMappings;
 			case 'results':
-				return null;
+				if (!$this->_useCache){
+					$this->process();
+				}
+				return $this->_truncatedData;
 			case 'totalPages':
 				return $this->_totalPages;
 			case 'currentPage':
