@@ -279,7 +279,8 @@ class SimpleQuery{
 				$currentGroup = $where['group'];
 				$endedGroup = true;
 			}
-			if (!$where['value']) $str .= $where['field'];
+			//@TODO this statement needs fixing
+			if (!$where['value'] && $where['value'] !== 0) $str .= $where['field'];
 			elseif (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
 			elseif (is_array($where['value'])){
 				//array_walk($where, 'mysql_escape_string');
