@@ -23,7 +23,7 @@ class SimpleResults{
 	protected $_data = array();
 	
 	//Maximum number of results we want per page.
-	protected $_resultsPerPage = 25;
+	protected $_resultsPerPage = 1000;
 	
 	//Rather then running the proccess method each we can track when we should run it
 	//by using this cache flag. If no changes were made then its safe to assume that we want
