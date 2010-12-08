@@ -105,7 +105,6 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 						$arg1 = '/^[a-zA-Z][\w\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$/';
 						break;
 				}	
-				dim($arg1);
 				$valid = preg_match( $arg1, $var );
 				
 				if (!$valid){
@@ -117,7 +116,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'date':
 			$arg1 = '/^(\d{1,2})[-\/\.]\s?(\d{1,2})[-\/\.]\s?(\d{2,4})\s?$/';
 			if (!preg_match($arg1, $var, $tmp)) return null;
-			return mktime(0, 0, 0, $tmp[1], $tmp[2], $tmp[3]);
+			return mktime(0, 0, 0, $tmp[2], $tmp[1], $tmp[3]);
 
 		case 'dec':
 		case 'float':

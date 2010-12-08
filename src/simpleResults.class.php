@@ -10,6 +10,9 @@ require_once( dirname( __FILE__ ).'/simpleDB.class.php' );
 
 class SimpleResults{
 	
+	//Use this value as the primary key.
+	protected $_primaryKey = null;
+	
 	//Map field names to there html names
 	protected $_fieldMappings = array();
 	
@@ -118,6 +121,9 @@ class SimpleResults{
 				return $this->_totalPages;
 			case 'currentPage':
 				return $this->_currentPage;
+			case 'primaryKey':
+				return $this->_primaryKey;
+				
 		}
 	}
 	
@@ -130,6 +136,9 @@ class SimpleResults{
 			case 'currentPage':
 				$tmpVal = cleanVar ( $value, 'int', 1, 99999999 );
 				$this->_currentPage = is_null($tmpVal ) ? 1 : $tmpVal;
+				break;
+			case 'primaryKey':
+				$this->_primaryKey = $value;
 				break;
 		}
 	}
