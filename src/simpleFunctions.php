@@ -178,7 +178,7 @@ function cleanPOST($field){
 	$type = isset($args[1]) ? $args[1] : null;
 	$arg1 = isset($args[2]) ? $args[2] : null;
 	$arg2 = isset($args[3]) ? $args[3] : null;
-
+	
 	if (array_key_exists($field, $_POST)){
 		return cleanVar( $_POST[$field], $type, $arg1, $arg2); 
 	}

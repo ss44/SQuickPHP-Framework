@@ -150,7 +150,11 @@ class SimpleDB{
 		switch ($this->_dbType){
 			case 'mysql':
 				$r = mysql_query($q->getSelect(), $this->connection);
-	
+				
+				if ($r === false ){
+					throw new SimpleDBException( "Unable to perform query: " . mysql_error() );
+				}
+				
 				if (@mysql_num_rows($r) > 0){
 					$result = mysql_fetch_assoc( $r );
 				}
