@@ -49,6 +49,7 @@ class SimpleForm implements ArrayAccess{
 			
 			//If any of the fields are invalid then all is not good.
 			if ( !$formField->isValid ){
+				$formField->addAttribute('class', 'sff_error');
 				$errors[ $key ] = $formField->error;		
 				$allValid = false;
 			}

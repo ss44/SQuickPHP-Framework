@@ -15,6 +15,7 @@
  	protected $validateArguments = array();
  	protected $clean  = null;
  	protected $errors = null;
+ 	protected $attributes = array();
  	
  	/**
  	 * Creates a new SimpleFormField object with basic options
@@ -102,5 +103,79 @@
  			$this->errors[] = "Value is required.";
  		}
  	}
- 
+ 	
+ 	/**
+ 	 * Gets a text field for this given field.
+ 	 * @return String that can be used to create a text field
+ 	 */
+ 	public function getTextField( $attributes = null ){
+ 		$str = "<input type='text' ";
+ 		$str .= "name='$this->elementName' ";
+ 		$str .= "value='".$this->value."' "; 
+
+ 		if ( is_array($attributes) ) {
+ 			$this->addAttribute( $attributes );
+ 		}
+ 		
+ 		$atr = $this->getAttrStr();
+ 		
+ 		$str .= $atr;
+ 		$str .= " />";
+ 		
+ 		return $str;
+ 	}
+ 	
+ 	
+ 	/**
+ 	 * Gets a password field for this given field.
+ 	 * @return String that represents an input field for a password field.
+ 	 */
+	public function getPasswordField( $attributes ){
+		$str = "<input type='password' ";
+ 		$str .= "name='$this->elementName' ";
+ 		$str .= "value='".$this->value."' "; 
+ 		
+ 		if ( is_array($attributes) ) {
+ 			$this->addAttribute( $attributes );
+ 		}
+ 		
+ 		$atr = $this->getAttrStr();
+ 		
+ 		$str .= $atr;
+ 		$str .= " />";
+ 		
+ 		return $str;
+	} 	
+ 	
+ 	/**
+ 	 * Adds an attribute of given name with value.
+ 	 * 
+ 	 * @param $name | mixed If an assoc array is passed then adds multiple attributes.
+ 	 * @param $value
+ 	 * @return unknown_type
+ 	 */
+ 	public function addAttribute( $name, $value = null){
+ 		
+ 		if (is_array($name)){
+ 			foreach ($name as $key => $value){
+ 				$this->addAttribute($key, $value);
+ 			}
+ 			return;	
+ 		}
+ 		
+ 		
+ 		$this->attributes[$name][] = $value;
+ 	}
+ 	
+ 	public function getAttrStr(){
+		$str = '';
+ 		
+		foreach ($this->attributes as $name => $val ){
+ 			$str = "$name = '".join( ' ', $val )."'"; 
+ 		}
+ 		
+ 		return $str; 
+ 	}
+ 	
+ 	
  }
