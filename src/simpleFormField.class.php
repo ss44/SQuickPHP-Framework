@@ -33,7 +33,8 @@
 		
 		if (func_num_args() > 2){
 			$arguments = func_get_args();
-			$this->validateArguments = array_slice( $arguments, 2, func_num_args()-2);
+			$numOfArguments = func_num_args()-2;
+			$this->validateArguments = array_slice( $arguments, 2, $numOfArguments);
 		}
  	}
  	
