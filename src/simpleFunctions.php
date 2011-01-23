@@ -75,7 +75,13 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 
 	switch ($type){
 		case 'str':
-			//if (!is_a($var, 'String')) return null;
+		case 'str:lower':
+		case 'str:upper':
+			if ($type == 'str:lower'){
+				$var = strtolower( $var );
+			}elseif( $type == "str:upper" ){
+				$var = strtoupper( $var );
+			}
 				
 			if ( is_int($arg1) && ( strlen($var) < $arg1)){
 				 return null;
