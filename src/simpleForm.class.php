@@ -7,7 +7,7 @@
 class SimpleForm implements ArrayAccess{
 	
 	protected $formFields = array(); 
-	protected $errors;
+	protected $errors = array();
 	
     public function __construct() {
     		
@@ -27,6 +27,7 @@ class SimpleForm implements ArrayAccess{
      */
     public function addField( SimpleFormField $simpleFormField ){
     	$this->formFields[ $simpleFormField->name ] = $simpleFormField;
+    	$this->formFields[ $simpleFormField->name ]->setform ( $this );
     }
     
    /**
@@ -86,6 +87,10 @@ class SimpleForm implements ArrayAccess{
 		foreach ( $this->formFields as $key=>$field){
 			$query->addField( $key, $field->clean );		
 		}
+	}
+	
+	public function addError( $field, $error ){
+		$this->errors[ $field ] = $error;
 	}
 }
 

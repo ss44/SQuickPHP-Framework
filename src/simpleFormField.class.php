@@ -9,6 +9,7 @@
  
  class SimpleFormField{
  	
+ 	protected $_form = null;
  	protected $value = null;
  	protected $isRequired = false;
  	protected $elementName = null;
@@ -79,6 +80,10 @@
  	 */
  	public function addError( $error ){
  		$this->errors[] = $error;
+ 		
+ 		if (isset($this->_form)){
+ 			$this->_form->addError( $this->elementName, $error );
+ 		}
  	}
  	
  	/**
@@ -178,5 +183,12 @@
  		return $str; 
  	}
  	
- 	
+ 	/**
+ 	 * Sets the simple form that this formfield is linked to.
+ 	 * @param SimpleForm $form
+ 	 * @return unknown_type
+ 	 */
+ 	public function setForm( SimpleForm $form ){
+ 		$this->_form = $form;
+ 	}
  }

@@ -16,23 +16,28 @@ class SimpleRoot extends SimpleDB{
 	protected $_isNew = true;
 	
 	public function __construct( $keyId = null ){
+		parent::__construct();
+		
 		if ( $keyId ){
-			
+			$this->load( array( $this->_primaryKey => $keyId ) );
 		}
 	}
 	
 	public function load( $loadParams ){
 		
-		$q = new uQuery();
+		$q = new SimpleQuery();
 		$q->addTable( $this->_table );
-		$q->addWhere( $loadParams );
+		
+		foreach ( $loadParams as $field=>$val ){
+			$q->addWhere( $field, $val );
+		}
 		
 		$this->_data = $this->getRow( $q );
 	}
 	
 	public function save( $saveParams ){
 		
-		$q = new uQuery();
+		$q = new SimpleQuery();
 		$q->addTable( $this->_table );
 		
 		

@@ -77,6 +77,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str':
 		case 'str:lower':
 		case 'str:upper':
+		case 'str:md5':
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
 			}elseif( $type == "str:upper" ){
@@ -118,6 +119,10 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 				}
 			}
             
+			if ( $type == 'str:md5' ){
+				return md5( $var );
+			}
+			
             return (string) $var;
 		case 'date':
 			$arg1 = '/^(\d{1,2})[-\/\.]\s?(\d{1,2})[-\/\.]\s?(\d{2,4})\s?$/';
