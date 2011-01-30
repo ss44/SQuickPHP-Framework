@@ -17,7 +17,8 @@
  	protected $clean  = null;
  	protected $errors = null;
  	protected $attributes = array();
- 	
+ 	protected $normalFields = array();
+
  	/**
  	 * Creates a new SimpleFormField object with basic options
  	 * 
@@ -65,6 +66,9 @@
  			case 'value':
  				$this->value = $value;
  				$this->validate($value);
+ 				break;
+ 			case 'normalizeFrom':
+ 				$this->normalFrom = (array) $value;
  				break;
  		}
  	}
@@ -154,6 +158,30 @@
 	} 	
  	
  	/**
+ 	 * Prepares a select element with options from values in the normalField array
+ 	 *
+ 	 * @return String that represents a select field.
+ 	 */
+ 	public function getSelectField( $attributes ){
+ 		$str = "<select name='$this->elementName' ";
+
+ 		if ( is_array( $this->getAttrStr() )){
+ 			$this->addAttributes( $attributes );
+ 		}
+
+ 		$str .= $this->getAttrStr();
+ 		$str .= ">";
+
+ 		foreach ( $this->normalFields as $key => $value ){
+ 			$str .= "<option name=$key>$value</option>"; 
+ 		}
+
+ 		$str .= '</select>';
+ 		
+ 		return $str;
+ 	}
+
+ 	/**
  	 * Adds an attribute of given name with value.
  	 * 
  	 * @param $name | mixed If an assoc array is passed then adds multiple attributes.
@@ -183,6 +211,7 @@
  		return $str; 
  	}
  	
+
  	/**
  	 * Sets the simple form that this formfield is linked to.
  	 * @param SimpleForm $form

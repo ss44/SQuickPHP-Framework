@@ -7,7 +7,7 @@
  * @created 13-Nov-2010
  */
 
-class SimpleRoot extends SimpleDB{
+abstract class SimpleRoot extends SimpleDB{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;
@@ -18,9 +18,14 @@ class SimpleRoot extends SimpleDB{
 	public function __construct( $keyId = null ){
 		parent::__construct();
 		
+		$this->_tableInfo = $this->getTableStructure( $this->_table );
+		$this->_data = array_fill_keys ( array_keys( $this->_tableInfo), null );
+
 		if ( $keyId ){
 			$this->load( array( $this->_primaryKey => $keyId ) );
 		}
+
+
 	}
 	
 	public function load( $loadParams ){
@@ -31,8 +36,12 @@ class SimpleRoot extends SimpleDB{
 		foreach ( $loadParams as $field=>$val ){
 			$q->addWhere( $field, $val );
 		}
-		
-		$this->_data = $this->getRow( $q );
+
+		$result = $this->getRow( $q );
+
+		if ( !empty( $result ) ){
+			$this->_data = $result; 
+		}
 	}
 	
 	public function save( $saveParams ){
@@ -61,8 +70,17 @@ class SimpleRoot extends SimpleDB{
 	}
 	
 	public function __get( $key ){
-		if (!array_key_exists( $key, $this->_data )) die("Invalid $key. Does not exist in data");
-		
+
+		if (!array_key_exists( $key, $this->_data )) throw new SimpleDataException("Invalid $key. Does not exist in data");
 		return $this->_data[ $key ];
 	}
+}
+
+class SimpleDataException extends SimpleException{
+	
+	public function __construct( $errorMessage = "" ){
+		
+		parent::__construct( $errorMessage );
+	}
+
 }

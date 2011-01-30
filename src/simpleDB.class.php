@@ -9,6 +9,7 @@
  */
 
 require_once(dirname(__FILE__).'/simpleQuery.class.php');
+require_once(dirname(__FILE__).'/simpleException.class.php');
 
 class SimpleDB{
 
@@ -73,6 +74,40 @@ class SimpleDB{
 				if (is_null($this->connection)) $this->connect();
 				$result = mysql_query($q->getUpdate(), $this->connection);
 				return $result;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				$r = $this->_dbObj->exec( $q->getUpdate() );
+				return $result;
+			case 'mysqli':
+			case 'postgres':
+			case 'sqlite':
+		}
+	}
+
+	/**
+	 * Attempts to update record if it already exists otherwise inserts it.
+	 * @param SimpleQuery $q Query to update and or insert.
+	 */
+	public function upsert( SimpleQuery $q ){
+		switch ($this->_dbType){
+			case 'mysql':
+				if (is_null($this->connection)) $this->connect();
+				
+				try{
+					$row = $this->getRow( $q );
+
+					if (empty($row)){
+						return $this->insert($q);
+					}
+					
+					//Otherwise update.
+					return $this->update($q);
+				}
+				//Throw errors up.
+				catch( Exception $ex ){
+					throw $ex;
+				}
+				break;
 			case 'sqlite3':
 				if (is_null($this->_dbObj)) $this->connect();
 				$r = $this->_dbObj->exec( $q->getUpdate() );
@@ -390,7 +425,7 @@ class SimpleDB{
 	}
 }
 
-class SimpleDBException extends Exception{
+class SimpleDBException extends SimpleException{
 	public function __construct( $message = null){
 		parent::__construct( $message );
 	}
