@@ -21,8 +21,13 @@ if (!function_exists('oops')){
 	
 	        $file = $dbg[0]['file'];
 	        $line = $dbg[0]['line'];
-	        echo "<pre><H1>". $file ." @ ". $line ."</H1>";
-	
+	        
+	        if (PHP_SAPI == "cli"){
+	        	echo "\n-- $file @ $line --\n";	
+	        }else{
+	        	echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+	        }
+
 	        for ($x = 1; $x < $level; $x++){
 	                if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
 	                		$file = $dbg[$x]['file'];
@@ -33,7 +38,12 @@ if (!function_exists('oops')){
 	
 	        if ($varDump) var_dump($vars);
 	        else print_r($vars);
-	        echo "</pre>";
+	
+			if (PHP_SAPI == "cli"){
+	        	echo "\n";	
+	        }else{
+	        	echo "</pre>";
+	        }
 	}
 }
 if (!function_exists('dim')){
@@ -43,7 +53,12 @@ if (!function_exists('dim')){
 	
 		$file = $dbg[0]['file'];
 		$line = $dbg[0]['line'];
-		echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+
+        if (PHP_SAPI == "cli"){
+        	echo "\n-- $file @ $line --\n";	
+        }else{
+        	echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+        }
 	
 		for ($x = 1; $x < $level; $x++){
 				if (isset($dbg[$x])){
@@ -55,7 +70,13 @@ if (!function_exists('dim')){
 	
 		if ($varDump) var_dump($vars);
 		else print_r($vars);
-		echo "</pre>";
+
+		if (PHP_SAPI == "cli"){
+        	echo "\n";	
+        }else{
+        	echo "</pre>";
+        }
+		
 	
 		exit;
 	}

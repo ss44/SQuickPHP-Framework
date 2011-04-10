@@ -22,9 +22,15 @@ class SimpleQuery{
 	public $whereGroupCounter = 0;
 	protected $limit = null;
 	protected $offset = null;
-	
+	protected $_dbType = null;
+
 	public function __construct(){
 		$this->whereGroups[0] = 'AND';
+	}
+
+	public function setDBType( $dbType ){
+		$this->_dbType = $dbType;
+
 	}
 
 	public function addColumn($columnName){
@@ -186,10 +192,10 @@ class SimpleQuery{
 			$field = $pair['field'];
 			$value = $pair['value'];
 				
-			$fields .= '`'.mysql_real_escape_string($field).'`';
+			$fields .= '`'.$this->escape($field).'`';
 				
 			if ($pair['escape'])
-			$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.mysql_real_escape_string($value).'\'';
+			$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.$this->escape($value).'\'';
 			else
 			$values .= $value;
 			/*
@@ -198,7 +204,7 @@ class SimpleQuery{
 				elseif (is_bool($value))
 				$values .= $value === true ? 1 : 0;
 				else
-				$values .= '\''.mysql_real_escape_string($value).'\'';
+				$values .= '\''.$this->escape($value).'\'';
 				*/
 			if ($x < $counter){
 				$fields .= ', ';
@@ -229,10 +235,10 @@ class SimpleQuery{
 				
 			$field = $pair['field'];
 			$value = $pair['value'];
-				
-			if (!$value)  $str .= "$field = NULL";
+			
+			if (is_null($value))  $str .= "$field = NULL";
 			elseif (is_numeric($value)) $str .= $field.'='.$value;
-			else $str .= $field.'='.'\''.mysql_real_escape_string($value).'\'';
+			else $str .= $field.'='.'\''.$this->escape($value).'\'';
 				
 			if ($x < $count){
 				$str .= ', ';
@@ -291,7 +297,7 @@ class SimpleQuery{
 				$obj = $where['value'];
 				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
 			}
-			else $str .= $where['field'] . ' ' . $where['operator'] . " '" . mysql_real_escape_string($where['value'])."'";
+			else $str .= $where['field'] . ' ' . $where['operator'] . " '" . $this->escape($where['value'])."'";
 			$counter++;
 			if ($counter != $numberOfItems){
 				$str .= " $boolType ";
@@ -371,6 +377,26 @@ class SimpleQuery{
 	}
 	
 	protected function prepareFields(){}
+
+	/**
+	 * Escapes a string based on the escape method set in this class.
+	 */
+	protected function escape( $value ){
+		
+		switch ($this->_dbType){
+			case 'mysql':
+				return mysql_real_escape_string( $value );
+			case 'sqlite3':
+				return SQLite3::escapeString( $value );
+			default:
+				return addslashes( $value );
+		}
+
+		return $escapedValue;
+	}
+
+
+
 }
 
 class SimpleQueryException extends Exception{

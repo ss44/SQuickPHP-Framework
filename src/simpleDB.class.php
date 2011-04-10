@@ -39,7 +39,8 @@ class SimpleDB{
 	 */
 	public function insert(SimpleQuery $q){
 		if (is_null($this->connection)) $this->connect();
-		
+		$this->queryChanges( $q );
+	
 		switch ($this->_dbType){
 			case 'mysql':
 				$result = mysql_query($q->getInsert(), $this->connection);
@@ -54,6 +55,10 @@ class SimpleDB{
 			case 'sqlite3':
 				if (is_null($this->_dbObj)) $this->connect();
 				$r = $this->_dbObj->exec( $q->getInsert() );
+				
+				if ($r === false){
+					throw new SimpleDBException( $this->_dbObj->lastErrorMsg() );
+				}
 				$lastId = $this->_dbObj->lastInsertRowID();
 				return $lastId;
 				
@@ -69,6 +74,8 @@ class SimpleDB{
 	 * @param SimpleQuery $q Query object that contains the update statement.
 	 */
 	public function update(SimpleQuery $q){
+		$this->queryChanges( $q );
+
 		switch ($this->_dbType){
 			case 'mysql':
 				if (is_null($this->connection)) $this->connect();
@@ -76,7 +83,7 @@ class SimpleDB{
 				return $result;
 			case 'sqlite3':
 				if (is_null($this->_dbObj)) $this->connect();
-				$r = $this->_dbObj->exec( $q->getUpdate() );
+				$result = $this->_dbObj->exec( $q->getUpdate() );
 				return $result;
 			case 'mysqli':
 			case 'postgres':
@@ -89,6 +96,8 @@ class SimpleDB{
 	 * @param SimpleQuery $q Query to update and or insert.
 	 */
 	public function upsert( SimpleQuery $q ){
+		$this->queryChanges( $q );
+
 		switch ($this->_dbType){
 			case 'mysql':
 				if (is_null($this->connection)) $this->connect();
@@ -110,8 +119,14 @@ class SimpleDB{
 				break;
 			case 'sqlite3':
 				if (is_null($this->_dbObj)) $this->connect();
-				$r = $this->_dbObj->exec( $q->getUpdate() );
-				return $result;
+				$row = $this->getRow( $q );
+
+				if (empty($row)){
+					return $this->insert($q);
+				}
+
+				return $this->update($q);
+
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -128,6 +143,7 @@ class SimpleDB{
 	public function delete(simpleQuery $q, $overRide = false){
 		if (is_null($this->connection)) $this->connect();
 		if ( !$overRide && empty($q->wheres) ) throw new SimpleDBException ("No where set for delete. Must set override to continue.");
+		$this->queryChanges( $q );
 
 		switch ($this->_dbType){
 			case 'mysql':
@@ -179,6 +195,7 @@ class SimpleDB{
 	 */
 	public function getRow(simpleQuery $q){
 		if (!$this->connection) $this->connect();
+		$this->queryChanges( $q );
 		
 		$result = array();
 
@@ -199,10 +216,8 @@ class SimpleDB{
 				if (is_null($this->_dbObj)) $this->connect();
 				
 				$r = $this->_dbObj->query( $q->getSelect() );
-				
-				if ($r->numColumns() && $r->columnType(0) != SQLITE3_NULL) { 
-					$result = $r->fetchArray( SQLITE3_ASSOC );
-				}
+				$result = $r->fetchArray( SQLITE3_ASSOC );
+
 				return $result;
 			case 'mysqli':
 			case 'postgres':
@@ -221,6 +236,9 @@ class SimpleDB{
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
+
+		$this->queryChanges( $q );
+
 				
 		$result = array();
 
@@ -269,6 +287,8 @@ class SimpleDB{
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
+		$this->queryChanges( $q );
+
 		
 		$q->addColumn( $column );
 
@@ -313,7 +333,8 @@ class SimpleDB{
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
-		
+		$this->queryChanges( $q );
+
 		$tmpQuery = clone $q; 
 		$tmpQuery->clearColumns();
 		$tmpQuery->addColumn( 'COUNT(*)');
@@ -332,6 +353,7 @@ class SimpleDB{
 	 */
 	public function getAssoc(SimpleQuery $q, $key, $value = null){
 		$result = array();
+		$this->queryChanges( $q );
 
 		switch ($this->_dbType){
 			case 'mysql':
@@ -409,7 +431,7 @@ class SimpleDB{
 				}
 				
 				$this->_dbObj = new SQLite3( $this->_dbName );
-				
+				$this->connection = true;
 				break;
 			case 'mysqli':
 			case 'postgres':
@@ -422,6 +444,10 @@ class SimpleDB{
 
 		if (!$this->connection) throw new SimpleDBException("Unable to connect to DB.");
 		
+	}
+
+	protected function queryChanges( SimpleQuery $q ){
+		$q->setDBType( $this->_dbType );
 	}
 }
 
