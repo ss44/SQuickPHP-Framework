@@ -13,6 +13,11 @@ require_once(dirname(__FILE__).'/simpleException.class.php');
 
 class SimpleDB{
 
+	//If the database has a flags paramater this can be specified here. 
+	//Varies depending on which database driver is used.
+	protected $_dbFlags = null; 
+
+	//Database type (mysql and sqlite are currently configured.)
 	protected $_dbType = '';
 	protected $_dbName = '';
 	protected $_dbUser = '';
@@ -159,6 +164,20 @@ class SimpleDB{
 		}
 	}
 
+	public function exec( simpleQuery $q ){
+		if (is_null($this->connection)) $this->connect();
+
+		switch ($this->_dbType){
+			case 'mysql':
+				$result = mysql_query( $q->getQuery(), $this->connection);
+				return $result;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				$result = $this->_dbObj->exec( $q->getQuery() );
+				return $result;
+		}
+	}
+
 	/**
 	 * Returns the table structure for a given table as an associtive array.
 	 *
@@ -287,9 +306,11 @@ class SimpleDB{
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
-		$this->queryChanges( $q );
-
 		
+		$old = $q;
+		$q = clone $old;
+				
+		$this->queryChanges( $q );
 		$q->addColumn( $column );
 
 		$result = array();
@@ -310,13 +331,9 @@ class SimpleDB{
 				
 				$r = $this->_dbObj->query( $q->getSelect() );
 				
-				if ($r->numColumns() && $r->columnType(0) != SQLITE3_NULL) { 
-					while( $row = $r->fetchArray( SQLITE3_ASSOC ) ){
-						if (array_key_exists($key, $row)){
-							$result[] = $row[ $column ];
-						}else{
-							throw new SimpleDBException('Invalid key. Not found in result.');
-						}
+				if ($r->numColumns()) { 
+					while( $row = $r->fetchArray( SQLITE3_NUM ) ){
+						$result[] = $row[ 0 ];
 					}
 				}
 				return $result;
@@ -377,7 +394,7 @@ class SimpleDB{
 				
 				$r = $this->_dbObj->query( $q->getSelect() );
 				
-				if ($res->numColumns() && $res->columnType(0) != SQLITE3_NULL) { 
+				if ($r->numColumns()) { 
 					while ($row = $r->fetchArray(SQLITE3_ASSOC)){
 						if (array_key_exists($key, $row)){
 							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
@@ -403,18 +420,21 @@ class SimpleDB{
 			$this->_dbName = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
 			$this->_dbUser = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
 			$this->_dbPass = array_key_exists('pass', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
-			
+			$this->_dbFlags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
+
 		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
 			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
 
 			$config =  parse_ini_file( $siteIni );
-				
+			
 			if (array_key_exists('DB_TYPE', $config)) $this->_dbType = $config['DB_TYPE'];
 			if (array_key_exists('DB_PATH', $config)) $this->_dbPath = $config['DB_PATH'];
 			if (array_key_exists('DB_NAME', $config)) $this->_dbName = $config['DB_NAME'];
 			if (array_key_exists('DB_USER', $config)) $this->_dbUser = $config['DB_USER'];
 			if (array_key_exists('DB_PASS', $config)) $this->_dbPass = $config['DB_PASS'];
+			if (array_key_exists('DB_FLAGS', $config)) $this->_dbFlags = $config['DB_FLAGS'];	
+
 		}else{
 			throw new SimpleDBException('No db settings provided.');
 		}
@@ -430,7 +450,7 @@ class SimpleDB{
 					throw new SimpleDBException("SimpleDB requires SQLite3 class to exist");
 				}
 				
-				$this->_dbObj = new SQLite3( $this->_dbName );
+				$this->_dbObj = new SQLite3( $this->_dbName, $this->_dbFlags );
 				$this->connection = true;
 				break;
 			case 'mysqli':

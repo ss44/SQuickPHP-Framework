@@ -24,8 +24,11 @@ class SimpleQuery{
 	protected $offset = null;
 	protected $_dbType = null;
 
-	public function __construct(){
+	protected $_query = null;
+
+	public function __construct( $query = null ){
 		$this->whereGroups[0] = 'AND';
+		$this->_query = $query;
 	}
 
 	public function setDBType( $dbType ){
@@ -149,6 +152,9 @@ class SimpleQuery{
 	}
 	
 	public function getSelect(){
+
+		if ($this->_query) return $this->_query;
+
 		$str = 'SELECT ';
 
 		if (!$this->columns) $str .= '* ';
@@ -174,6 +180,9 @@ class SimpleQuery{
 	public function getInsert(){
 		if (!$this->tables) throw new Exception('Must set a table first.');
 		if (!$this->fields) throw new Exception('No fields set');
+
+		if ($this->_query) return $this->_query;
+
 
 		$str = 'INSERT INTO ';
 
@@ -219,6 +228,8 @@ class SimpleQuery{
 	public function getUpdate(){
 		if (!$this->tables) throw new Exception("Must set a table.");
 		if (!$this->fields) throw new Exception("Must select fields.");
+
+		if ($this->_query) return $this->_query;
 
 		$str = 'UPDATE ';
 		$str .= join(', ', $this->tables);
@@ -395,7 +406,9 @@ class SimpleQuery{
 		return $escapedValue;
 	}
 
-
+	public function getQuery(){
+		return $this->_query;
+	}
 
 }
 
