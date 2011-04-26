@@ -32,7 +32,12 @@ if (!function_exists('oops')){
 	                if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
 	                		$file = $dbg[$x]['file'];
 	                        $line = $dbg[$x]['line'];
-	                        echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+				
+					        if (PHP_SAPI == 'cli'){
+					        	echo "\t-- $file @ $line --\n";	
+					        }else{
+					            echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+							}
 	                }
 	        }
 	
@@ -64,7 +69,12 @@ if (!function_exists('dim')){
 				if (isset($dbg[$x])){
 						$file = $dbg[$x]['file'];
 						$line = $dbg[$x]['line'];
-						echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+
+				        if (PHP_SAPI == 'cli'){
+				        	echo "\t$file @ $line \n";	
+				        }else{
+				            echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+						}
 				}
 		}
 	
