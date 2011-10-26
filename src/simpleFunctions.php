@@ -179,6 +179,18 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	}
 }
 
+function cleanArrayKey($key, $array){
+	if (!array_key_exists( $key, $array )) return null;
+
+	$args = func_get_args();
+
+	$type = isset($args[2]) ? $args[2] : null;
+	$arg1 = isset($args[3]) ? $args[3] : null;
+	$arg2 = isset($args[4]) ? $args[4] : null;
+
+	
+	return cleanVar( $array[$key], $type, $arg1, $arg2); 
+}
 
 /**
  * Convience function that passes a variable to cleanVar which validates a given value. This method is specific
@@ -190,20 +202,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanREQUEST($field){
-	if (!array_key_exists($field, $_REQUEST) ) return null;
-	
-	$args = func_get_args();
-
-	$type = isset($args[1]) ? $args[1] : null;
-	$arg1 = isset($args[2]) ? $args[2] : null;
-	$arg2 = isset($args[3]) ? $args[3] : null;
-
-	if (array_key_exists($field, $_REQUEST)){
-		return cleanVar( $_REQUEST[$field], $type, $arg1, $arg2); 
-	}
-	
-	return null;
-	
+	return cleanArrayKey( $field, $_REQUEST);
 }
 
 /**
@@ -213,20 +212,7 @@ function cleanREQUEST($field){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanPOST($field){
-	if (!array_key_exists($field, $_POST) ) return null;
-	
-	$args = func_get_args();
-
-	$type = isset($args[1]) ? $args[1] : null;
-	$arg1 = isset($args[2]) ? $args[2] : null;
-	$arg2 = isset($args[3]) ? $args[3] : null;
-	
-	if (array_key_exists($field, $_POST)){
-		return cleanVar( $_POST[$field], $type, $arg1, $arg2); 
-	}
-
-	return null;
-
+	return cleanArrayKey( $field, $_POST);
 }
 
 /**
@@ -236,20 +222,7 @@ function cleanPOST($field){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanGET($field){
-	if (!array_key_exists($field, $_GET) ) return null;
-	
-	$args = func_get_args();
-
-	$type = isset($args[1]) ? $args[1] : null;
-	$arg1 = isset($args[2]) ? $args[2] : null;
-	$arg2 = isset($args[3]) ? $args[3] : null;
-
-	if (array_key_exists($field, $_GET)){
-		return cleanVar( $_GET[$field], $type, $arg1, $arg2); 
-	}
-
-	return null;
-
+	return cleanArrayKey( $field, $_GET);
 }
 
 /**
