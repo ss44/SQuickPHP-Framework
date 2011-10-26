@@ -6,8 +6,6 @@
  * 
  */
 
-//require_once( dirname(__FILE__).'/SimpleDB.class.php');
-//require_once( dirname(__FILE__).'/SimpleQuery.class.php');
 
 class SimpleUser extends SimpleDB{
 	protected $_userTable = null; // Name of the table that we want to read user information from
@@ -91,6 +89,7 @@ class SimpleUser extends SimpleDB{
 			return $this->_userData[$key];
 	}
 	
+
 }
 
 class SimpleUserException extends Exception{}

@@ -35,16 +35,17 @@
 	 * @override The parent display method to try and call the wrapper.
 	 * 
 	 * @param $tpl String File / Template to load.
+	 * @param $includeWrapper Whether or not we want to include the wrapper with this display.
 	 * @author $file File to attempt to load.
 	 */
-	public function display( $tpl = null ){
-		
-		
+	public function display( $tpl = null, $includeWrapper = true ){
 		try{
-			if ( $this->getWrapper() ){
+			if ( $this->getWrapper() && $includeWrapper){
 				$value = $this->fetch( $tpl ) ;
 				$this->_content = $value;
 				parent::display( $this->getWrapper() );
+			}else{
+				parent::display( $tpl );
 			}
 		}catch( Exception $e ){
 			die( $e->getMessage() );
