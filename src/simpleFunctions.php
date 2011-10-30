@@ -233,7 +233,7 @@ function cleanGET($field){
  * @param bool $caseSensitive False will return all characters in upper case while true will create a mixture of upper and lowercase.
  * @return String of random characters.  
  */
-function randomChars( $length, $numbers = true , $caseSensitive = true){
+function randomChars( $length, $numbers = true , $caseSensitive = true, $includeSymbols = false ){
 	$str = ''; 
 	
 	mt_srand();
@@ -244,6 +244,9 @@ function randomChars( $length, $numbers = true , $caseSensitive = true){
 		//Do we want to include numbers? 
 		$y = $numbers ? 2 : 1;
 		
+		//Lets make it a bit mask to know what type of characters we 
+		//are working with.
+
 		$charType = mt_rand(0, $y);
 		
 		switch ($charType){
@@ -259,6 +262,11 @@ function randomChars( $length, $numbers = true , $caseSensitive = true){
 			case 2:
 				$char = mt_rand(48, 57);
 				break;
+
+			//Select a random special character
+			case 3:
+				$char = mt_rand( 32, 47):
+				
 		}
 		
 		$str .= chr( $char );

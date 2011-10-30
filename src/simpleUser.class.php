@@ -4,6 +4,8 @@
  * 
  * @author Shajinder Padda
  * 
+ * Basic table structure should be
+ * 
  */
 
 
@@ -13,6 +15,9 @@ class SimpleUser extends SimpleDB{
 	protected $_passwordField = null; //The field that we want to read the password from.
 	protected $_saltField = null; //The field which holds the salt code.
 	
+	//Rule when storing a password.
+	protected $_passwordRule = null;
+
 	protected $_username = null;
 	protected $_password = null;
 
@@ -23,6 +28,8 @@ class SimpleUser extends SimpleDB{
 	protected $_userData = array();
 	protected $_USERCONFIG = null;
 	
+
+
 	public function __construct($_CONFIG = null){
 		global $__SIMPLE_CONFIG;
 		parent::__construct($_CONFIG);
@@ -90,6 +97,56 @@ class SimpleUser extends SimpleDB{
 	}
 	
 
+	/**
+	 * Allows creating of a new user in our database.
+	 * 
+	 * @param string $username the username of the user we are creating.
+	 * @param string $password for the user that we're creating.
+	 * @param array $fields Additional fields that we want to store when user is created.
+	 */
+	public function create( $username, $password, $fields ){
+		
+		//Test to make sure the user doesn't already exist.
+		$q = new SimpleQuery();
+		$q->addTable( $this->_userTable );
+		$q->addWhere( $this->_usernameField, $username );
+
+		if ( $this->getCount( $q ) > 0 )
+			throw new SimpleUserException( 100, "Cannot create user. Username already exists.");
+		
+		//Test to make sure password is valid if we have password rules.
+		if ( $this->_passwordRule ){
+			if ( !preg_match( $this->_passwordRule, $password ) ){
+				throw new SimpleUserException( 101,, "Invalid password. Password doesn't match system defined rule.");
+			}
+		}
+
+		$q = new SimpleUser();
+		$q->addTable( $this->_userTable );
+		$q->addFields( $fields );
+		$q->addField( $this->_usernameField, $username );
+
+		//generate a salt and add it to the password if we can.
+		if ( $this->_saltField ){
+			//Create the user.
+			$salt = randomChars( 10 );
+			$password = $password + $salt;
+			$q->addField( $this->_saltField, $salt  );
+		}
+
+		$q->addField( $this->_passwordField, md5($password) );
+		$q->addField( $this->_saltField )
+		
+		return $this->insert($q);
+	}
+
 }
 
+/**
+ * Exceptions related to simple user functions.
+ * 
+ * Error codes are:
+ * 100 : User already exists.
+ * 101 : Password doesn't match our rule.
+ */
 class SimpleUserException extends Exception{}
