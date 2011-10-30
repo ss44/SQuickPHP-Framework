@@ -242,34 +242,42 @@ function randomChars( $length, $numbers = true , $caseSensitive = true, $include
 		//Randomly select what type of character we want
 
 		//Do we want to include numbers? 
-		$y = $numbers ? 2 : 1;
-		
+		$y = 1;
+		//001 - 1
+		//011 - 3 include
+		//101 - 5 
+		//111 - 7
+		if ( $numbers ){
+			$y = 2;
+		}
+
+		if ( $includeSymbols ){
+			
+		}
 		//Lets make it a bit mask to know what type of characters we 
 		//are working with.
 
 		$charType = mt_rand(0, $y);
 		
-		switch ($charType){
-			//Select a random character between A-Z [ASCII 65-90]
-			case 0:
-				$char = mt_rand(65, 90);
-				break;
-			//Select a random character between a-z [ASCII 97-122]
-			case 1:
-				$char = mt_rand(97, 122);
-				break;
-			//Select a random cahracter between 0-9 [ASCII 48-57]
-			case 2:
-				$char = mt_rand(48, 57);
-				break;
-
-			//Select a random special character
-			case 3:
-				$char = mt_rand( 32, 47):
-				
-		}
+		$chars = arrays();
 		
-		$str .= chr( $char );
+		//Select a random character between A-Z [ASCII 65-90]
+		$chars[] = mt_rand(65, 90);
+
+		//Select a random character between a-z [ASCII 97-122]
+		$chars[] = mt_rand(97, 122);
+
+		//Select a random cahracter between 0-9 [ASCII 48-57]
+		if ($numbers){
+			$chars[] = mt_rand(48, 57);
+		}
+
+		if ( $includeSymbols ){
+			$chars[] = mt_rand(32, 47);
+		}
+
+		//Get a random character from the chars array		
+		$str .= chr( $chars[ array_rand( $chars ) ] );
 	}
 	
 	return ($caseSensitive) ? $str : strtoupper( $str );  
