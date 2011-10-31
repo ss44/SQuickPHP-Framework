@@ -28,8 +28,6 @@ class SimpleUser extends SimpleDB{
 	protected $_userData = array();
 	protected $_USERCONFIG = null;
 	
-
-
 	public function __construct($_CONFIG = null){
 		global $__SIMPLE_CONFIG;
 		parent::__construct($_CONFIG);
@@ -42,6 +40,7 @@ class SimpleUser extends SimpleDB{
 			$this->_usernameField = array_key_exists('username_field', $this->_USERCONFIG) ? $this->_USERCONFIG['username_field'] : null;
 			$this->_passwordField = array_key_exists('password_field', $this->_USERCONFIG) ? $this->_USERCONFIG['password_field'] : null;
 			$this->_saltfield = array_key_exists('salt_field', $this->_USERCONFIG) ? $this->_USERCONFIG['salt_field'] : null;
+			$this->_passwordRule = array_key_exists('password_rule', $this->_USERCONFIG) ? $this->_USERCONFIG['password_rule'] : null;
 		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
 			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
@@ -51,7 +50,8 @@ class SimpleUser extends SimpleDB{
 			if (array_key_exists('SU_USERS_TABLE', $config)) $this->_userTable = $config['SU_USERS_TABLE'];
 			if (array_key_exists('SU_USERNAME_FIELD', $config)) $this->_usernameField = $config['SU_USERNAME_FIELD'];
 			if (array_key_exists('SU_PASSWORD_FIELD', $config)) $this->_passwordField = $config['SU_PASSWORD_FIELD'];
-			if (array_key_exists('SU_SALT', $config)) $this->_saltField = $config['SU_SALT'];
+			if (array_key_exists('SU_SALT_FIELD', $config)) $this->_saltField = $config['SU_SALT_FIELD'];
+			if (array_key_exists('SU_PASSWORD_RULE', $config)) $this->_passwordRule = $config['SU_PASSWORD_RULE']
 		}else{
 			throw new SimpleUserException('No SimpleUser settings provided.');
 		}
@@ -73,10 +73,10 @@ class SimpleUser extends SimpleDB{
 		$q->addTable( $this->_userTable );
 		$q->addWhere( $this->_usernameField, $username);
 		
-		//@TODO Handle salt fields. 
 		//If a salt field is provided then we want to add the salt + password
 		if ($this->_saltField){
-			//$q->addWhere($this->_passwordField,)	
+			//Need to properly escape the password field
+			$q->addWhere( 'MD5(CONCAT('. addslashes($this->_passwordField).','.$this->_saltField.'))' );	
 		}else{
 			$q->addWhere( $this->_passwordField, md5($password ));
 		}
