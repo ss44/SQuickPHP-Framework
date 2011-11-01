@@ -347,4 +347,24 @@ function callTemplateWrapper($temp = null){
 	}
 }
 
+/**
+ * Loads a simple ini file. Which allows server specific variables, and combines these into
+ * a single relevent section to be used.
+ * 
+ * @param string $siteIni The site ini to use.
+ * @return returns an array of the parsed config file.
+ */
+function loadSimpleIniFile( $siteIni ){
+	
+	$conifg = parse_ini_file( $siteIni, true );
+
+	//If server is defined then get our server modes.
+	
+	//Determine which instance the site is currently running.
+
+	//If we can't then die with an error.
+	die ("Server settings not properly configured.");
+
+
+}
 ?>

@@ -6,18 +6,18 @@
   * It is expected that this class is extended.
   * by the sub sites.
   * 
-  * @autor Shajinder Padda <ss@ss44.ca>
+  * @aStor Shajinder Padda <ss@ss44.ca>
   * @created 20-Oct-2011
   */
 
-  class SimpleCMS extends simpleDB{
+  class SimpleCMS extends SimpleDB{
   	
-  	protected $fields = array();
+    protected $fields = array();
   	protected $section = null;
   	protected $errors = array();
 
   	
- 	protected __construct(  ){
+ 	  protected __construct(  ){
   		super();
   	}
 

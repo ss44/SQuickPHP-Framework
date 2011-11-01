@@ -424,10 +424,10 @@ class SimpleDB{
 
 		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
-			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
+			$siteIni = defined('SIMPLE_INI_FILE') ? SIMPLE_INI_FILE : 'site.ini';
 
-			$config =  parse_ini_file( $siteIni );
-			
+			$config = loadSimpleIniFile( $siteIni );
+
 			if (array_key_exists('DB_TYPE', $config)) $this->_dbType = $config['DB_TYPE'];
 			if (array_key_exists('DB_PATH', $config)) $this->_dbPath = $config['DB_PATH'];
 			if (array_key_exists('DB_NAME', $config)) $this->_dbName = $config['DB_NAME'];
