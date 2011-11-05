@@ -55,8 +55,6 @@
  			case 'clean':
  				return $this->clean;	
  			case 'isValid':
- 				//oops($this->clean, 1);
- 				//oops($this->isRequired, 1);
  				return ( (is_null($this->clean)  && !$this->isRequired) || (!is_null($this->clean)) );
  		}
  	}
