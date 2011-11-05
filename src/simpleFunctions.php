@@ -356,15 +356,68 @@ function callTemplateWrapper($temp = null){
  */
 function loadSimpleIniFile( $siteIni ){
 	
-	$conifg = parse_ini_file( $siteIni, true );
+	$config = parse_ini_file( $siteIni, true );
 
 	//If server is defined then get our server modes.
-	
+	$servers = array();
+	$currentSite = array_key_exists( 'current_site', $config) ? $config['current_site'] : null;
+
+	//If current site is null then no need to read the server variable.
+	if (is_null($currentSite) && array_key_exists('SERVER', $config)){
+		$servers = $config['SERVER'];
+	}
+
+
 	//Determine which instance the site is currently running.
+	foreach ( $servers as $key=>$server ){
+		
+		if (isset($_SERVER) && array_key_exists('SERVER_NAME', $_SERVER) ){
+			$serverName = $_SERVER['SERVER_NAME'];
+			$found = strpos( strtolower($server), strtolower($serverName) );
+		}else{
+			//If we're running in CLI mode then the above method won't work.
+			//So we can determine which to run based on the hostname and path.
+			$currentServerPath = php_uname("n").':'.getcwd();
+			$found = strpos(strtolower($server), strtolower($currentServerPath));
 
-	//If we can't then die with an error.
-	die ("Server settings not properly configured.");
+		}
 
+		//If we found it then ue that key.
+		if ( $found !== false){
+			$currentSite = $key;
+			break;
+		}
+	}
+
+	//If we have our current site
+	if ($currentSite){
+		
+		$configCopy = $config;
+		//Loop over the config and merge our server specific settings.
+		foreach( $configCopy as $key=>$val ){
+			if (preg_match('/^(.*)_'.$currentSite.'$/i', $key, $tmp)){
+				//Merge that key with our custom settings
+				if ( array_key_exists( $tmp[1], $config) ){
+					$config[ $tmp[1] ] = $config[ $tmp[1] ] + $config[ $key ];
+				}
+			}
+
+			//Loop over all our keys in the config and make them lowercase
+			if (is_array($val)){
+				foreach ( $val as $tKey => $item ){
+					$newKey = strtolower( $tKey );
+					unset($config[$key][$tKey]);
+					$config[$key][$newKey] = $item;
+					
+				}
+			}else{
+				$newKey = strtolower( $key );
+				unset($config[$key]);
+				$config[$newKey] = $value;
+			}
+		}
+	}
+	return $config;
 
 }
 ?>

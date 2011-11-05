@@ -425,15 +425,16 @@ class SimpleDB{
 		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
 			//If not found then check settings from config file
 			$siteIni = defined('SIMPLE_INI_FILE') ? SIMPLE_INI_FILE : 'site.ini';
-
 			$config = loadSimpleIniFile( $siteIni );
 
-			if (array_key_exists('DB_TYPE', $config)) $this->_dbType = $config['DB_TYPE'];
-			if (array_key_exists('DB_PATH', $config)) $this->_dbPath = $config['DB_PATH'];
-			if (array_key_exists('DB_NAME', $config)) $this->_dbName = $config['DB_NAME'];
-			if (array_key_exists('DB_USER', $config)) $this->_dbUser = $config['DB_USER'];
-			if (array_key_exists('DB_PASS', $config)) $this->_dbPass = $config['DB_PASS'];
-			if (array_key_exists('DB_FLAGS', $config)) $this->_dbFlags = $config['DB_FLAGS'];	
+			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
+
+			if (array_key_exists('type', $dbSettings)) $this->_dbType = $dbSettings['type'];
+			if (array_key_exists('path', $dbSettings)) $this->_dbPath = $dbSettings['path'];
+			if (array_key_exists('name', $dbSettings)) $this->_dbName = $dbSettings['name'];
+			if (array_key_exists('user', $dbSettings)) $this->_dbUser = $dbSettings['user'];
+			if (array_key_exists('password', $dbSettings)) $this->_dbPass = $dbSettings['password'];
+			if (array_key_exists('flags', $dbSettings)) $this->_dbFlags = $config['flags'];	
 
 		}else{
 			throw new SimpleDBException('No db settings provided.');
