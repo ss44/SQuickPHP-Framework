@@ -92,6 +92,10 @@ class SimpleForm implements ArrayAccess{
 	public function addError( $field, $error ){
 		$this->errors[ $field ] = $error;
 	}
+
+	public function getFormFields(){
+		return $this->_formFields;
+	}
 }
 
 class SimpleFormException extends Exception{

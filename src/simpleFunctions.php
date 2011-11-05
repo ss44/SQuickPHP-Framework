@@ -12,6 +12,10 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
+$tmp = register_shutdown_function('simpleCleanShutdown');;
+$tmp = set_error_handler ('simpleCleanError', E_ALL);
+ini_set('display_errors', 0);
+
 /**
  * Debug tools
  */
@@ -283,7 +287,7 @@ function randomChars( $length, $numbers = true , $caseSensitive = true, $include
 	return ($caseSensitive) ? $str : strtoupper( $str );  
 }
 
-function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
+function simpleCleanError($errNo, $errStr, $errFile, $errLine){
 	$msg = '';
 	$bgColor = 'yellow';
 	
@@ -303,9 +307,6 @@ function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
 			break;
 	}
 	
-	
-	
-	
 	//@TODO - have some sort of check here so that if we are in cli mode these errors are not handled like this.
 	echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor; color:black;'>";
 	echo "$msg";
@@ -323,9 +324,22 @@ function simpleCleanError( $errNo, $errStr, $errFile, $errLine){
 	return true;
 }
 
+function simpleCleanShutdown(){
+	$error = error_get_last();
 
 
-$tmp = set_error_handler ('simpleCleanError');
+	//If there wasn't an error then end normaly.
+	if (is_null($error)){
+		return;
+	}
+
+	echo "<pre style='width:100%; border:thin solid black; background-color:pink; color:black;'>";
+	echo $error['message'];
+
+	echo "\n";
+	echo "\t".$error['line']. ' @ '. $error['file']. "\n";
+
+	echo "</pre>";}
 
 /**
  * Displays the hedaer and footer.
@@ -347,6 +361,16 @@ function callTemplateWrapper($temp = null){
 	}
 }
 
+/**
+ * Redirects the user and if there was output then displays a click here to continue link.
+ * 
+ * @param String $url to redirect to.
+ */
+function redirect( $url ){
+	
+	header("Location: $url ");
+	exit;
+}
 /**
  * Loads a simple ini file. Which allows server specific variables, and combines these into
  * a single relevent section to be used.
@@ -418,6 +442,15 @@ function loadSimpleIniFile( $siteIni ){
 		}
 	}
 	return $config;
-
 }
-?>
+
+/**
+ * Tests to see if string is serialized.
+ *
+ * @param String $string The string to to test.
+ * @return Boolean True if is a serialzied string false otherwise.
+ */
+function isSerialized( $string ){
+	$isSerial = @unserialize( $string );
+	return !($isSerial === false);
+}
