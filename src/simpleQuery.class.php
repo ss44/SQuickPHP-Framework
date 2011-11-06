@@ -297,7 +297,17 @@ class SimpleQuery{
 				$endedGroup = true;
 			}
 			//@TODO this statement needs fixing
-			if (!$where['value'] && $where['value'] !== 0) $str .= $where['field'];
+			if (is_null($where['value'])){
+				$str .= $where['field'];
+
+				if ($where['operator'] == '!='){
+					$str .= ' IS NOT null';
+				}elseif ( $where['operator'] == '='){
+					$str .= ' IS null';
+				}else{
+					$str .= $where['operator'] . ' null';
+				}
+			}
 			elseif (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
 			elseif (is_array($where['value'])){
 				//array_walk($where, 'mysql_escape_string');
