@@ -94,7 +94,7 @@ class SimpleForm implements ArrayAccess{
 	}
 
 	public function getFormFields(){
-		return $this->_formFields;
+		return $this->formFields;
 	}
 }
 

@@ -103,8 +103,11 @@ class SimpleResults{
 			$this->_query->addLimit( $this->_resultsPerPage );
 			$this->_query->addOffset( $this->_resultsPerPage * ($this->_currentPage - 1) );
 			$this->_truncatedData = $this->_db->getAll( $this->_query );
+		}else{
+			//@TODO add array splicing code here.
+			$this->_truncatedData = $this->_data;
 		}
-				
+		
 		$this->_useCache = true;
 	}
 	

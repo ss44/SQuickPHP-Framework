@@ -47,7 +47,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 		$fields = $this->fields[ $this->section ]->getFormFields();
 
 		//Check if its serailzied
-		if ( !isSerialzied( $content ) ) {
+		if ( !isSerialized( $content ) ) {
 			//Throw an exception 
 		}
 
@@ -61,7 +61,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 
 	}
 
-	private  function requireSection(){
+	protected  function requireSection(){
 		if (!$this->section || !array_key_exists($this->section, $this->fields))
 			SimpleCMSException::InvalidSection();
 	}
@@ -69,7 +69,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 	public function serializeFields(){
 		$this->requireSection();
 				
-		$fields = $this->fields[ $this->section ]->getFormFields();
+		$fields = (array) $this->fields[ $this->section ]->getFormFields();
 
 		$fieldData = array();
 		foreach ($fields as $fieldName=>$field){
@@ -85,6 +85,13 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 		}
 	}
 
+	public function getId(){
+		return $this->id;
+	}
+
+	public function setId( $id ){
+		$this->id = $id;
+	}
 
 	public function validate( $array ){
 		if (!$this->section || !array_key_exists($this->section, $this->fields))
@@ -94,15 +101,27 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 		return $sForm->validate( $array );
 	}
 
-	public static function getContent( $section, $limit, $start ){
+	public static function getContent( $section, $contentField = 'content', $limit = null, $start = null){
 
-		$q = self::getContentQuery( $section );
+	
+		$q = static::getContentQuery( $section );
 
-		$q->addLimit( $limit );
-		$q->addOffset( $start );
+		if (is_numeric($limit)){
+			$q->addLimit( $limit );
+		}
 
-		return $this->getAll( $q );
+		if (is_numeric( $start )){
+			$q->addOffset( $start );
+		}
 
+		$db = new SimpleDB();
+		$contentRows = $db->getAll( $q );
+
+		foreach ( $contentRows as &$content ){
+			$content = $content + unserialize( $content[ $contentField ] );
+		}
+
+		return $contentRows;
 	}
 }
 /*
