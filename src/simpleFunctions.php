@@ -422,7 +422,7 @@ function loadSimpleIniFile( $siteIni ){
 			if (preg_match('/^(.*)_'.$currentSite.'$/i', $key, $tmp)){
 				//Merge that key with our custom settings
 				if ( array_key_exists( $tmp[1], $config) ){
-					$config[ $tmp[1] ] = $config[ $tmp[1] ] + $config[ $key ];
+					$config[ $tmp[1] ] = array_merge($config[ $tmp[1] ], $config[ $key ]);
 				}
 			}
 
