@@ -10,10 +10,10 @@
  * @created 20-Oct-2011
  */
 
-require_once( dirname(__FILE__).'/simpleForm.class.php');
-require_once( dirname(__FILE__).'/simpleFormField.class.php');
+require_once( dirname(__FILE__).'/SQuickForm.class.php');
+require_once( dirname(__FILE__).'/SQuickFormField.class.php');
 
-interface iSimpleCMS{
+interface SQuickCMSInterface{
 	
 	public function load( $id );
 	public function save();
@@ -21,7 +21,7 @@ interface iSimpleCMS{
 	public static function getContentQuery( $section );
 	
 }
-abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
+abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 		
 	//A 2D array of simpleForms where the key is the section name.
 	protected $fields = array();
@@ -33,7 +33,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 		$this->setSection( $section );
 	}
 
-	public function addSection( $sectionName, SimpleForm $fields ){
+	public function addSection( $sectionName, SQuickForm $fields ){
 		$this->fields[ $sectionName ] = $fields;
 	}
 
@@ -63,10 +63,10 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 
 	protected  function requireSection(){
 		if (!$this->section || !array_key_exists($this->section, $this->fields))
-			SimpleCMSException::InvalidSection();
+			SQuickCMSException::InvalidSection();
 	}
 
-	public function serializeFields(){
+	public Function serializeFields(){
 		$this->requireSection();
 				
 		$fields = (array) $this->fields[ $this->section ]->getFormFields();
@@ -95,7 +95,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 
 	public function validate( $array ){
 		if (!$this->section || !array_key_exists($this->section, $this->fields))
-			SimpleCMSException::InvalidSection();
+			SQuickCMSException::InvalidSection();
 
 		$sForm = $this->fields[$this->section];
 		return $sForm->validate( $array );
@@ -114,7 +114,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 			$q->addOffset( $start );
 		}
 
-		$db = new SimpleDB();
+		$db = new SQuickDB();
 		$contentRows = $db->getAll( $q );
 
 		foreach ( $contentRows as &$content ){
@@ -125,7 +125,7 @@ abstract class SimpleCMS extends SimpleDB implements iSimpleCMS{
 	}
 }
 /*
-class SimpleCMSField{
+class SQuickCMSField{
 	 
 	protected $name;
 	protected $isRequired;
@@ -175,7 +175,7 @@ class SimpleCMSField{
 	
  }*/
 
-class SimpleCMSException extends Exception {
+class SQuickCMSException extends Exception {
 	
 	public function __construct( $errorCode, $message ){
 		parent::__construct( $errorCode, $message );

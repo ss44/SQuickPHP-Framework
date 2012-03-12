@@ -6,7 +6,7 @@
  * @created 30-Jan-2011
  */
 
- class SimpleException extends Exception{
+ class SQuickException extends Exception{
  	public function __construct( $errorMessage = "" ){
  		parent::__construct( $errorMessage );
  	}

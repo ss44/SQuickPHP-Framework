@@ -7,13 +7,13 @@
  * @created 04-July-2008
  */
 
-class simpleImageGD2{
+class SQuickImageGD2{
 	protected $image = null;
 	protected $imageInfo = null;
 	//protected $newImage = null;
 	
 	/**
-	 * 	Creates a new instance of simpleImage
+	 * 	Creates a new instance of SQuickImage
 	 * 
 	 * @param $imagePath = '';
 	 * @exception Exception exception if image not found

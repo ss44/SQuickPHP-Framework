@@ -12,8 +12,8 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
-$tmp = register_shutdown_function('simpleCleanShutdown');;
-$tmp = set_error_handler ('simpleCleanError', E_ALL);
+$tmp = register_shutdown_function('SQuickCleanShutdown');;
+$tmp = set_error_handler ('SQuickCleanError', E_ALL);
 ini_set('display_errors', 0);
 
 /**
@@ -287,7 +287,7 @@ function randomChars( $length, $numbers = true , $caseSensitive = true, $include
 	return ($caseSensitive) ? $str : strtoupper( $str );  
 }
 
-function simpleCleanError($errNo, $errStr, $errFile, $errLine){
+function SQuickCleanError($errNo, $errStr, $errFile, $errLine){
 	$msg = '';
 	$bgColor = 'yellow';
 	
@@ -324,7 +324,7 @@ function simpleCleanError($errNo, $errStr, $errFile, $errLine){
 	return true;
 }
 
-function simpleCleanShutdown(){
+function SQuickCleanShutdown(){
 	$error = error_get_last();
 
 
@@ -372,13 +372,13 @@ function redirect( $url ){
 	exit;
 }
 /**
- * Loads a simple ini file. Which allows server specific variables, and combines these into
+ * Loads a SQuick ini file. Which allows server specific variables, and combines these into
  * a single relevent section to be used.
  * 
  * @param string $siteIni The site ini to use.
  * @return returns an array of the parsed config file.
  */
-function loadSimpleIniFile( $siteIni ){
+function loadSQuickIniFile( $siteIni ){
 	
 	$config = parse_ini_file( $siteIni, true );
 

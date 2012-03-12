@@ -8,7 +8,7 @@
  * @created 26-June-2008
  */
 
-class SimpleQuery{
+class SQuickQuery{
 
 	public $tables = array();
 	public $columns = array();
@@ -314,7 +314,7 @@ class SimpleQuery{
 				//TODO do a type check using typeof() to determine if is a real int instead checking if is numeric
 				$str .= $where['field'] . ' IN (\'' . implode("', '", $where['value'] ) . '\')';
 			}
-			elseif ($where['value'] instanceof simpleQuery){
+			elseif ($where['value'] instanceof SQuickQuery){
 				$obj = $where['value'];
 				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
 			}
@@ -422,7 +422,7 @@ class SimpleQuery{
 
 }
 
-class SimpleQueryException extends Exception{
+class SQuickQueryException extends Exception{
 	public function __construct( $message = null ){
 		parent::__construct( $message );	
 	}

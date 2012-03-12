@@ -1,10 +1,10 @@
 <?php
 /**
- * A form handler that handles multiple SimpleFormFields.
+ * A form handler that handles multiple SQuickFormFields.
  * 
  * @author Shajinder Padda <shajinder@pause.ca>
  */
-class SimpleForm implements ArrayAccess{
+class SQuickForm implements ArrayAccess{
 	
 	protected $formFields = array(); 
 	protected $errors = array();
@@ -22,12 +22,12 @@ class SimpleForm implements ArrayAccess{
     /**
      * Adds a field to our form.
      * 
-     * @param SimpleFormField $simpleFormField A simple form field object that we want to 
+     * @param SQuickFormField $SQuickFormField A SQuick form field object that we want to 
      * 	add to our form validation.
      */
-    public function addField( SimpleFormField $simpleFormField ){
-    	$this->formFields[ $simpleFormField->name ] = $simpleFormField;
-    	$this->formFields[ $simpleFormField->name ]->setform ( $this );
+    public function addField( SQuickFormField $SQuickFormField ){
+    	$this->formFields[ $SQuickFormField->name ] = $SQuickFormField;
+    	$this->formFields[ $SQuickFormField->name ]->setform ( $this );
     }
     
    /**
@@ -77,12 +77,12 @@ class SimpleForm implements ArrayAccess{
 	}
 	
 	/**
-	 * Generates / adds fields to a SimpleQuery object.
+	 * Generates / adds fields to a SQuickQuery object.
 	 * 
-	 * @param SimpleQuery $query
+	 * @param SQuickQuery $query
 	 * @return unknown_type
 	 */
-	public function generateSimpleQueryFields( SimpleQuery $query ){
+	public function generateSQuickQueryFields( SQuickQuery $query ){
 		
 		foreach ( $this->formFields as $key=>$field){
 			$query->addField( $key, $field->clean );		
@@ -98,7 +98,7 @@ class SimpleForm implements ArrayAccess{
 	}
 }
 
-class SimpleFormException extends Exception{
+class SQuickFormException extends Exception{
 	
 	public function __construct( $message = null){
 		parent::__construct( $message );

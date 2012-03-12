@@ -6,9 +6,9 @@
  * @created May-21-2010
  */
 
-require_once( dirname( __FILE__ ).'/simpleDB.class.php' );
+require_once( dirname( __FILE__ ).'/SQuickDB.class.php' );
 
-class SimpleResults{
+class SQuickResults{
 	
 	//Use this value as the primary key.
 	protected $_primaryKey = null;
@@ -30,7 +30,7 @@ class SimpleResults{
 	//to use the cache.
 	protected $_useCache = false;
 		
-	//If a SimpleQuery object is passed then we'll want to keep that here.
+	//If a SQuickQuery object is passed then we'll want to keep that here.
 	protected $_query = null;
 	
 	//The data we want to use 
@@ -49,9 +49,9 @@ class SimpleResults{
 	 * @return unknown_type
 	 */
 	public function __construct(){
-		global $__SIMPLE_CONFIG;
+		global $__SQuick_CONFIG;
 
-		$this->_db = new SimpleDB();
+		$this->_db = new SQuickDB();
 		
 	}
 	
@@ -84,8 +84,8 @@ class SimpleResults{
 	 * @return unknown_type
 	 */
 	public function setData( &$data ){
-		//If its an instance of simple query then load data from that object
-		if ( $data instanceof SimpleQuery ){
+		//If its an instance of SQuick query then load data from that object
+		if ( $data instanceof SQuickQuery ){
 			$this->_data = null;
 			$this->_query = clone $data;
 		}else{
@@ -98,7 +98,7 @@ class SimpleResults{
 		//@NOTE For now rely completely on the fact that class needs the $_GET
 		
 		//If they are using the query then we just need to add a limit in the query
-		if ($this->_query instanceof SimpleQuery){
+		if ($this->_query instanceof SQuickQuery){
 			$this->_totalPages = ceil( $this->_db->getCount( $this->_query ) / $this->_resultsPerPage );
 			$this->_query->addLimit( $this->_resultsPerPage );
 			$this->_query->addOffset( $this->_resultsPerPage * ($this->_currentPage - 1) );
