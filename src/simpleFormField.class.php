@@ -1,13 +1,13 @@
 <?php
 /*
  * A basic form field handler. Used to effectivly 
- * parse and handle form data in conunjuction with simpleForm.
+ * parse and handle form data in conunjuction with SQuickForm.
  * 
  * @author Shajinder Padda <shajinder@gmail.com>
  * @created Apr 30, 2010
  */
  
- class SimpleFormField{
+ class SQuickFormField{
  	
  	protected $_form = null;
  	protected $value = null;
@@ -20,14 +20,14 @@
  	protected $normalFields = array();
 
  	/**
- 	 * Creates a new SimpleFormField object with basic options
+ 	 * Creates a new SQuickFormField object with basic options
  	 * 
  	 * @param String $elementName The name of the element that we want to be using.
  	 * 	This should be what the form element name is, in our REQUEST, GET or POST
  	 * 
  	 * @param Bool $required Whether or not this element is required.
  	 * 
- 	 * @param Additional arguments are the same as simpleValidate(); 
+ 	 * @param Additional arguments are the same as SQuickValidate(); 
  	 */
  	public function __construct( $elementName, $required = false){
 		$this->elementName = $elementName;
@@ -211,11 +211,11 @@
  	
 
  	/**
- 	 * Sets the simple form that this formfield is linked to.
- 	 * @param SimpleForm $form
+ 	 * Sets the SQuick form that this formfield is linked to.
+ 	 * @param SQuickForm $form
  	 * @return unknown_type
  	 */
- 	public function setForm( SimpleForm $form ){
+ 	public function setForm( SQuickForm $form ){
  		$this->_form = $form;
  	}
  }
