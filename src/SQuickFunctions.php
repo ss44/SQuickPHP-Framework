@@ -295,21 +295,30 @@ function SQuickCleanError($errNo, $errStr, $errFile, $errLine){
 		
 	switch ($errNo){
 		case E_USER_WARNING:
-			$msg = "<b>Warning : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$msgHTML = "<b>Warning : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$msgCLI = "* Warning : [$errNo] $errFile @ $errLine *\n\t$errStr";
 			$bgColor = 'red';
 			break;
 		case E_USER_NOTICE:
-			$msg = "<b>Notice : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$msgHTML = "<b>Notice : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$msgCLI = "* Notice : [$errNo] $errFile @ $errLine *\n\t$errStr";
 			break;
 		case E_USER_ERROR:
 		default:
-			$msg = "<b>Error : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$msgHTML = "<b>Error : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
+			$msgCLI = "* Error : [$errNo] $errFile @ $errLine *\n\t$errStr";
 			break;
 	}
 	
 	//@TODO - have some sort of check here so that if we are in cli mode these errors are not handled like this.
-	echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor; color:black;'>";
-	echo "$msg";
+	if (PHP_SAPI == "cli"){
+		echo "\n$msgCLI";
+	}else{
+		echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor; color:black;'>";
+		echo "$msgHTML";
+	}
+
+	
 
 	if ( count($dbg > 1) ){
 		echo "\n";
@@ -318,8 +327,12 @@ function SQuickCleanError($errNo, $errStr, $errFile, $errLine){
 				echo "\t".$dbg[$x]['line']. ' @ '. $dbg[$x]['file']. "\n";
 		}
 	}
-	
-	echo "</pre>";
+
+	if (PHP_SAPI == "cli"){
+		echo "\n";
+	}else{
+		echo "</pre>";
+	}
 	
 	return true;
 }
@@ -333,14 +346,23 @@ function SQuickCleanShutdown(){
 		return;
 	}
 
-	echo "<pre style='width:100%; border:thin solid black; background-color:pink; color:black;'>";
+	if ( PHP_SAPI == "cli"){
+		echo "** Error **\n";
+	}else{
+		echo "<pre style='width:100%; border:thin solid black; background-color:pink; color:black;'>";
+	}
+	
 	echo $error['message'];
 
 	echo "\n";
 	echo "\t".$error['line']. ' @ '. $error['file']. "\n";
 
-	echo "</pre>";}
-
+	if ( PHP_SAPI == "cli"){
+		echo "\n **************** \n";
+	}else{
+		echo "</pre>";
+	}
+}
 /**
  * Displays the hedaer and footer.
  * @param <type> $page
@@ -391,7 +413,6 @@ function loadSQuickIniFile( $siteIni ){
 		$servers = $config['SERVER'];
 	}
 
-
 	//Determine which instance the site is currently running.
 	foreach ( $servers as $key=>$server ){
 		
@@ -403,7 +424,6 @@ function loadSQuickIniFile( $siteIni ){
 			//So we can determine which to run based on the hostname and path.
 			$currentServerPath = php_uname("n").':'.getcwd();
 			$found = strpos(strtolower($server), strtolower($currentServerPath));
-
 		}
 
 		//If we found it then ue that key.
@@ -412,7 +432,7 @@ function loadSQuickIniFile( $siteIni ){
 			break;
 		}
 	}
-
+	
 	//If we have our current site
 	if ($currentSite){
 		

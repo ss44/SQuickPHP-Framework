@@ -8,10 +8,10 @@
  * @created 13-Dec-2008
  */
 
-require_once(dirname(__FILE__).'/simpleQuery.class.php');
-require_once(dirname(__FILE__).'/simpleException.class.php');
+require_once(dirname(__FILE__).'/SQuickQuery.class.php');
+require_once(dirname(__FILE__).'/SQuickException.class.php');
 
-class SimpleDB{
+class SQuickDB{
 
 	//If the database has a flags paramater this can be specified here. 
 	//Varies depending on which database driver is used.
@@ -30,19 +30,24 @@ class SimpleDB{
 	protected $_dbObj = null;
 	
 	public function __construct( $_CONFIG = null){
-		global $__SIMPLE_CONFIG;
-		$this->_DBCONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleDB', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleDB'] : $_CONFIG; 
+		
+		$__SQUICK_CONFIG = null;
+
+		if ( array_key_exists( '__SQUICK_CONFIG', $GLOBALS) )
+			$__SQUICK_CONFIG = $GLOBALS['__SQUICK_CONFIG'];
+
+		$this->_DBCONFIG = (!$_CONFIG && is_array($__SQUICK_CONFIG) && array_key_exists('SQuickDB', $__SQuick_CONFIG)) ? $__SQuick_CONFIG['SQuickDB'] : $_CONFIG; 
 		$this->connect();
 	}
 
 	/**
 	 * Executes an insert command.
 	 *
-	 * @param SimpleQuery $q Query object that contains the insert statement.
+	 * @param SQuickQuery $q Query object that contains the insert statement.
 	 * @return int Returns the last insert id if available or null if not.
-	 * @TODO: Set the insert_id in the simpleQuery object.
+	 * @TODO: Set the insert_id in the SQuickQuery object.
 	 */
-	public function insert(SimpleQuery $q){
+	public function insert(SQuickQuery $q){
 		if (is_null($this->connection)) $this->connect();
 		$this->queryChanges( $q );
 	
@@ -51,7 +56,7 @@ class SimpleDB{
 				$result = mysql_query($q->getInsert(), $this->connection);
 				
 				if (!$result){
-					throw new SimpleDBException( mysql_error( $this->connection ));
+					throw new SQuickDBException( mysql_error( $this->connection ));
 				}
 				
 				$lastId = mysql_insert_id($this->connection);
@@ -62,7 +67,7 @@ class SimpleDB{
 				$r = $this->_dbObj->exec( $q->getInsert() );
 				
 				if ($r === false){
-					throw new SimpleDBException( $this->_dbObj->lastErrorMsg() );
+					throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
 				}
 				$lastId = $this->_dbObj->lastInsertRowID();
 				return $lastId;
@@ -74,11 +79,11 @@ class SimpleDB{
 	}
 
 	/**
-	 * Executes an update command from simple query.
+	 * Executes an update command from SQuick query.
 	 *
-	 * @param SimpleQuery $q Query object that contains the update statement.
+	 * @param SQuickQuery $q Query object that contains the update statement.
 	 */
-	public function update(SimpleQuery $q){
+	public function update(SQuickQuery $q){
 		$this->queryChanges( $q );
 
 		switch ($this->_dbType){
@@ -98,9 +103,9 @@ class SimpleDB{
 
 	/**
 	 * Attempts to update record if it already exists otherwise inserts it.
-	 * @param SimpleQuery $q Query to update and or insert.
+	 * @param SQuickQuery $q Query to update and or insert.
 	 */
-	public function upsert( SimpleQuery $q ){
+	public function upsert( SQuickQuery $q ){
 		$this->queryChanges( $q );
 
 		switch ($this->_dbType){
@@ -139,15 +144,15 @@ class SimpleDB{
 	}
 
 	/**
-	 * Executes the delete command from a simple query object.
+	 * Executes the delete command from a SQuick query object.
 	 *
-	 * @param SimpleQuery $q Query object that contains the delete statement.
+	 * @param SQuickQuery $q Query object that contains the delete statement.
 	 * @param bool $overRide If no where statements are detected, will throw an error unless override is set to true.
 	 * 	This is just added protection from accidently deleting all rows in a table.
 	 */
-	public function delete(simpleQuery $q, $overRide = false){
+	public function delete(SQuickQuery $q, $overRide = false){
 		if (is_null($this->connection)) $this->connect();
-		if ( !$overRide && empty($q->wheres) ) throw new SimpleDBException ("No where set for delete. Must set override to continue.");
+		if ( !$overRide && empty($q->wheres) ) throw new SQuickDBException ("No where set for delete. Must set override to continue.");
 		$this->queryChanges( $q );
 
 		switch ($this->_dbType){
@@ -164,7 +169,7 @@ class SimpleDB{
 		}
 	}
 
-	public function exec( simpleQuery $q ){
+	public function exec( SQuickQuery $q ){
 		if (is_null($this->connection)) $this->connect();
 
 		switch ($this->_dbType){
@@ -210,9 +215,9 @@ class SimpleDB{
 	/**
 	 * Returns a single row from the current result set.
 	 *
-	 * @param SimpleQuery $q Query object that contains the select statement.
+	 * @param SQuickQuery $q Query object that contains the select statement.
 	 */
-	public function getRow(simpleQuery $q){
+	public function getRow(SQuickQuery $q){
 		if (!$this->connection) $this->connect();
 		$this->queryChanges( $q );
 		
@@ -223,7 +228,7 @@ class SimpleDB{
 				$r = mysql_query($q->getSelect(), $this->connection);
 				
 				if ($r === false ){
-					throw new SimpleDBException( "Unable to perform query: " . mysql_error() );
+					throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
 				}
 				
 				if (@mysql_num_rows($r) > 0){
@@ -249,9 +254,9 @@ class SimpleDB{
 	/**
 	 * Returns all results from the current result set.
 	 *
-	 * @param SimpleQuery $q Query object that contains the update statement.
+	 * @param SQuickQuery $q Query object that contains the update statement.
 	 */
-	public function getAll(SimpleQuery $q ){
+	public function getAll(SQuickQuery $q ){
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
@@ -267,7 +272,7 @@ class SimpleDB{
 				$r = mysql_query($q->getSelect(), $this->connection);
 
 				if ($r === false ){
-					throw new SimpleDBException( "Unable to perform query: " . mysql_error() );
+					throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
 				}
 				
 				if ($r !== false && mysql_num_rows($r) > 0){
@@ -299,10 +304,10 @@ class SimpleDB{
 	/**
 	 * Gets the column from a result set.
 	 *
-	 * @param SimpleQuery $q The simple query object that we want to iterate.
+	 * @param SQuickQuery $q The SQuick query object that we want to iterate.
 	 * @param String $column The column that we want to retrieve.
 	 */
-	public function getColumn( SimpleQuery $q, $column ){
+	public function getColumn( SQuickQuery $q, $column ){
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
@@ -344,9 +349,9 @@ class SimpleDB{
 	
 	/**
 	 * Returns a count of rows of the current query.
-	 * @param SimpleQuery $q
+	 * @param SQuickQuery $q
 	 */
-	public function getCount( SimpleQuery $q ){
+	public function getCount( SQuickQuery $q ){
 		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
 			$this->connect();
 		}
@@ -364,11 +369,11 @@ class SimpleDB{
 	/**
 	 * Returns an associative array from the current result set.
 	 *
-	 * @param SimpleQuery $q Query object tthat contains the update statement.
+	 * @param SQuickQuery $q Query object tthat contains the update statement.
 	 * @param string $key The column that should be the key for the array.
 	 * @param string $value The column that will be the value of the associtive array.
 	 */
-	public function getAssoc(SimpleQuery $q, $key, $value = null){
+	public function getAssoc(SQuickQuery $q, $key, $value = null){
 		$result = array();
 		$this->queryChanges( $q );
 
@@ -383,7 +388,7 @@ class SimpleDB{
 						if (array_key_exists($key, $row)){
 							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
 						}else{
-							throw new SimpleDBException('Invalid key. Not found in result.');
+							throw new SQuickDBException('Invalid key. Not found in result.');
 						}
 					}
 					return $result;
@@ -399,7 +404,7 @@ class SimpleDB{
 						if (array_key_exists($key, $row)){
 							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
 						}else{
-							throw new SimpleDBException('Invalid key. Not found in result.');
+							throw new SQuickDBException('Invalid key. Not found in result.');
 						}
 					}
 					return $result;
@@ -422,11 +427,10 @@ class SimpleDB{
 			$this->_dbPass = array_key_exists('pass', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
 			$this->_dbFlags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
 
-		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
+		}elseif(file_exists('site.ini') || (defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE))){
 			//If not found then check settings from config file
-			$siteIni = defined('SIMPLE_INI_FILE') ? SIMPLE_INI_FILE : 'site.ini';
-			$config = loadSimpleIniFile( $siteIni );
-
+			$siteIni = defined('SQUICK_INI_FILE') ? SQUICK_INI_FILE : 'site.ini';
+			$config = loadSQuickIniFile( $siteIni );
 			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
 
 			if (array_key_exists('type', $dbSettings)) $this->_dbType = $dbSettings['type'];
@@ -437,7 +441,7 @@ class SimpleDB{
 			if (array_key_exists('flags', $dbSettings)) $this->_dbFlags = $config['flags'];	
 
 		}else{
-			throw new SimpleDBException('No db settings provided.');
+			throw new SQuickDBException('No db settings provided.');
 		}
 
 		//@TODO: Try loading db if unable to load throw an exception.
@@ -448,7 +452,7 @@ class SimpleDB{
 				break;
 			case 'sqlite3':
 				if (!class_exists('SQLite3')){
-					throw new SimpleDBException("SimpleDB requires SQLite3 class to exist");
+					throw new SQuickDBException("SQuickDB requires SQLite3 class to exist");
 				}
 				
 				$this->_dbObj = new SQLite3( $this->_dbName, $this->_dbFlags );
@@ -460,19 +464,19 @@ class SimpleDB{
 			
 				
 			default:
-				throw new SimpleDBException('Invalid/Unsupported database type.');
+				throw new SQuickDBException('Invalid/Unsupported database type.');
 		}
 
-		if (!$this->connection) throw new SimpleDBException("Unable to connect to DB.");
+		if (!$this->connection) throw new SQuickDBException("Unable to connect to DB.");
 		
 	}
 
-	protected function queryChanges( SimpleQuery $q ){
+	protected function queryChanges( SQuickQuery $q ){
 		$q->setDBType( $this->_dbType );
 	}
 }
 
-class SimpleDBException extends SimpleException{
+class SQuickDBException extends SQuickException{
 	public function __construct( $message = null){
 		parent::__construct( $message );
 	}
