@@ -424,7 +424,7 @@ class SQuickDB{
 			$this->_dbPath = array_key_exists('path', $this->_DBCONFIG) ? $this->_DBCONFIG['path'] : null;
 			$this->_dbName = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
 			$this->_dbUser = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
-			$this->_dbPass = array_key_exists('pass', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
+			$this->_dbPass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
 			$this->_dbFlags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
 
 		}elseif(file_exists('site.ini') || (defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE))){

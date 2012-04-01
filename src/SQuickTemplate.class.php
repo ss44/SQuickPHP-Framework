@@ -6,11 +6,9 @@
  * @created 10-Oct-2011
  */
 
- if (!class_exists('Savant3')){
- 	throw new SimpleException("Cannot use SimpleTemplateSavant3 without first including the Savant3 template engine.", 1);
- }
- 
- class SimpleTemplateSavant3 extends Savant3{
+require_once( dirname(__FILE__) .'/Savant3.php');
+
+class SQuickTemplate extends Savant3{
  	
 	/**
 	 * String name of the wrapper file to use.
