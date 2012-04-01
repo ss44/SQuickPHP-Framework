@@ -432,7 +432,7 @@ function loadSQuickIniFile( $siteIni ){
 			break;
 		}
 	}
-	
+
 	//If we have our current site
 	if ($currentSite){
 		
@@ -440,9 +440,14 @@ function loadSQuickIniFile( $siteIni ){
 		//Loop over the config and merge our server specific settings.
 		foreach( $configCopy as $key=>$val ){
 			if (preg_match('/^(.*)_'.$currentSite.'$/i', $key, $tmp)){
-				//Merge that key with our custom settings
+				// If we have a general catch all name already, then replace it's values with those of our newly found key. 
+				// By merging over the new values over the old ones. 
 				if ( array_key_exists( $tmp[1], $config) ){
 					$config[ $tmp[1] ] = array_merge($config[ $tmp[1] ], $config[ $key ]);
+				}
+				// Otherwise just copy it as a whole.
+				else{
+					$config[ $tmp[1] ] = $config[ $key ];
 				}
 			}
 
