@@ -262,8 +262,6 @@ class SQuickDB{
 		}
 
 		$this->queryChanges( $q );
-
-				
 		$result = array();
 
 		switch ($this->_dbType){
@@ -274,7 +272,7 @@ class SQuickDB{
 				if ($r === false ){
 					throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
 				}
-				
+
 				if ($r !== false && mysql_num_rows($r) > 0){
 					while($row = mysql_fetch_assoc($r)){
 						$result[] = $row;

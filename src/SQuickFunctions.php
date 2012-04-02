@@ -187,7 +187,6 @@ function cleanArrayKey($key, $array){
 	if (!array_key_exists( $key, $array )) return null;
 
 	$args = func_get_args();
-
 	$type = isset($args[2]) ? $args[2] : null;
 	$arg1 = isset($args[3]) ? $args[3] : null;
 	$arg2 = isset($args[4]) ? $args[4] : null;
@@ -206,7 +205,13 @@ function cleanArrayKey($key, $array){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanREQUEST($field){
-	return cleanArrayKey( $field, $_REQUEST);
+	$args = func_get_args();
+	$vars[0] = $field;
+	$vars[1] = $_REQUEST;
+
+	$vars = array_merge( $vars, array_slice( $args, 1) );
+
+	return call_user_func_array('cleanArrayKey', $vars );
 }
 
 /**
@@ -216,7 +221,13 @@ function cleanREQUEST($field){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanPOST($field){
-	return cleanArrayKey( $field, $_POST);
+	$args = func_get_args();
+	$vars[0] = $field;
+	$vars[1] = $_POST;
+
+	$vars = array_merge( $vars, array_slice( $args, 1) );
+
+	return call_user_func_array('cleanArrayKey', $vars );
 }
 
 /**
@@ -226,7 +237,15 @@ function cleanPOST($field){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanGET($field){
-	return cleanArrayKey( $field, $_GET);
+	
+	$args = func_get_args();
+	$vars[0] = $field;
+	$vars[1] = $_GET;
+
+	$vars = array_merge( $vars, array_slice( $args, 1) );
+
+	return call_user_func_array('cleanArrayKey', $vars );
+	
 }
 
 /**
