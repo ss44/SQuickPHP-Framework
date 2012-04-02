@@ -21,38 +21,38 @@ ini_set('display_errors', 0);
  */
 if (!function_exists('oops')){
 	function oops( $vars, $varDump = false, $level = 0 ){
-	        $dbg = debug_backtrace();
-	
-	        $file = $dbg[0]['file'];
-	        $line = $dbg[0]['line'];
-	        
-	        if (PHP_SAPI == "cli"){
-	        	echo "\n-- $file @ $line --\n";	
-	        }else{
-	        	echo "<pre><H1>". $file ." @ ". $line ."</H1>";
-	        }
+		$dbg = debug_backtrace();
 
-	        for ($x = 1; $x < $level; $x++){
-	                if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
-	                		$file = $dbg[$x]['file'];
-	                        $line = $dbg[$x]['line'];
-				
-					        if (PHP_SAPI == 'cli'){
-					        	echo "\t-- $file @ $line --\n";	
-					        }else{
-					            echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
-							}
-	                }
-	        }
-	
-	        if ($varDump) var_dump($vars);
-	        else print_r($vars);
-	
-			if (PHP_SAPI == "cli"){
-	        	echo "\n";	
-	        }else{
-	        	echo "</pre>";
-	        }
+		$file = $dbg[0]['file'];
+		$line = $dbg[0]['line'];
+		
+		if (PHP_SAPI == "cli"){
+			echo "\n-- $file @ $line --\n";	
+		}else{
+			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+		}
+
+		for ($x = 1; $x < $level; $x++){
+				if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
+						$file = $dbg[$x]['file'];
+						$line = $dbg[$x]['line'];
+			
+						if (PHP_SAPI == 'cli'){
+							echo "\t-- $file @ $line --\n";	
+						}else{
+							echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+						}
+				}
+		}
+
+		if ($varDump) var_dump($vars);
+		else print_r($vars);
+
+		if (PHP_SAPI == "cli"){
+			echo "\n";	
+		}else{
+			echo "</pre>";
+		}
 	}
 }
 if (!function_exists('dim')){
@@ -63,21 +63,21 @@ if (!function_exists('dim')){
 		$file = $dbg[0]['file'];
 		$line = $dbg[0]['line'];
 
-        if (PHP_SAPI == "cli"){
-        	echo "\n-- $file @ $line --\n";	
-        }else{
-        	echo "<pre><H1>". $file ." @ ". $line ."</H1>";
-        }
+		if (PHP_SAPI == "cli"){
+			echo "\n-- $file @ $line --\n";	
+		}else{
+			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+		}
 	
 		for ($x = 1; $x < $level; $x++){
 				if (isset($dbg[$x])){
 						$file = $dbg[$x]['file'];
 						$line = $dbg[$x]['line'];
 
-				        if (PHP_SAPI == 'cli'){
-				        	echo "\t$file @ $line \n";	
-				        }else{
-				            echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+						if (PHP_SAPI == 'cli'){
+							echo "\t$file @ $line \n";	
+						}else{
+							echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
 						}
 				}
 		}
@@ -86,10 +86,10 @@ if (!function_exists('dim')){
 		else print_r($vars);
 
 		if (PHP_SAPI == "cli"){
-        	echo "\n";	
-        }else{
-        	echo "</pre>";
-        }
+			echo "\n";	
+		}else{
+			echo "</pre>";
+		}
 		
 	
 		exit;
@@ -153,12 +153,12 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 					return null;
 				}
 			}
-            
+			
 			if ( $type == 'str:md5' ){
 				return md5( $var );
 			}
 			
-            return (string) $var;
+			return (string) $var;
 		case 'date':
 			$arg1 = '/^(\d{1,2})[-\/\.]\s?(\d{1,2})[-\/\.]\s?(\d{2,4})\s?$/';
 			if (!preg_match($arg1, $var, $tmp)) return null;
@@ -414,22 +414,23 @@ function loadSQuickIniFile( $siteIni ){
 	}
 
 	//Determine which instance the site is currently running.
-	foreach ( $servers as $key=>$server ){
-		
-		if (isset($_SERVER) && array_key_exists('SERVER_NAME', $_SERVER) ){
-			$serverName = $_SERVER['SERVER_NAME'];
-			$found = strpos( strtolower($server), strtolower($serverName) );
-		}else{
-			//If we're running in CLI mode then the above method won't work.
-			//So we can determine which to run based on the hostname and path.
-			$currentServerPath = php_uname("n").':'.getcwd();
-			$found = strpos(strtolower($server), strtolower($currentServerPath));
-		}
+	foreach ( $servers as $key=>$serverList ){
+		foreach (explode(',', $serverList) as $server ){
+			if (isset($_SERVER) && array_key_exists('SERVER_NAME', $_SERVER) ){
+				$serverName = $_SERVER['SERVER_NAME'];
+				$found = strpos( strtolower($server), strtolower($serverName) );
+			}else{
+				//If we're running in CLI mode then the above method won't work.
+				//So we can determine which to run based on the hostname and path.
+				$currentServerPath = php_uname("n").':'.getcwd();
+				$found = strpos(strtolower($server), strtolower($currentServerPath));
+			}
 
-		//If we found it then ue that key.
-		if ( $found !== false){
-			$currentSite = $key;
-			break;
+			//If we found it then ue that key.
+			if ( $found !== false){
+				$currentSite = $key;
+				break 2;
+			}
 		}
 	}
 
