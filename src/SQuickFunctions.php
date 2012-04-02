@@ -423,7 +423,7 @@ function loadSQuickIniFile( $siteIni ){
 				//If we're running in CLI mode then the above method won't work.
 				//So we can determine which to run based on the hostname and path.
 				$currentServerPath = php_uname("n").':'.getcwd();
-				$found = strpos(strtolower($server), strtolower($currentServerPath));
+				$found = strpos( strtolower($currentServerPath), strtolower($server) );
 			}
 
 			//If we found it then ue that key.
