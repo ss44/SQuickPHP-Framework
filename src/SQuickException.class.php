@@ -6,8 +6,22 @@
  * @created 30-Jan-2011
  */
 
- class SQuickException extends Exception{
- 	public function __construct( $errorMessage = "" ){
- 		parent::__construct( $errorMessage );
+class SQuickException extends Exception{
+ 	
+ 	const MISSING_PARAMS = 1000;
+ 	const INVALID_PARAMS = 1001;
+
+ 	public function __construct( $errorMessage = "", $code = null){
+ 		parent::__construct( $errorMessage, $code );
  	}
- }
+
+	public static function missingParam( $message ){
+		return new SQuickException( $message, self::MISSING_PARAMS );
+	}
+
+ 	public static function invalidParam( $message ){
+ 		return new SQuickException( $message, self::INVALID_PARAMS );
+ 	}
+
+
+}
