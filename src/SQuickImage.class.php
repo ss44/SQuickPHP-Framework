@@ -6,8 +6,9 @@
  * @author Shajinder Padda <shajinder@pause.ca>
  * @created 04-July-2008
  */
+require_once( dirname(__FILE__).'/SQuickException.class.php' );
 
-class SQuickImageGD2{
+class SQuickImage{
 	protected $image = null;
 	protected $imageInfo = null;
 	//protected $newImage = null;
@@ -27,38 +28,69 @@ class SQuickImageGD2{
 	/**
 	 * Loads an image at given path
 	 * 
-	 * @param $imagePath The image to open
+	 * @param String $imagePath The image to open
 	 * @exception Exception Throws an exception
 	 */
 	public function loadImage($imagePath){
 		//Throw our basic errors.
-		if (!$imagePath || !is_string($imagePath)) throw new Exception('Must supply a valid file path as a string');
+		if (!$imagePath || !is_string($imagePath)) 
+			throw new Exception('Must supply a valid file path as a string');
 		
 		//Try actually loading the file
-		if (!file_exists($imagePath)) throw new Exception('Invalid Image. Image does not exist');
+		if (!file_exists($imagePath)) 
+			throw new Exception('Invalid Image. Image does not exist');
 		
 		//File exists try reading it
 		$info = getimagesize($imagePath);
 		
-                if (!$info) throw new Exception("Invalid Image. Not a valid image file.");
+		if (!$info) 
+			throw new Exception("Invalid Image. Not a valid image file.");
 
-                $this->imageInfo = $info;
+		$this->imageInfo = $info;
 		
 		$imageContents = file_get_contents( $imagePath );
-
-                $this->image = imagecreatefromstring( $imageContents );
+		$this->image = imagecreatefromstring( $imageContents );
 		
 		return true;
 	}
 
-	public function resizeImage($newWidth, $newHeight, $constrain = true, $magnify = false){
-		if (!$this->image) throw new Exception('Must load a valid image first.');
+	/**
+	 * Resizes an image to fit into the desired dimensions.
+	 * @param Array $options =
+	 *	maxWidth : int Max width to use.
+	 *	maxHeight : int Max height to use.
+	 *	constrain[true] : bool Whether or not to constrain an image.
+	 *	magnify[faslse] : bool Whether or not to zoom in on the image if it doesn't fit in this size.
+	 */	 
+	public function resize( $params ){
+		if (!$this->image) 
+			throw new Exception('Must load a valid image first.');
+
+		$options = array(
+			'newWidth' => null,
+			'newHeight' => null,
+			'constrain' => true,
+			'magnify' => false,
+		);
+
+		$options = (array) $params + $options;
+
+		if ( is_null($options['newWidth']) && is_null($options['newHeight']) )
+			throw SQuickException::missingParam( 'Must specify either one of newWidth or newHeight');
 		
 		$oldImage = $this->image;
 		
-		if ($constrain){
+		if ( $options['constrain'] ) {
 			//Get the factor by which to change by
-			$factor = $this->imageInfo[0] > $this->imageInfo[1] ? $newWidth / $this->imageInfo[0] : $newHeight / $this->imageInfo[1];
+			
+			// If they specify both max with and or height, determine which one is greater.
+			if ( !is_null( $options['newWidth'] ) && !is_null( $options['newHeight'] ) ){
+				$factor = $this->imageInfo[0] > $this->imageInfo[1] ? $options['newWidth'] / $this->imageInfo[0] : $options['newHeight'] / $this->imageInfo[1];
+			}elseif ( !is_null($options['newWidth']) ){
+				$factor = $options['newWidth'] / $this->imageInfo[0];
+			}else{
+				$factor = $options['newHeight'] / $this->imageInfo[1];
+			}
 		}else{
 			$factor = 1;
 		}
@@ -97,9 +129,14 @@ class SQuickImageGD2{
 		imagepng($this->image);
 	}
 
-        public function getImageInfo(){
-            return $this->imageInfo;
-        }
+		public function getImageInfo(){
+			return $this->imageInfo;
+		}
+}
+
+
+class SQuickImageException extends SQuickException{
+
 }
 
 ?>
