@@ -136,7 +136,7 @@ class SQuickQuery{
 	 * @param String $field Field you want to sort by.
 	 * @param Direction $direction  Direction to sort by, should be either ASC or DESC.
 	 */
-	public function addOrderBy($field, $direction = "ASC"){
+	public function addOrder($field, $direction = "ASC"){
 		$order = arraY();
 		$order['field'] = $field;
 		$order['direction'] = $direction;
