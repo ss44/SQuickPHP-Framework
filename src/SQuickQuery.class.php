@@ -114,6 +114,17 @@ class SQuickQuery{
 		$this->whereGroupCounter = $this->whereGroupCounter == 0 ? 0 : $this->whereGroupCounter-1;
 	}
 
+	/**
+	 * An alias method for startWhereGroup for just "ors"
+	*/
+	public function beginOr(){
+		$this->startWhereGroup('OR');
+	}
+
+	public function endOr(){
+		$this->endWhereGroup();
+	}
+
 	public function addGroup($group){
 		$this->groups[] = $group;
 	}
