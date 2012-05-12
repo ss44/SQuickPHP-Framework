@@ -2,14 +2,14 @@
 /**
  * Class to handle basic user authorization and access criteria.
  * 
- * @author Shajinder Padda
+ * @author Shajinder Singh <ss@ss44.ca>
  * 
  * Basic table structure should be
  * 
  */
 
 
-class SimpleUser extends SimpleDB{
+class SQuickUser extends SQuickControllerDB{
 	protected $_userTable = null; // Name of the table that we want to read user information from
 	protected $_usernameField = null; //The field which we want to treat as the username field.
 	protected $_passwordField = null; //The field that we want to read the password from.
@@ -29,10 +29,10 @@ class SimpleUser extends SimpleDB{
 	protected $_USERCONFIG = null;
 	
 	public function __construct($_CONFIG = null){
-		global $__SIMPLE_CONFIG;
+		global $__SQuick_CONFIG;
 		parent::__construct($_CONFIG);
 
-		$this->_USERCONFIG = (!$_CONFIG && is_array($__SIMPLE_CONFIG) && array_key_exists('SimpleUser', $__SIMPLE_CONFIG)) ? $__SIMPLE_CONFIG['SimpleUser'] : $_CONFIG;
+		$this->_USERCONFIG = (!$_CONFIG && is_array($__SQuick_CONFIG) && array_key_exists('SQuickUser', $__SQuick_CONFIG)) ? $__SQuick_CONFIG['SQuickUser'] : $_CONFIG;
 
 		if (is_array($this->_USERCONFIG)){
 			//Try to load settings from array
@@ -41,9 +41,9 @@ class SimpleUser extends SimpleDB{
 			$this->_passwordField = array_key_exists('password_field', $this->_USERCONFIG) ? $this->_USERCONFIG['password_field'] : null;
 			$this->_saltfield = array_key_exists('salt_field', $this->_USERCONFIG) ? $this->_USERCONFIG['salt_field'] : null;
 			$this->_passwordRule = array_key_exists('password_rule', $this->_USERCONFIG) ? $this->_USERCONFIG['password_rule'] : null;
-		}elseif(file_exists('site.ini') || (defined('SIMPLE_INI_FILE') && file_exists(SIMPLE_INI_FILE))){
+		}elseif(file_exists('site.ini') || (defined('SQuick_INI_FILE') && file_exists(SQuick_INI_FILE))){
 			//If not found then check settings from config file
-			$siteIni = defined(SIMPLE_INI_FILE) ? SIMPLE_INI_FILE : 'site.ini';
+			$siteIni = defined(SQuick_INI_FILE) ? SQuick_INI_FILE : 'site.ini';
 
 			$config =  parse_ini_file( $siteIni );
 				
@@ -53,7 +53,7 @@ class SimpleUser extends SimpleDB{
 			if (array_key_exists('SU_SALT_FIELD', $config)) $this->_saltField = $config['SU_SALT_FIELD'];
 			if (array_key_exists('SU_PASSWORD_RULE', $config)) $this->_passwordRule = $config['SU_PASSWORD_RULE']
 		}else{
-			throw new SimpleUserException('No SimpleUser settings provided.');
+			throw new SQuickUserException('No SQuickUser settings provided.');
 		}
 	}
 	
@@ -69,7 +69,7 @@ class SimpleUser extends SimpleDB{
 	 */
 	public function login($username, $password){
 
-		$q = new SimpleQuery();
+		$q = new SQuickQuery();
 		$q->addTable( $this->_userTable );
 		$q->addWhere( $this->_usernameField, $username);
 		
@@ -107,21 +107,21 @@ class SimpleUser extends SimpleDB{
 	public function create( $username, $password, $fields ){
 		
 		//Test to make sure the user doesn't already exist.
-		$q = new SimpleQuery();
+		$q = new SQuickQuery();
 		$q->addTable( $this->_userTable );
 		$q->addWhere( $this->_usernameField, $username );
 
 		if ( $this->getCount( $q ) > 0 )
-			throw new SimpleUserException( 100, "Cannot create user. Username already exists.");
+			throw new SQuickUserException( 100, "Cannot create user. Username already exists.");
 		
 		//Test to make sure password is valid if we have password rules.
 		if ( $this->_passwordRule ){
 			if ( !preg_match( $this->_passwordRule, $password ) ){
-				throw new SimpleUserException( 101,, "Invalid password. Password doesn't match system defined rule.");
+				throw new SQuickUserException( 101,, "Invalid password. Password doesn't match system defined rule.");
 			}
 		}
 
-		$q = new SimpleUser();
+		$q = new SQuickUser();
 		$q->addTable( $this->_userTable );
 		$q->addFields( $fields );
 		$q->addField( $this->_usernameField, $username );
@@ -143,10 +143,10 @@ class SimpleUser extends SimpleDB{
 }
 
 /**
- * Exceptions related to simple user functions.
+ * Exceptions related to SQuick user functions.
  * 
  * Error codes are:
  * 100 : User already exists.
  * 101 : Password doesn't match our rule.
  */
-class SimpleUserException extends Exception{}
+class SQuickUserException extends Exception{}
