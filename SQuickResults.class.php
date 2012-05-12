@@ -2,7 +2,7 @@
 /**
  * Class to handle pagination and limit the number of results per page.
  * 
- * @author Shajinder Padda <shajinder@gmail.com>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created May-21-2010
  */
 

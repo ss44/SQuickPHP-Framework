@@ -4,7 +4,7 @@
  * No more messing with 20 line strings, simply use this to build a query in a simple
  * organzing and readable method, without loosing any flexiblity of raw sql.
  *
- * @author Shajinder Padda <shajinder@gmail.com>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 26-June-2008
  */
 

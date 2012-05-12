@@ -3,7 +3,7 @@
  * A base class to load a table as an object and validate fields,
  * against the table structure.
  * 
- * @author Shajinder Singh <ss@ss44ca>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 13-Nov-2010
  */
 

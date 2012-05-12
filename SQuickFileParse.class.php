@@ -15,7 +15,7 @@
  * 	$listing->includeType( 'MP3' );
  *  $files = $listing->getFiles();
  * 
- * @author Shajinder Padda <shajinder@gmail.com
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 10-July-2009
  * @modified 10-July-2009
  */

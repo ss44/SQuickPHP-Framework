@@ -1,7 +1,7 @@
 <?php
 /**
  * Collection of commonly used functions to be included in our project.
- * @author Shajinder Padda <shajinder@gmail.com
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 28-June-2008
  * @modified 29-May-2009
  */

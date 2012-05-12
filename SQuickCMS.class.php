@@ -6,7 +6,7 @@
  * It is expected that this class is extended.
  * by the sub sites.
  * 
- * @aStor Shajinder Padda <ss@ss44.ca>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 20-Oct-2011
  */
 

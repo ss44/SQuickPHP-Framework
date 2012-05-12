@@ -2,7 +2,7 @@
 /**
  * A form handler that handles multiple SQuickFormFields.
  * 
- * @author Shajinder Padda <shajinder@pause.ca>
+ * @author Shajinder Singh <ss@ss44.ca>
  */
 class SQuickForm implements ArrayAccess{
 	

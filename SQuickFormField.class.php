@@ -3,7 +3,7 @@
  * A basic form field handler. Used to effectivly 
  * parse and handle form data in conunjuction with SQuickForm.
  * 
- * @author Shajinder Padda <shajinder@gmail.com>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created Apr 30, 2010
  */
  

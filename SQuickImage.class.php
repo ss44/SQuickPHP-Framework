@@ -3,7 +3,7 @@
  * Handles common image manipulation functions
  * Requires PHP v.5 <
  * 
- * @author Shajinder Padda <shajinder@pause.ca>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 04-July-2008
  */
 require_once( dirname(__FILE__).'/SQuickException.class.php' );

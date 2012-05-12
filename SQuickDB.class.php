@@ -4,7 +4,7 @@
  * Plans are to support
  * mysql, mysqli, postGres, and sqlLite.
  *
- * @author Shajinder Padda <shajinder@gmail.com>
+ * @author Shajinder Singh <ss@ss44.ca>
  * @created 13-Dec-2008
  */
 
