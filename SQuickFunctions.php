@@ -282,7 +282,7 @@ function randomChars( $length, $numbers = true , $caseSensitive = true, $include
 
 		$charType = mt_rand(0, $y);
 		
-		$chars = arrays();
+		$chars = array();
 		
 		//Select a random character between A-Z [ASCII 65-90]
 		$chars[] = mt_rand(65, 90);

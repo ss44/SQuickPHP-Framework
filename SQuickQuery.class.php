@@ -62,7 +62,7 @@ class SQuickQuery{
 				$pair = array();
 				$pair['field'] = $field;
 				$pair['value'] = $value;
-
+				$pair['escape'] = true;
 				$this->fields[] = $pair;
 			}
 		}
@@ -215,7 +215,7 @@ class SQuickQuery{
 			$fields .= '`'.$this->escape($field).'`';
 				
 			if ($pair['escape'])
-			$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.$this->escape($value).'\'';
+				$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.$this->escape($value).'\'';
 			else
 			$values .= $value;
 			/*

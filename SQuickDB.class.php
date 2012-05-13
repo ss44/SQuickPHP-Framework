@@ -26,6 +26,8 @@ class SQuickDB{
 	protected $connection = null;
 	protected $_DBCONFIG = null;
 
+	protected $_lastID = null;
+
 	//Some db engines use objects for thease cases we can store those classes in here.
 	protected $_dbObj = null;
 	
@@ -36,7 +38,7 @@ class SQuickDB{
 		if ( array_key_exists( '__SQUICK_CONFIG', $GLOBALS) )
 			$__SQUICK_CONFIG = $GLOBALS['__SQUICK_CONFIG'];
 
-		$this->_DBCONFIG = (!$_CONFIG && is_array($__SQUICK_CONFIG) && array_key_exists('SQuickDB', $__SQuick_CONFIG)) ? $__SQuick_CONFIG['SQuickDB'] : $_CONFIG; 
+		$this->_DBCONFIG = (!is_null($_CONFIG) && is_array($__SQUICK_CONFIG) && array_key_exists('SQuickDB', $__SQUICK_CONFIG)) ? $__SQuick_CONFIG['DB'] : $_CONFIG; 
 		$this->connect();
 	}
 
@@ -59,8 +61,8 @@ class SQuickDB{
 					throw new SQuickDBException( mysql_error( $this->connection ));
 				}
 				
-				$lastId = mysql_insert_id($this->connection);
-				return $lastId;
+				$this->_lastID = mysql_insert_id($this->connection);
+				return $this->_lastID;
 			
 			case 'sqlite3':
 				if (is_null($this->_dbObj)) $this->connect();
@@ -69,8 +71,8 @@ class SQuickDB{
 				if ($r === false){
 					throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
 				}
-				$lastId = $this->_dbObj->lastInsertRowID();
-				return $lastId;
+				$this->_lastID = $this->_dbObj->lastInsertRowID();
+				return $this->_lastID;
 				
 			case 'mysqli':
 			case 'postgres':
@@ -226,7 +228,6 @@ class SQuickDB{
 		switch ($this->_dbType){
 			case 'mysql':
 				$r = mysql_query($q->getSelect(), $this->connection);
-				
 				if ($r === false ){
 					throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
 				}
@@ -424,10 +425,10 @@ class SQuickDB{
 			$this->_dbUser = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
 			$this->_dbPass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
 			$this->_dbFlags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
-
-		}elseif(file_exists('site.ini') || (defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE))){
+			oops('here');
+		}elseif(defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE)){
 			//If not found then check settings from config file
-			$siteIni = defined('SQUICK_INI_FILE') ? SQUICK_INI_FILE : 'site.ini';
+			$siteIni = SQUICK_INI_FILE;
 			$config = loadSQuickIniFile( $siteIni );
 			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
 
@@ -437,7 +438,6 @@ class SQuickDB{
 			if (array_key_exists('user', $dbSettings)) $this->_dbUser = $dbSettings['user'];
 			if (array_key_exists('password', $dbSettings)) $this->_dbPass = $dbSettings['password'];
 			if (array_key_exists('flags', $dbSettings)) $this->_dbFlags = $config['flags'];	
-
 		}else{
 			throw new SQuickDBException('No db settings provided.');
 		}
@@ -467,6 +467,14 @@ class SQuickDB{
 
 		if (!$this->connection) throw new SQuickDBException("Unable to connect to DB.");
 		
+	}
+
+	/**
+	 * Returns the last insert id if available.
+	 * @return int the Last Insert ID set in the database.
+	 */
+	public function getLastInsertID(){
+		return $this->_lastID;
 	}
 
 	protected function queryChanges( SQuickQuery $q ){

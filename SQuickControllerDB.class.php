@@ -7,7 +7,7 @@
  * @created 13-Nov-2010
  */
 
-abstract class SimpleRoot extends SimpleDB{
+abstract class SQuickControllerDB extends SQuickDB{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;
@@ -30,13 +30,13 @@ abstract class SimpleRoot extends SimpleDB{
 	
 	public function load( $loadParams ){
 		
-		$q = new SimpleQuery();
+		$q = new SQuickQuery();
 		$q->addTable( $this->_table );
-		
+	
 		foreach ( $loadParams as $field=>$val ){
 			$q->addWhere( $field, $val );
 		}
-
+	
 		$result = $this->getRow( $q );
 
 		if ( !empty( $result ) ){
@@ -44,19 +44,26 @@ abstract class SimpleRoot extends SimpleDB{
 		}
 	}
 	
-	public function save( $saveParams ){
+	public function save(){
 		
-		$q = new SimpleQuery();
+		if ( method_exists($this, '_preSave')){
+			$this->_preSave();
+		}
+
+		$q = new SQuickQuery();
 		$q->addTable( $this->_table );
-		
-		
+		$q->addFields( $this->_data );
+
 		//If we have a primary key then update otherwise insert
 		if ($this->_isNew){
-			$this->insert($q);
+			$id = $this->insert($q);
 		}else{
-			$this->update($q);	
+			$id = $this->update($q);	
 		}
 		
+		if ( method_exists($this, '_postSave') ) {
+			$this->_postSave();
+		}
 		
 	}
 	
@@ -64,19 +71,29 @@ abstract class SimpleRoot extends SimpleDB{
 		if (!array_key_exists( $key, $this->_data )) die("Invalid $key. Does not exist in data");
 		if (!array_key_exists( $key, $this->_tableInfo )) die("Invalid $key. Does not exist in data");
 		
-		$cleanValue = null;
+		//If a _setVarName method exists run that
+		$methodName = "_set{$value}";
+		if ( method_exists( $this, $methodName ) ){
+			$cleanValue = $this->$methodName( $value );
+		}
+		//@TODO Cast the value based on what's expected in the db struction
+		else{
+			// 
+			$cleanValue = $value;
+		}
 		
 		$this->_data[ $key ] = $cleanValue;
 	}
 	
 	public function __get( $key ){
+		if (!array_key_exists( $key, $this->_data )) 
+			throw new SQuickDataException("Invalid $key. Does not exist in data");
 
-		if (!array_key_exists( $key, $this->_data )) throw new SimpleDataException("Invalid $key. Does not exist in data");
 		return $this->_data[ $key ];
 	}
 }
 
-class SimpleDataException extends SimpleException{
+class SQuickDataException extends SQuickException{
 	
 	public function __construct( $errorMessage = "" ){
 		
