@@ -46,8 +46,8 @@ abstract class SQuickControllerDB extends SQuickDB{
 	
 	public function save(){
 		
-		if ( method_exists($this, '_preSave')){
-			$this->_preSave();
+		if ( method_exists($this, '_beforeSave')){
+			$this->_beforeSave();
 		}
 
 		$q = new SQuickQuery();
@@ -61,8 +61,8 @@ abstract class SQuickControllerDB extends SQuickDB{
 			$id = $this->update($q);	
 		}
 		
-		if ( method_exists($this, '_postSave') ) {
-			$this->_postSave();
+		if ( method_exists($this, '_afterSave') ) {
+			$this->_afterSave();
 		}
 		
 	}
