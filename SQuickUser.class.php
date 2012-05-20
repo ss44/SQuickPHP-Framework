@@ -136,10 +136,11 @@ class SQuickUser extends SQuickControllerDB{
 		return parent::save();
 	}
 
+
 	/** 
 	 * Load the id of the newly created user.
 	 */
-	protected function _postSave(){
+	protected function _afterSave(){
 
 		if ( !$this->user_id ){
 			$this->load( $this->getLastInsertID() );
@@ -150,6 +151,15 @@ class SQuickUser extends SQuickControllerDB{
 
 	public function load( $userID ){
 		return parent::load( array('user_id' => $userID) );
+	}
+
+	public function save(){
+		if ( !$this->user_id ){
+			$this->create();
+			return;
+		}
+
+		parent::save();
 	}
 
 }
