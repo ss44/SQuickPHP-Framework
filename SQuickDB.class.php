@@ -345,6 +345,51 @@ class SQuickDB{
 		
 		return $result;
 	}
+
+	public function getOne( SQuickQuery $q){
+		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
+			$this->connect();
+		}
+		
+		$old = $q;
+		$q = clone $old;
+				
+		$this->queryChanges( $q );
+		$q->addColumn( $column );
+		$q->addLimit(1);
+
+		$result = null;
+		switch ($this->_dbType){
+			case 'mysql':
+				
+				$r = mysql_query($q->getSelect(), $this->connection);
+
+				if (mysql_num_rows($r) > 0){
+					$row = mysql_fetch_assoc($r);
+					$result = array_pop( $row );
+				}
+
+				return $result;
+			case 'sqlite3':
+				if (is_null($this->_dbObj)) $this->connect();
+				
+				$r = $this->_dbObj->query( $q->getSelect() );
+				
+				if ($r->numColumns()) { 
+					$row  = $r->fetchArray( SQLITE3_NUM );
+					$result = array_pop($row);
+				}
+
+				return $result;
+		}
+		
+		
+		return $result;
+
+
+	}
+
+
 	
 	/**
 	 * Returns a count of rows of the current query.
