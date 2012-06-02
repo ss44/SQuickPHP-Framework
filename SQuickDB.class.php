@@ -355,7 +355,6 @@ class SQuickDB{
 		$q = clone $old;
 				
 		$this->queryChanges( $q );
-		$q->addColumn( $column );
 		$q->addLimit(1);
 
 		$result = null;
