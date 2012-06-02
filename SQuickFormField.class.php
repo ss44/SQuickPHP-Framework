@@ -7,7 +7,7 @@
  * @created Apr 30, 2010
  */
  
- class SQuickFormField{
+ class SQuickFormField implements ArrayAccess{
  	
  	protected $_form = null;
  	protected $value = null;
@@ -15,7 +15,7 @@
  	protected $elementName = null;
  	protected $validateArguments = array();
  	protected $clean  = null;
- 	protected $errors = null;
+ 	protected $error = null;
  	protected $attributes = array();
  	protected $normalFields = array();
 
@@ -56,6 +56,9 @@
  				return $this->clean;	
  			case 'isValid':
  				return ( (is_null($this->clean)  && !$this->isRequired) || (!is_null($this->clean)) );
+
+ 			case 'error':
+ 				return $this->error;
  		}
  	}
  	
@@ -81,14 +84,14 @@
  	 * @param $error String the error message to dispaly.
  	 */
  	public function addError( $error ){
- 		$this->errors[] = $error;
+ 		$this->error = $error;
  		
  		if (isset($this->_form)){
  			$this->_form->addError( $this->elementName, $error );
  		}
  	}
  	
- 	/**
+ 	/**s
  	 * Validates the given value against our criteria.
  	 * 
  	 * @param Mixed $value The value that we want to validate
@@ -106,9 +109,15 @@
  			$this->clean = call_user_func_array( 'cleanVar',  $cleanParams);
 		}
 		
- 		//If clean is null and this was a required field
+		// If value is not empty but is not clean then show an error for invalid field.
+		if ( is_null($this->clean) && $value){
+			$this->addError("Invalid data set for this field.");
+		}
+
+ 		// If clean is null and this was a required field
  		if ( is_null($this->clean) && $this->isRequired){
- 			$this->errors[] = "Value is required.";
+ 			// $this->errors[] = "Value is required.";
+ 			$this->addError("Value is required.");
  		}
  	}
  	
@@ -138,7 +147,7 @@
  	 * Gets a password field for this given field.
  	 * @return String that represents an input field for a password field.
  	 */
-	public function getPasswordField( $attributes ){
+	public function getPasswordField( $attributes = array() ){
 		$str = "<input type='password' ";
  		$str .= "name='$this->elementName' ";
  		$str .= "value='".$this->value."' "; 
@@ -160,23 +169,41 @@
  	 *
  	 * @return String that represents a select field.
  	 */
- 	public function getSelectField( $attributes ){
+ 	public function getSelectField( $attributes = array() ){
  		$str = "<select name='$this->elementName' ";
 
- 		if ( is_array( $this->getAttrStr() )){
- 			$this->addAttributes( $attributes );
+ 		if ( is_array( $attributes )){
+ 			$this->addAttribute( $attributes );
  		}
 
  		$str .= $this->getAttrStr();
  		$str .= ">";
 
  		foreach ( $this->normalFields as $key => $value ){
- 			$str .= "<option name=$key>$value</option>"; 
+ 			$str .= "<option name='{$key}' ". ( $key == $this->value ? 'SELECTED' : '' ) .">$value</option>"; 
  		}
 
  		$str .= '</select>';
  		
  		return $str;
+ 	}
+
+ 	public function getRadioFields( $attributes = array() ){
+ 		
+		if ( is_array( $attributes )){
+ 			$this->addAttribute( $attributes );
+ 		}
+
+ 		$str = '';
+ 		foreach ( $this->normalFields as $key=>$field ){
+ 			$str .= "<label><input type='radio' name='{$this->elementName}' value='{$key}' ";
+ 			$str .= ($key == $this->value) ? ' CHECKED ' : '';
+ 			$str .= ' />';
+ 			$str .= "{$field}</label>";
+	 	}
+
+
+	 	return $str;
  	}
 
  	/**
@@ -211,6 +238,15 @@
  	
 
  	/**
+ 	 * Sets the normal fields
+ 	 * 
+ 	 * @param $fields
+ 	 */
+ 	public function setNormalFields( $fields ){
+ 		$this->normalFields = $fields;
+ 	}
+
+ 	/**
  	 * Sets the SQuick form that this formfield is linked to.
  	 * @param SQuickForm $form
  	 * @return unknown_type
@@ -218,4 +254,24 @@
  	public function setForm( SQuickForm $form ){
  		$this->_form = $form;
  	}
- }
+
+ 	public function offsetExists( $key ){
+ 		return array_key_exists( $this->attributes, $key );
+ 	}
+
+ 	public function offsetSet( $key, $value ){
+ 		$this->addAttribute( $key, $value );
+ 	}
+
+ 	public function offsetGet( $key ){
+
+ 		if ( $this->offsetExists( $key ) )
+ 			return join(' ', $this->attributes[$name] );
+
+ 		return '';
+ 	}
+
+ 	public function offsetUnset( $key ){
+ 		unset( $this->attributes[$name] );
+ 	}
+}
