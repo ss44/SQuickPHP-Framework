@@ -109,10 +109,14 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	$checks = false;
 
 	switch ($type){
+		case 'email':
+			$arg1 = 'email';
 		case 'str':
 		case 'str:lower':
 		case 'str:upper':
 		case 'str:md5':
+		
+
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
 			}elseif( $type == "str:upper" ){
