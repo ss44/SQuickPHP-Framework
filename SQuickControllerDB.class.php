@@ -54,6 +54,14 @@ abstract class SQuickControllerDB extends SQuickDB{
 		$q->addTable( $this->_table );
 		$q->addFields( $this->_data );
 
+		$keys = (array) $this->_primaryKey;
+
+		foreach ( $keys as $key ){
+			$q->addWhere( $key, $this->$key );
+			if ( !is_null($this->$key) )
+				$this->_isNew = false;
+		}
+
 		//If we have a primary key then update otherwise insert
 		if ($this->_isNew){
 			$id = $this->insert($q);
@@ -90,6 +98,14 @@ abstract class SQuickControllerDB extends SQuickDB{
 			throw new SQuickDataException("Invalid $key. Does not exist in data");
 
 		return $this->_data[ $key ];
+	}
+
+	/**
+	 * Returns a generic simple form with all the fields as set by the table structure
+	 * @return SQuickForm();
+	 */
+	public function generateForm(){
+
 	}
 }
 
