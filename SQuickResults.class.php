@@ -77,7 +77,7 @@ class SQuickResults{
 	}
 	
 	/**
-	 * Sets the data that we want to 9 in our results table.
+	 * Sets the data that we want to in our results table.
 	 * 
 	 * @param $data Data that we want to process.
 	 * 
