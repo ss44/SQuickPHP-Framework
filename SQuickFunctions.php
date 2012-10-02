@@ -12,9 +12,9 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
-$tmp = register_shutdown_function('SQuickCleanShutdown');;
-$tmp = set_error_handler ('SQuickCleanError', E_ALL);
-ini_set('display_errors', 0);
+// $tmp = register_shutdown_function('SQuickCleanShutdown');;
+$tmp = set_error_handler ('SQuickCleanError', 0);
+ini_set('display_errors', -1);
 
 /**
  * Debug tools
