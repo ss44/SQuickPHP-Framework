@@ -20,78 +20,105 @@ ini_set('display_errors', 0);
  * Debug tools
  */
 if (!function_exists('oops')){
-	function oops( $vars, $varDump = false, $level = 0 ){
+	function oops( $vars, $varDump = false, $level = 0, $logFile = null){
 		$dbg = debug_backtrace();
 
 		$file = $dbg[0]['file'];
 		$line = $dbg[0]['line'];
 		
-		if (PHP_SAPI == "cli"){
+		$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+		ob_start();
+
+		if (PHP_SAPI == "cli" || $isAjax || $logFile){
 			echo "\n-- $file @ $line --\n";	
 		}else{
 			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
 		}
 
 		for ($x = 1; $x < $level; $x++){
-				if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
-						$file = $dbg[$x]['file'];
-						$line = $dbg[$x]['line'];
-			
-						if (PHP_SAPI == 'cli'){
-							echo "\t-- $file @ $line --\n";	
-						}else{
-							echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
-						}
+			if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
+				$file = $dbg[$x]['file'];
+				$line = $dbg[$x]['line'];
+	
+				if (PHP_SAPI == "cli" || $isAjax || $logFile){
+					echo "\t-- $file @ $line --\n";	
+				}else{
+					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
 				}
+			}
 		}
 
 		if ($varDump) var_dump($vars);
 		else print_r($vars);
 
-		if (PHP_SAPI == "cli"){
+		if (PHP_SAPI == "cli" || $isAjax || $logFile){
 			echo "\n";	
 		}else{
 			echo "</pre>";
 		}
+
+		if ($logFile){
+			$contents = ob_get_contents();
+			$fh = fopen( $logFile, 'a');
+			fwrite($fh, $contents);
+			fclose($fh);
+		}else{
+			flush(); ob_flush();
+		}
+		
+		ob_end_clean();
 	}
 }
 if (!function_exists('dim')){
 	//Die improved merges oops with die
-	function dim( $vars, $varDump = false, $level = 0 ){
+	function dim( $vars, $varDump = false, $level = 0, $logFile = null ){
 		$dbg = debug_backtrace();
 	
 		$file = $dbg[0]['file'];
 		$line = $dbg[0]['line'];
 
-		if (PHP_SAPI == "cli"){
+		$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+		ob_start();
+
+		if (PHP_SAPI == "cli" || $isAjax || $logFile){
 			echo "\n-- $file @ $line --\n";	
 		}else{
 			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
 		}
 	
 		for ($x = 1; $x < $level; $x++){
-				if (isset($dbg[$x])){
-						$file = $dbg[$x]['file'];
-						$line = $dbg[$x]['line'];
+			if (isset($dbg[$x])){
+				$file = $dbg[$x]['file'];
+				$line = $dbg[$x]['line'];
 
-						if (PHP_SAPI == 'cli'){
-							echo "\t$file @ $line \n";	
-						}else{
-							echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
-						}
+				if (PHP_SAPI == "cli" || $isAjax || $logFile){
+					echo "\t$file @ $line \n";	
+				}else{
+					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
 				}
+			}
 		}
 	
 		if ($varDump) var_dump($vars);
 		else print_r($vars);
 
-		if (PHP_SAPI == "cli"){
-			echo "\n";	
+		if (PHP_SAPI == "cli" || $isAjax || $logFile){
+			echo "\n";
 		}else{
 			echo "</pre>";
 		}
+
+		if ($logFile){
+			$contents = ob_get_contents();
+			$fh = fopen( $logFile, 'a');
+			fwrite($fh, $contents);
+			fclose($fh);
+		}else{
+			flush(); ob_flush();
+		}
 		
-	
+		ob_end_clean();
 		exit;
 	}
 }
