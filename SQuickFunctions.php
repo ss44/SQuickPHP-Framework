@@ -21,6 +21,10 @@ ini_set('display_errors', 0);
  */
 if (!function_exists('oops')){
 	function oops( $vars, $varDump = false, $level = 0, $logFile = null){
+		
+		// If they have defined a log file always use that.
+		$logFile = defined('SQUICK_LOG_FILE') ? $SQUICK_LOG_FILE : $logFile;
+
 		$dbg = debug_backtrace();
 
 		$file = $dbg[0]['file'];
@@ -73,6 +77,10 @@ if (!function_exists('oops')){
 if (!function_exists('dim')){
 	//Die improved merges oops with die
 	function dim( $vars, $varDump = false, $level = 0, $logFile = null ){
+
+		// If they have defined a log file always use that.
+		$logFile = defined('SQUICK_LOG_FILE') ? $SQUICK_LOG_FILE : $logFile;
+
 		$dbg = debug_backtrace();
 	
 		$file = $dbg[0]['file'];
