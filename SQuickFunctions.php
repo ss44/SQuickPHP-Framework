@@ -23,7 +23,7 @@ if (!function_exists('oops')){
 	function oops( $vars, $varDump = false, $level = 0, $logFile = null){
 		
 		// If they have defined a log file always use that.
-		$logFile = defined('SQUICK_LOG_FILE') ? $SQUICK_LOG_FILE : $logFile;
+		$logFile = defined('SQUICK_LOG_FILE') ? SQUICK_LOG_FILE : $logFile;
 
 		$dbg = debug_backtrace();
 
@@ -79,7 +79,7 @@ if (!function_exists('dim')){
 	function dim( $vars, $varDump = false, $level = 0, $logFile = null ){
 
 		// If they have defined a log file always use that.
-		$logFile = defined('SQUICK_LOG_FILE') ? $SQUICK_LOG_FILE : $logFile;
+		$logFile = defined('SQUICK_LOG_FILE') ? SQUICK_LOG_FILE : $logFile;
 
 		$dbg = debug_backtrace();
 	
