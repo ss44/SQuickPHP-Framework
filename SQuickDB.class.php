@@ -8,20 +8,17 @@
  * @created 13-Dec-2008
  */
 
+// Cache the table structure
+$_SQuickDBTableStructures = array();
+
 class SQuickDB{
 
-	//If the database has a flags paramater this can be specified here. 
-	//Varies depending on which database driver is used.
-	protected $_dbFlags = null; 
 
-	//Database type (mysql and sqlite are currently configured.)
-	protected $_dbType = '';
-	protected $_dbName = '';
-	protected $_dbUser = '';
-	protected $_dbPass = '';
-	protected $_dbPath = '';
+	protected $_sdbConfig = null;
 	protected $connection = null;
 	protected $_DBCONFIG = null;
+
+	protected $_driver = null;
 
 	protected $_lastID = null;
 
@@ -35,6 +32,8 @@ class SQuickDB{
 			$__SQUICK_CONFIG = $GLOBALS['__SQUICK_CONFIG'];
 
 		$this->_DBCONFIG = (!is_null($_CONFIG) && is_array($__SQUICK_CONFIG) && array_key_exists('SQuickDB', $__SQUICK_CONFIG)) ? $__SQuick_CONFIG['DB'] : $_CONFIG; 
+		$this->_sdbConfig = new SQuickDBConfig();
+
 		$this->connect();
 	}
 
@@ -48,32 +47,8 @@ class SQuickDB{
 	public function insert(SQuickQuery $q){
 		if (is_null($this->connection)) $this->connect();
 		$this->queryChanges( $q );
-	
-		switch ($this->_dbType){
-			case 'mysql':
-				$result = mysql_query($q->getInsert(), $this->connection);
-				
-				if (!$result){
-					throw new SQuickDBException( mysql_error( $this->connection ));
-				}
-				
-				$this->_lastID = mysql_insert_id($this->connection);
-				return $this->_lastID;
-			
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				$r = $this->_dbObj->exec( $q->getInsert() );
-				
-				if ($r === false){
-					throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
-				}
-				$this->_lastID = $this->_dbObj->lastInsertRowID();
-				return $this->_lastID;
-				
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-		}
+		
+		return $this->_driver->insert( $q );
 	}
 
 	/**
@@ -83,20 +58,7 @@ class SQuickDB{
 	 */
 	public function update(SQuickQuery $q){
 		$this->queryChanges( $q );
-
-		switch ($this->_dbType){
-			case 'mysql':
-				if (is_null($this->connection)) $this->connect();
-				$result = mysql_query($q->getUpdate(), $this->connection);
-				return $result;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				$result = $this->_dbObj->exec( $q->getUpdate() );
-				return $result;
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-		}
+		return $this->_driver->update($q);
 	}
 
 	/**
@@ -106,39 +68,7 @@ class SQuickDB{
 	public function upsert( SQuickQuery $q ){
 		$this->queryChanges( $q );
 
-		switch ($this->_dbType){
-			case 'mysql':
-				if (is_null($this->connection)) $this->connect();
-				
-				try{
-					$row = $this->getRow( $q );
-
-					if (empty($row)){
-						return $this->insert($q);
-					}
-					
-					//Otherwise update.
-					return $this->update($q);
-				}
-				//Throw errors up.
-				catch( Exception $ex ){
-					throw $ex;
-				}
-				break;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				$row = $this->getRow( $q );
-
-				if (empty($row)){
-					return $this->insert($q);
-				}
-
-				return $this->update($q);
-
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-		}
+		return $this->_driver->upsert( $q );
 	}
 
 	/**
@@ -153,41 +83,11 @@ class SQuickDB{
 		if ( !$overRide && empty($q->wheres) ) throw new SQuickDBException ("No where set for delete. Must set override to continue.");
 		$this->queryChanges( $q );
 
-		switch ($this->_dbType){
-			case 'mysql':
-				$result = mysql_query( $q->getDelete(), $this->connection);
-				return $result;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				$result = $this->_dbObj->exec( $q->getDelete() );
-				return $result;
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-		}
+		return $this->_driver->delete($q);
 	}
 
 	public function exec( SQuickQuery $q ){
-		if (is_null($this->connection)) $this->connect();
-
-		switch ($this->_dbType){
-			case 'mysql':
-				$result = mysql_query( $q->getQuery(), $this->connection);
-
-				if ( $result === false)
-					throw new SQuickDBException( mysql_error( $this->connection ) ) ;
-
-				return $result;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				@$result = $this->_dbObj->exec( $q->getQuery() );
-				
-				if ( !$result ){
-					throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
-				}
-
-				return $result;
-		}
+		return $this->_driver->exec( $q );
 	}
 
 	/**
@@ -197,34 +97,13 @@ class SQuickDB{
 	 * @return array A 2D associative of the fields with field properties.
 	 */
 	public function getTableStructure($tableName){
-		if ( is_null($this->connection) )
-			$this->connect();
+		global $_SQuickDBTableStructures;
 
-		$result = array();
-
-		switch ($this->_dbType){
-			case 'mysql':
-				$r = mysql_query('Describe '.mysql_real_escape_string($tableName), $this->connection);
-				while ($r == true && $row = mysql_fetch_assoc($r)){
-					$result[ $row['Field'] ] = $row;
-				}
-
-				return $result;
-
-			case 'sqlite3':
-				$r = $this->_dbObj->query( 'PRAGMA table_info(\'' . $this->_dbObj->escapeString( $tableName ) . '\');' );
-				
-				while( $row = $r->fetchArray() ){
-					$result[ $row['name'] ] = $row;
-				}
-				
-				return $result;
-
-
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
+		if ( !array_key_exists( $tableName, (array) $_SQuickDBTableStructures) ){
+			$_SQuickDBTableStructures[ $tableName ] = $this->_driver->getTableStructure( $tableName );
 		}
+
+		return $_SQuickDBTableStructures[ $tableName ];
 	}
 
 	/**
@@ -238,33 +117,7 @@ class SQuickDB{
 		
 		$this->queryChanges( $q );
 		
-		$result = array();
-
-		switch ($this->_dbType){
-			case 'mysql':
-				$r = mysql_query($q->getSelect(), $this->connection);
-				if ($r === false ){
-					throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
-				}
-				
-				if (@mysql_num_rows($r) > 0){
-					$result = mysql_fetch_assoc( $r );
-				}
-				return $result;
-
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				
-				$r = $this->_dbObj->query( $q->getSelect() );
-				$result = $r->fetchArray( SQLITE3_ASSOC );
-
-				return $result;
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-		}
-
-		return $result;
+		return $this->_driver->getRow($q);
 	}
 
 	/**
@@ -278,77 +131,12 @@ class SQuickDB{
 		}
 
 		$this->queryChanges( $q );
-		$result = array();
 
-		switch ($this->_dbType){
-			case 'mysql':
-				
-				$r = mysql_query($q->getSelect(), $this->connection);
-
-				if ($r === false ){
-					throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
-				}
-
-				if ($r !== false && mysql_num_rows($r) > 0){
-					while($row = mysql_fetch_assoc($r)){
-						$result[] = $row;
-					}
-					return $result;
-				}
-				break;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) 
-					$this->connect();
-				//
-				$r = $this->_dbObj->query( $q->getSelect() );
-
-				if ($r) { 
-					while( $row = $r->fetchArray( SQLITE3_ASSOC ) ){
-						$result[] = $row;
-					}
-
-					return $result;	
-				}
-
-				throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
-				
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-					
-		}
-		return $result;
+		return $this->_driver->getAll( $q );
 	}
 
 	public function getResult( SQuickQuery $q ){
-		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
-			$this->connect();
-		}
-
-		switch ($this->_dbType){
-			case 'sqlite3':
-				//
-				$r = $this->_dbObj->query( $q->getSelect() );
-
-				if ($r) { 
-					return new SQuickDBResultSqlLite3( $r );
-				}
-
-				throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
-				
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-			case 'mysql':
-				throw new SQuickDBException( "Not yet implemented");
-				break;
-
-					
-		}
-		return $result;
-
-
-
+		return $this->_driver->getResult( $q );
 	}
 
 	/**
@@ -368,33 +156,7 @@ class SQuickDB{
 		$this->queryChanges( $q );
 		$q->addColumn( $column );
 
-		$result = array();
-
-		switch ($this->_dbType){
-			case 'mysql':
-				
-				$r = mysql_query($q->getSelect(), $this->connection);
-
-				if (mysql_num_rows($r) > 0){
-					while ($row = mysql_fetch_assoc($r)){
-						$result[] = $row[ $column ];
-					}
-				}
-				return $result;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				
-				$r = $this->_dbObj->query( $q->getSelect() );
-				
-				if ($r->numColumns()) { 
-					while( $row = $r->fetchArray( SQLITE3_NUM ) ){
-						$result[] = $row[ 0 ];
-					}
-				}
-				return $result;
-		}
-		
-		return $result;
+		return $this->_driver->getColumn();
 	}
 
 	public function getOne( SQuickQuery $q){
@@ -408,34 +170,7 @@ class SQuickDB{
 		$this->queryChanges( $q );
 		$q->addLimit(1);
 
-		$result = null;
-		switch ($this->_dbType){
-			case 'mysql':
-				
-				$r = mysql_query($q->getSelect(), $this->connection);
-
-				if (mysql_num_rows($r) > 0){
-					$row = mysql_fetch_assoc($r);
-					$result = array_pop( $row );
-				}
-
-				return $result;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				
-				$r = $this->_dbObj->query( $q->getSelect() );
-				
-				if ($r->numColumns()) { 
-					$row  = $r->fetchArray( SQLITE3_NUM );
-					$result = array_pop($row);
-				}
-
-				return $result;
-		}
-		
-		
-		return $result;
-
+		return $this->_driver->getOne($q);
 
 	}
 
@@ -470,96 +205,45 @@ class SQuickDB{
 	public function getAssoc(SQuickQuery $q, $key, $value = null){
 		$result = array();
 		$this->queryChanges( $q );
-
-		switch ($this->_dbType){
-			case 'mysql':
-				if (is_null($this->connection)) $this->connect();
-				
-				$r = mysql_query($q->getSelect(), $this->connection);
-
-				if (mysql_num_rows($r) > 0){
-					while( $row = mysql_fetch_assoc($r)){
-						if (array_key_exists($key, $row)){
-							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
-						}else{
-							throw new SQuickDBException('Invalid key. Not found in result.');
-						}
-					}
-					return $result;
-				}
-				break;
-			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				
-				$r = $this->_dbObj->query( $q->getSelect() );
-				
-				if ($r->numColumns()) { 
-					while ($row = $r->fetchArray(SQLITE3_ASSOC)){
-						if (array_key_exists($key, $row)){
-							$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
-						}else{
-							throw new SQuickDBException('Invalid key. Not found in result.');
-						}
-					}
-					return $result;
-				}
-				break;
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-		}
-		return $result;
+		return $this->_driver->getAssoc($q);
 	}
 	
 	protected function connect(){
 		if (is_array($this->_DBCONFIG)){
 			//Try to load settings from array
-			$this->_dbType = array_key_exists('type', $this->_DBCONFIG) ? $this->_DBCONFIG['type'] : null;
-			$this->_dbPath = array_key_exists('path', $this->_DBCONFIG) ? $this->_DBCONFIG['path'] : null;
-			$this->_dbName = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
-			$this->_dbUser = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
-			$this->_dbPass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
-			$this->_dbFlags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
+			$this->_sdbConfig->type = array_key_exists('type', $this->_DBCONFIG) ? $this->_DBCONFIG['type'] : null;
+			$this->_sdbConfig->path = array_key_exists('path', $this->_DBCONFIG) ? $this->_DBCONFIG['path'] : null;
+			$this->_sdbConfig->name = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
+			$this->_sdbConfig->user = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
+			$this->_sdbConfig->pass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
+			$this->_sdbConfig->flags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
 		}elseif(defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE)){
 			//If not found then check settings from config file
 			$siteIni = SQUICK_INI_FILE;
 			$config = loadSQuickIniFile( $siteIni );
 			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
 
-			if (array_key_exists('type', $dbSettings)) $this->_dbType = $dbSettings['type'];
-			if (array_key_exists('path', $dbSettings)) $this->_dbPath = $dbSettings['path'];
-			if (array_key_exists('name', $dbSettings)) $this->_dbName = $dbSettings['name'];
-			if (array_key_exists('user', $dbSettings)) $this->_dbUser = $dbSettings['user'];
-			if (array_key_exists('password', $dbSettings)) $this->_dbPass = $dbSettings['password'];
-			if (array_key_exists('flags', $dbSettings)) $this->_dbFlags = $config['flags'];	
+			if (array_key_exists('type', $dbSettings)) $this->_sdbConfig->type = $dbSettings['type'];
+			if (array_key_exists('path', $dbSettings)) $this->_sdbConfig->path = $dbSettings['path'];
+			if (array_key_exists('name', $dbSettings)) $this->_sdbConfig->name = $dbSettings['name'];
+			if (array_key_exists('user', $dbSettings)) $this->_sdbConfig->user = $dbSettings['user'];
+			if (array_key_exists('password', $dbSettings)) $this->_sdbConfig->pass = $dbSettings['password'];
+			if (array_key_exists('flags', $dbSettings)) $this->_sdbConfig->flags = $config['flags'];	
 		}else{
 			throw new SQuickDBException('No db settings provided.');
 		}
 
-		//@TODO: Try loading db if unable to load throw an exception.
-		switch ($this->_dbType){
+		//Try loading db if unable to load throw an exception.
+		switch ($this->_sdbConfig->type){
 			case 'mysql':
-				$this->connection = mysql_connect($this->_dbPath, $this->_dbUser, $this->_dbPass);
-				mysql_select_db($this->_dbName, $this->connection);
+				$this->_driver = new SQuickDBDriverMySQL( $this->_sdbConfig );
 				break;
 			case 'sqlite3':
-				if (!class_exists('SQLite3')){
-					throw new SQuickDBException("SQuickDB requires SQLite3 class to exist");
-				}
-				$this->_dbObj = new SQLite3( $this->_dbName, $this->_dbFlags );
-				$this->connection = true;
+				$this->_driver = new SQuickDBDriverSQLLite3(  $this->_sdbConfig );
 				break;
-			case 'mysqli':
-			case 'postgres':
-			case 'sqlite':
-				
-				
 			default:
 				throw new SQuickDBException('Invalid/Unsupported database type.');
 		}
-
-		if (!$this->connection) throw new SQuickDBException("Unable to connect to DB.");
-		
 	}
 
 	/**
@@ -571,7 +255,7 @@ class SQuickDB{
 	}
 
 	protected function queryChanges( SQuickQuery $q ){
-		$q->setDBType( $this->_dbType );
+		$q->setDBType( $this->_sdbConfig->type );
 	}
 }
 

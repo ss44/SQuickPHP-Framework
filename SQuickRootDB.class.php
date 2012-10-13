@@ -13,13 +13,15 @@ abstract class SQuickRootDB{
 	protected $_primaryKey = null;
 	protected $_tableInfo = null;
 	protected $_data = null;
+	protected $_originalData = null;
 	protected $_isNew = true;
 	protected $_db = null;
 
 	public function __construct( $keyId = null ){
 
 		$this->_tableInfo = $this->_db->getTableStructure( $this->_table );
-		$this->_data = array_fill_keys ( array_keys( $this->_tableInfo), null );
+
+		$this->_resetData();
 
 		if ( $keyId ){
 			$this->load( array( $this->_primaryKey => $keyId ) );
@@ -40,6 +42,26 @@ abstract class SQuickRootDB{
 		if ( !empty( $result ) ){
 			$this->_data = $result; 
 		}
+
+		if ( method_exists($this, '_afterLoad')){
+			$this->_beforeSave();
+		}
+
+	}
+
+	protected function _resetData(){
+		$this->_data = array_fill_keys ( array_keys( $this->_tableInfo), null );
+		$this->_originalData = $this->_data;
+	}
+	public function loadFromArray( $array ){
+		$this->_resetData();
+		$this->importArray( $array, false );
+		$this->_originalData = $this->_data;
+
+		if ( method_exists($this, '_afterLoad')){
+			$this->_afterLoad();
+		}
+
 	}
 	
 	public function save(){
@@ -63,6 +85,7 @@ abstract class SQuickRootDB{
 		//If we have a primary key then update otherwise insert
 		if ($this->_isNew){
 			$id = $this->_db->insert($q);
+			$this->{$this->_primaryKey} = $id;
 		}else{
 			$id = $this->_db->update($q);	
 		}
@@ -96,6 +119,19 @@ abstract class SQuickRootDB{
 			throw new SQuickDataException("Invalid $key. Does not exist in data");
 
 		return $this->_data[ $key ];
+	}
+
+	public function importArray( $data, $useSetters = true ){
+		
+		foreach ( $data as $column => $value ){
+			if ( $useSetters ){
+				$this->$column = $value;
+			}
+
+			elseif ( array_key_exists( $column, $this->_data) ){
+				$this->_data[$column] = $value;
+			}
+		}
 	}
 
 	/**
