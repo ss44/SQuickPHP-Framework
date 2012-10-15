@@ -538,3 +538,27 @@ function isSerialized( $string ){
 	$isSerial = @unserialize( $string );
 	return !($isSerial === false);
 }
+
+/**
+ * Sets the autoloader that squick uses to load squick classes
+ */
+function SQuickAutoLoader( $class ){
+	
+	if ( substr( $class, 0, strlen('squick')) == "SQuick"){
+		
+		$filePaths = array(
+			'classFileName' => __DIR__.'/'.$class.'.class.php',
+			'interfaceFileName' => __DIR__.'/'.$class.'interface.php',
+			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
+			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'interface.php'
+		);
+
+		foreach ( $filePaths as $path ){
+			if ( file_exists( $path ) )
+				require_once( $path );
+		}
+	}
+
+}
+
+spl_autoload_register('SQuickAutoLoader');

@@ -8,9 +8,6 @@
  * @created 13-Dec-2008
  */
 
-require_once(dirname(__FILE__).'/SQuickQuery.class.php');
-require_once(dirname(__FILE__).'/SQuickException.class.php');
-
 class SQuickDB{
 
 	//If the database has a flags paramater this can be specified here. 
@@ -32,7 +29,6 @@ class SQuickDB{
 	protected $_dbObj = null;
 	
 	public function __construct( $_CONFIG = null){
-		
 		$__SQUICK_CONFIG = null;
 
 		if ( array_key_exists( '__SQUICK_CONFIG', $GLOBALS) )
@@ -177,10 +173,19 @@ class SQuickDB{
 		switch ($this->_dbType){
 			case 'mysql':
 				$result = mysql_query( $q->getQuery(), $this->connection);
+
+				if ( $result === false)
+					throw new SQuickDBException( mysql_error( $this->connection ) ) ;
+
 				return $result;
 			case 'sqlite3':
 				if (is_null($this->_dbObj)) $this->connect();
-				$result = $this->_dbObj->exec( $q->getQuery() );
+				@$result = $this->_dbObj->exec( $q->getQuery() );
+				
+				if ( !$result ){
+					throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
+				}
+
 				return $result;
 		}
 	}
@@ -192,13 +197,13 @@ class SQuickDB{
 	 * @return array A 2D associative of the fields with field properties.
 	 */
 	public function getTableStructure($tableName){
-		
+		if ( is_null($this->connection) )
+			$this->connect();
+
 		$result = array();
 
 		switch ($this->_dbType){
 			case 'mysql':
-				if (is_null($this->connection)) $this->connect();
-				
 				$r = mysql_query('Describe '.mysql_real_escape_string($tableName), $this->connection);
 				while ($r == true && $row = mysql_fetch_assoc($r)){
 					$result[ $row['Field'] ] = $row;
@@ -207,7 +212,15 @@ class SQuickDB{
 				return $result;
 
 			case 'sqlite3':
+				$r = $this->_dbObj->query( 'PRAGMA table_info(\'' . $this->_dbObj->escapeString( $tableName ) . '\');' );
 				
+				while( $row = $r->fetchArray() ){
+					$result[ $row['name'] ] = $row;
+				}
+				
+				return $result;
+
+
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
@@ -220,7 +233,9 @@ class SQuickDB{
 	 * @param SQuickQuery $q Query object that contains the select statement.
 	 */
 	public function getRow(SQuickQuery $q){
-		if (!$this->connection) $this->connect();
+		if (!$this->connection) 
+			$this->connect();
+		
 		$this->queryChanges( $q );
 		
 		$result = array();
@@ -282,22 +297,58 @@ class SQuickDB{
 				}
 				break;
 			case 'sqlite3':
-				if (is_null($this->_dbObj)) $this->connect();
-				
+				if (is_null($this->_dbObj)) 
+					$this->connect();
+				//
 				$r = $this->_dbObj->query( $q->getSelect() );
-				
-				if ($r->numColumns() && $r->columnType(0) != SQLITE3_NULL) { 
+
+				if ($r) { 
 					while( $row = $r->fetchArray( SQLITE3_ASSOC ) ){
 						$result[] = $row;
 					}
+
+					return $result;	
 				}
-				return $result;	
+
+				throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
+				
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
 					
 		}
 		return $result;
+	}
+
+	public function getResult( SQuickQuery $q ){
+		if (is_null($this->connection) || is_null( $this->_dbObj ) ){
+			$this->connect();
+		}
+
+		switch ($this->_dbType){
+			case 'sqlite3':
+				//
+				$r = $this->_dbObj->query( $q->getSelect() );
+
+				if ($r) { 
+					return new SQuickDBResultSqlLite3( $r );
+				}
+
+				throw new SQuickDBException( $this->_dbObj->lastErrorMsg() );
+				
+			case 'mysqli':
+			case 'postgres':
+			case 'sqlite':
+			case 'mysql':
+				throw new SQuickDBException( "Not yet implemented");
+				break;
+
+					
+		}
+		return $result;
+
+
+
 	}
 
 	/**
@@ -469,7 +520,6 @@ class SQuickDB{
 			$this->_dbUser = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
 			$this->_dbPass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
 			$this->_dbFlags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
-			oops('here');
 		}elseif(defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE)){
 			//If not found then check settings from config file
 			$siteIni = SQUICK_INI_FILE;
@@ -496,14 +546,13 @@ class SQuickDB{
 				if (!class_exists('SQLite3')){
 					throw new SQuickDBException("SQuickDB requires SQLite3 class to exist");
 				}
-				
 				$this->_dbObj = new SQLite3( $this->_dbName, $this->_dbFlags );
 				$this->connection = true;
 				break;
 			case 'mysqli':
 			case 'postgres':
 			case 'sqlite':
-			
+				
 				
 			default:
 				throw new SQuickDBException('Invalid/Unsupported database type.');

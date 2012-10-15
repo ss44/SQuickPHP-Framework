@@ -5,7 +5,7 @@
  * @author Shajinder Padda <shajinder@gmail.com>
  */
 
-class SimplePayPal{
+class SQuickPaypal{
 	
 	//Main api settings we need.
 	protected $_apiSigniture = null;
