@@ -7,25 +7,23 @@
  * @created 13-Nov-2010
  */
 
-abstract class SQuickControllerDB extends SQuickDB{
+abstract class SQuickRootDB{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;
 	protected $_tableInfo = null;
 	protected $_data = null;
 	protected $_isNew = true;
-	
+	protected $_db = null;
+
 	public function __construct( $keyId = null ){
-		parent::__construct();
-		
-		$this->_tableInfo = $this->getTableStructure( $this->_table );
+
+		$this->_tableInfo = $this->_db->getTableStructure( $this->_table );
 		$this->_data = array_fill_keys ( array_keys( $this->_tableInfo), null );
 
 		if ( $keyId ){
 			$this->load( array( $this->_primaryKey => $keyId ) );
 		}
-
-
 	}
 	
 	public function load( $loadParams ){
@@ -37,7 +35,7 @@ abstract class SQuickControllerDB extends SQuickDB{
 			$q->addWhere( $field, $val );
 		}
 	
-		$result = $this->getRow( $q );
+		$result = $this->_db->getRow( $q );
 
 		if ( !empty( $result ) ){
 			$this->_data = $result; 
@@ -64,9 +62,9 @@ abstract class SQuickControllerDB extends SQuickDB{
 
 		//If we have a primary key then update otherwise insert
 		if ($this->_isNew){
-			$id = $this->insert($q);
+			$id = $this->_db->insert($q);
 		}else{
-			$id = $this->update($q);	
+			$id = $this->_db->update($q);	
 		}
 		
 		if ( method_exists($this, '_afterSave') ) {
@@ -106,6 +104,13 @@ abstract class SQuickControllerDB extends SQuickDB{
 	 */
 	public function generateForm(){
 
+	}
+
+	/**
+	 * Use the following db instance.
+	 */
+	public function useDB( SQuickDB $db ){
+		$this->_db = $db;
 	}
 }
 
