@@ -24,11 +24,14 @@ class SQuickTemplate extends Savant3{
 		$this->_wrapper = $wrapperFile;
 	}
 	
-	
+	/**
+	 * Returns the name/path of the current wrapper.
+	 * @return String
+	 */
 	public function getWrapper(){
 		return $this->_wrapper;
 	}
-	
+
 	/**
 	 * @override The parent display method to try and call the wrapper.
 	 * 
