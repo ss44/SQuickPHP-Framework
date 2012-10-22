@@ -21,7 +21,7 @@ ini_set('display_errors', 0);
  */
 if (!function_exists('oops')){
 	function oops( $vars, $varDump = false, $level = 0, $logFile = null){
-		
+
 		// If they have defined a log file always use that.
 		$logFile = defined('SQUICK_LOG_FILE') ? SQUICK_LOG_FILE : $logFile;
 
@@ -29,13 +29,13 @@ if (!function_exists('oops')){
 
 		$file = $dbg[0]['file'];
 		$line = $dbg[0]['line'];
-		
+
 		$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 
 		ob_start();
 
 		if (PHP_SAPI == "cli" || $isAjax || $logFile){
-			echo "\n-- $file @ $line --\n";	
+			echo "\n-- $file @ $line --\n";
 		}else{
 			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
 		}
@@ -44,70 +44,15 @@ if (!function_exists('oops')){
 			if (isset($dbg[$x]) && isset($dbg[$x]['file'])){
 				$file = $dbg[$x]['file'];
 				$line = $dbg[$x]['line'];
-	
+
 				if (PHP_SAPI == "cli" || $isAjax || $logFile){
-					echo "\t-- $file @ $line --\n";	
+					echo "\t-- $file @ $line --\n";
 				}else{
 					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
 				}
 			}
 		}
 
-		if ($varDump) var_dump($vars);
-		else print_r($vars);
-
-		if (PHP_SAPI == "cli" || $isAjax || $logFile){
-			echo "\n";	
-		}else{
-			echo "</pre>";
-		}
-
-		if ($logFile){
-			$contents = ob_get_contents();
-			$fh = fopen( $logFile, 'a');
-			fwrite($fh, $contents);
-			fclose($fh);
-		}else{
-			flush(); ob_flush();
-		}
-		
-		ob_end_clean();
-	}
-}
-if (!function_exists('dim')){
-	//Die improved merges oops with die
-	function dim( $vars, $varDump = false, $level = 0, $logFile = null ){
-
-		// If they have defined a log file always use that.
-		$logFile = defined('SQUICK_LOG_FILE') ? SQUICK_LOG_FILE : $logFile;
-
-		$dbg = debug_backtrace();
-	
-		$file = $dbg[0]['file'];
-		$line = $dbg[0]['line'];
-
-		$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
-		ob_start();
-
-		if (PHP_SAPI == "cli" || $isAjax || $logFile){
-			echo "\n-- $file @ $line --\n";	
-		}else{
-			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
-		}
-	
-		for ($x = 1; $x < $level; $x++){
-			if (isset($dbg[$x])){
-				$file = $dbg[$x]['file'];
-				$line = $dbg[$x]['line'];
-
-				if (PHP_SAPI == "cli" || $isAjax || $logFile){
-					echo "\t$file @ $line \n";	
-				}else{
-					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
-				}
-			}
-		}
-	
 		if ($varDump) var_dump($vars);
 		else print_r($vars);
 
@@ -125,7 +70,62 @@ if (!function_exists('dim')){
 		}else{
 			flush(); ob_flush();
 		}
-		
+
+		ob_end_clean();
+	}
+}
+if (!function_exists('dim')){
+	//Die improved merges oops with die
+	function dim( $vars, $varDump = false, $level = 0, $logFile = null ){
+
+		// If they have defined a log file always use that.
+		$logFile = defined('SQUICK_LOG_FILE') ? SQUICK_LOG_FILE : $logFile;
+
+		$dbg = debug_backtrace();
+
+		$file = $dbg[0]['file'];
+		$line = $dbg[0]['line'];
+
+		$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+		ob_start();
+
+		if (PHP_SAPI == "cli" || $isAjax || $logFile){
+			echo "\n-- $file @ $line --\n";
+		}else{
+			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+		}
+
+		for ($x = 1; $x < $level; $x++){
+			if (isset($dbg[$x])){
+				$file = $dbg[$x]['file'];
+				$line = $dbg[$x]['line'];
+
+				if (PHP_SAPI == "cli" || $isAjax || $logFile){
+					echo "\t$file @ $line \n";
+				}else{
+					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+				}
+			}
+		}
+
+		if ($varDump) var_dump($vars);
+		else print_r($vars);
+
+		if (PHP_SAPI == "cli" || $isAjax || $logFile){
+			echo "\n";
+		}else{
+			echo "</pre>";
+		}
+
+		if ($logFile){
+			$contents = ob_get_contents();
+			$fh = fopen( $logFile, 'a');
+			fwrite($fh, $contents);
+			fclose($fh);
+		}else{
+			flush(); ob_flush();
+		}
+
 		ob_end_clean();
 		exit;
 	}
@@ -150,31 +150,31 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str:lower':
 		case 'str:upper':
 		case 'str:md5':
-		
+
 
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
 			}elseif( $type == "str:upper" ){
 				$var = strtoupper( $var );
 			}
-				
+
 			if ( is_int($arg1) && ( strlen($var) < $arg1)){
 				 return null;
 			}
-			
+
 			if ( is_int($arg2) && ( strlen($var) > $arg2)){
 				$var = trim($var, $arg2);
-			}  
-			
+			}
+
 			if ( is_array($arg1) ){
 				$var = in_array( $var, $arg1 ) ? $var : null;
 				return $var;
 			}
-			
+
 			//If the first argument is any of the following try to parse it based on rules.
 			if (!is_null($arg1) && !is_int($arg1)){
-				
-				//Treat like a regex 				
+
+				//Treat like a regex
 				switch ($arg1){
 					case 'date':
 						$arg1 = '/^\d{1,2}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{2,4}\s?$/';
@@ -185,18 +185,18 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 					case 'email':
 						$arg1 = '/^[a-zA-Z][\w\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$/';
 						break;
-				}	
+				}
 				$valid = preg_match( $arg1, $var );
-				
+
 				if (!$valid){
 					return null;
 				}
 			}
-			
+
 			if ( $type == 'str:md5' ){
 				return md5( $var );
 			}
-			
+
 			return (string) $var;
 		case 'date':
 			$arg1 = '/^(\d{1,2})[-\/\.]\s?(\d{1,2})[-\/\.]\s?(\d{2,4})\s?$/';
@@ -230,8 +230,8 @@ function cleanArrayKey($key, $array){
 	$arg1 = isset($args[3]) ? $args[3] : null;
 	$arg2 = isset($args[4]) ? $args[4] : null;
 
-	
-	return cleanVar( $array[$key], $type, $arg1, $arg2); 
+
+	return cleanVar( $array[$key], $type, $arg1, $arg2);
 }
 
 /**
@@ -276,7 +276,7 @@ function cleanPOST($field){
  * @return mixed Returns the variable cleaned or null if not loaded.
  */
 function cleanGET($field){
-	
+
 	$args = func_get_args();
 	$vars[0] = $field;
 	$vars[1] = $_GET;
@@ -284,45 +284,45 @@ function cleanGET($field){
 	$vars = array_merge( $vars, array_slice( $args, 1) );
 
 	return call_user_func_array('cleanArrayKey', $vars );
-	
+
 }
 
 /**
- * Creats a string of random characters. 
+ * Creats a string of random characters.
  *
  * @param int $length The total length of the string.
  * @param bool $numbers Include Numbers.
  * @param bool $caseSensitive False will return all characters in upper case while true will create a mixture of upper and lowercase.
- * @return String of random characters.  
+ * @return String of random characters.
  */
 function randomChars( $length, $numbers = true , $caseSensitive = true, $includeSymbols = false ){
-	$str = ''; 
-	
+	$str = '';
+
 	mt_srand();
-	
+
 	for ($x = 0; $x < $length; $x++ ){
 		//Randomly select what type of character we want
 
-		//Do we want to include numbers? 
+		//Do we want to include numbers?
 		$y = 1;
 		//001 - 1
 		//011 - 3 include
-		//101 - 5 
+		//101 - 5
 		//111 - 7
 		if ( $numbers ){
 			$y = 2;
 		}
 
 		if ( $includeSymbols ){
-			
+
 		}
-		//Lets make it a bit mask to know what type of characters we 
+		//Lets make it a bit mask to know what type of characters we
 		//are working with.
 
 		$charType = mt_rand(0, $y);
-		
+
 		$chars = array();
-		
+
 		//Select a random character between A-Z [ASCII 65-90]
 		$chars[] = mt_rand(65, 90);
 
@@ -338,19 +338,21 @@ function randomChars( $length, $numbers = true , $caseSensitive = true, $include
 			$chars[] = mt_rand(32, 47);
 		}
 
-		//Get a random character from the chars array		
+		//Get a random character from the chars array
 		$str .= chr( $chars[ array_rand( $chars ) ] );
 	}
-	
-	return ($caseSensitive) ? $str : strtoupper( $str );  
+
+	return ($caseSensitive) ? $str : strtoupper( $str );
 }
 
 function SQuickCleanError($errNo, $errStr, $errFile, $errLine){
 	$msg = '';
 	$bgColor = 'yellow';
-	
+	$errorLogFile = defined('SQUICK_ERROR_FILE') ? SQUICK_ERROR_FILE : null;
+	ob_start();
+
 	$dbg = debug_backtrace();
-		
+
 	switch ($errNo){
 		case E_USER_WARNING:
 			$msgHTML = "<b>Warning : [$errNo] $errFile @ $errLine </b>\n\t$errStr";
@@ -367,16 +369,19 @@ function SQuickCleanError($errNo, $errStr, $errFile, $errLine){
 			$msgCLI = "* Error : [$errNo] $errFile @ $errLine *\n\t$errStr";
 			break;
 	}
-	
+
+	$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+
 	//@TODO - have some sort of check here so that if we are in cli mode these errors are not handled like this.
-	if (PHP_SAPI == "cli"){
+	if (PHP_SAPI == "cli" || $isAjax || $errorLogFile){
 		echo "\n$msgCLI";
 	}else{
 		echo "<pre style='width:100%; border:thin solid black; background-color:$bgColor; color:black;'>";
 		echo "$msgHTML";
 	}
 
-	
+
 
 	if ( count($dbg > 1) ){
 		echo "\n";
@@ -386,40 +391,63 @@ function SQuickCleanError($errNo, $errStr, $errFile, $errLine){
 		}
 	}
 
-	if (PHP_SAPI == "cli"){
+	if (PHP_SAPI == "cli" || $isAjax || $errorLogFile){
 		echo "\n";
 	}else{
 		echo "</pre>";
 	}
-	
+
+	if ($errorLogFile){
+		$contents = ob_get_contents();
+		$fh = fopen( $errorLogFile, 'a');
+		fwrite($fh, $contents);
+		fclose($fh);
+	}else{
+		flush(); ob_flush();
+	}
+	ob_end_clean();
+
 	return true;
 }
 
 function SQuickCleanShutdown(){
 	$error = error_get_last();
-
+	$errorLogFile = defined('SQUICK_ERROR_FILE') ? SQUICK_ERROR_FILE : null;
 
 	//If there wasn't an error then end normaly.
 	if (is_null($error)){
 		return;
 	}
+	ob_start();
+	$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 
-	if ( PHP_SAPI == "cli"){
+	if (PHP_SAPI == "cli" || $isAjax || $errorLogFile){
 		echo "** Error **\n";
 	}else{
 		echo "<pre style='width:100%; border:thin solid black; background-color:pink; color:black;'>";
 	}
-	
+
 	echo $error['message'];
 
 	echo "\n";
 	echo "\t".$error['line']. ' @ '. $error['file']. "\n";
 
-	if ( PHP_SAPI == "cli"){
+	if (PHP_SAPI == "cli" || $isAjax || $errorLogFile){
 		echo "\n **************** \n";
 	}else{
 		echo "</pre>";
 	}
+
+	if ($errorLogFile){
+		$contents = ob_get_contents();
+		$fh = fopen( $errorLogFile, 'a');
+		fwrite($fh, $contents);
+		fclose($fh);
+	}else{
+		flush(); ob_flush();
+	}
+
+	ob_end_clean();
 }
 /**
  * Displays the hedaer and footer.
@@ -443,23 +471,23 @@ function callTemplateWrapper($temp = null){
 
 /**
  * Redirects the user and if there was output then displays a click here to continue link.
- * 
+ *
  * @param String $url to redirect to.
  */
 function redirect( $url ){
-	
+
 	header("Location: $url ");
 	exit;
 }
 /**
  * Loads a SQuick ini file. Which allows server specific variables, and combines these into
  * a single relevent section to be used.
- * 
+ *
  * @param string $siteIni The site ini to use.
  * @return returns an array of the parsed config file.
  */
 function loadSQuickIniFile( $siteIni ){
-	
+
 	$config = parse_ini_file( $siteIni, true );
 
 	//If server is defined then get our server modes.
@@ -494,13 +522,13 @@ function loadSQuickIniFile( $siteIni ){
 
 	//If we have our current site
 	if ($currentSite){
-		
+
 		$configCopy = $config;
 		//Loop over the config and merge our server specific settings.
 		foreach( $configCopy as $key=>$val ){
 			if (preg_match('/^(.*)_'.$currentSite.'$/i', $key, $tmp)){
-				// If we have a general catch all name already, then replace it's values with those of our newly found key. 
-				// By merging over the new values over the old ones. 
+				// If we have a general catch all name already, then replace it's values with those of our newly found key.
+				// By merging over the new values over the old ones.
 				if ( array_key_exists( $tmp[1], $config) ){
 					$config[ $tmp[1] ] = array_merge($config[ $tmp[1] ], $config[ $key ]);
 				}
@@ -516,7 +544,7 @@ function loadSQuickIniFile( $siteIni ){
 					$newKey = strtolower( $tKey );
 					unset($config[$key][$tKey]);
 					$config[$key][$newKey] = $item;
-					
+
 				}
 			}else{
 				$newKey = strtolower( $key );
