@@ -469,16 +469,20 @@ function callTemplateWrapper($temp = null){
 	}
 }
 
-/**
- * Redirects the user and if there was output then displays a click here to continue link.
- *
- * @param String $url to redirect to.
- */
-function redirect( $url ){
+if (!function_exists('redirect')){
 
-	header("Location: $url ");
-	exit;
+	/**
+	 * Redirects the user and if there was output then displays a click here to continue link.
+	 *
+	 * @param String $url to redirect to.
+	 */
+	function redirect( $url ){
+
+		header("Location: $url ");
+		exit;
+	}
 }
+
 /**
  * Loads a SQuick ini file. Which allows server specific variables, and combines these into
  * a single relevent section to be used.
