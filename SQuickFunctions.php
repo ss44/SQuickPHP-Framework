@@ -6,14 +6,16 @@
  * @modified 29-May-2009
  */
 
+namespace SQuick;
+
 /**
  * Outputs basic debug info with / pre tags attached.
  * @param mixed $var  The variable to output.
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
-$tmp = register_shutdown_function('SQuickCleanShutdown');;
-$tmp = set_error_handler ('SQuickCleanError', E_ALL);
+$tmp = register_shutdown_function(__NAMESPACE__.'\\SQuickCleanShutdown');;
+$tmp = set_error_handler (__NAMESPACE__.'\\SQuickCleanError', E_ALL);
 ini_set('display_errors', 0);
 
 /**
@@ -475,12 +477,12 @@ if (!function_exists('redirect')){
 	 * Redirects the user and if there was output then displays a click here to continue link.
 	 *
 	 * @param String $url to redirect to.
-	 */
+	 *//*
 	function redirect( $url ){
 
 		header("Location: $url ");
 		exit;
-	}
+	}*/
 }
 
 /**
@@ -593,4 +595,4 @@ function SQuickAutoLoader( $class ){
 
 }
 
-spl_autoload_register('SQuickAutoLoader');
+spl_autoload_register(__NAMESPACE__.'\\SQuickAutoLoader');
