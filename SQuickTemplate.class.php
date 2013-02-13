@@ -11,10 +11,15 @@ require_once( dirname(__FILE__) .'/externals/Savant3.php');
 class SQuickTemplate extends Savant3{
  	
 	/**
-	 * String name of the wrapper file to use.
+	 * @var String name of the wrapper file to use.
 	 */
 	protected $_wrapper = null;
 	
+	/**
+	 * @var String The path of where templates are stored.
+	 */ 
+	protected $_path = null;
+
 	/**
 	 * Sets the wrapper file to use.
 	 * 
@@ -26,9 +31,16 @@ class SQuickTemplate extends Savant3{
 	
 	
 	public function getWrapper(){
-		return $this->_wrapper;
+		return ( !is_null( $this->_path ) ) ? $this->_path .'/'. $this->_wrapper : $this->_wrapper ;
 	}
 	
+	/**
+	 * Sets the home template path.
+	 */
+	public function setPath( $path ){
+		$this->_path = realpath($path);
+	}
+
 	/**
 	 * @override The parent display method to try and call the wrapper.
 	 * 
@@ -37,6 +49,11 @@ class SQuickTemplate extends Savant3{
 	 * @author $file File to attempt to load.
 	 */
 	public function display( $tpl = null, $includeWrapper = true ){
+		
+		if ( $this->_path ){
+			$tpl = $this->_path . '/'. $tpl;
+		}
+
 		try{
 			if ( $this->getWrapper() && $includeWrapper){
 				$value = $this->fetch( $tpl ) ;
