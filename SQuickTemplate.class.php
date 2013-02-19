@@ -40,7 +40,7 @@ class SQuickTemplate extends Savant3{
 	/**
 	 * Sets the home template path.
 	 */
-	public function setPath( $path ){
+	public function setPath( $path, $config ){
 		$this->_path = realpath($path);
 	}
 

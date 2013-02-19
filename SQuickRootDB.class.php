@@ -7,7 +7,7 @@
  * @created 13-Nov-2010
  */
 
-abstract class SQuickRootDB{
+abstract class SQuickRootDB implements ArrayAccess{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;
@@ -16,9 +16,11 @@ abstract class SQuickRootDB{
 	protected $_originalData = null;
 	protected $_isNew = true;
 	protected $_db = null;
+	protected $_id = null;
+	protected $_normal = array();
 
 	public function __construct( $keyId = null ){
-
+		
 		$this->_tableInfo = $this->_db->getTableStructure( $this->_table );
 
 		$this->_resetData();
@@ -38,7 +40,7 @@ abstract class SQuickRootDB{
 		}
 	
 		$result = $this->_db->getRow( $q );
-
+		
 		if ( !empty( $result ) ){
 			$this->_data = $result; 
 		}
@@ -90,6 +92,12 @@ abstract class SQuickRootDB{
 			$id = $this->_db->update($q);	
 		}
 		
+		$this->_id = $id;
+
+		if ( !is_array( $this->_primaryKey ) ){
+			$this->_data[ $this->_primaryKey ] = $id;
+		}
+
 		if ( method_exists($this, '_afterSave') ) {
 			$this->_afterSave();
 		}
@@ -142,19 +150,41 @@ abstract class SQuickRootDB{
 
 	}
 
+	public function importFromArray( $array ){
+		
+		foreach ( $this->_data as $key => $data ){
+			if ( array_key_exists( $key, $array ) ){
+				$this->_data[ $key ] = $array[ $key ];
+			}
+		}
+
+	}
+
 	/**
 	 * Use the following db instance.
 	 */
 	public function useDB( SQuickDB $db ){
 		$this->_db = $db;
 	}
-}
 
-class SQuickDataException extends SQuickException{
-	
-	public function __construct( $errorMessage = "" ){
-		
-		parent::__construct( $errorMessage );
+	public function offsetExists( $key ){
+		return array_key_exists( $key, $this->_normal );
 	}
 
+	public function offsetGet( $key ){
+		$key = 'normal_'.strtolower( $key );
+
+		if ( method_exists( $this, $key) ){
+			return call_user_func( array($this, $key) );
+		}
+	}
+
+	public function offsetSet( $key, $value ){
+
+	}
+
+	public function offsetUnset( $key ){
+
+	}
 }
+

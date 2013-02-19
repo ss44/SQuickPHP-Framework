@@ -584,6 +584,7 @@ function SQuickAutoLoader( $class ){
 	if ( substr( $class, 0, strlen('squick')) == "SQuick"){
 		
 		$filePaths = array(
+			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
 			'interfaceFileName' => __DIR__.'/'.$class.'interface.php',
 			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
