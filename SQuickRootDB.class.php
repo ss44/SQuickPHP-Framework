@@ -147,7 +147,37 @@ abstract class SQuickRootDB implements ArrayAccess{
 	 * @return SQuickForm();
 	 */
 	public function generateForm(){
+		$form = new SQuickForm();
 
+		foreach ( $this->_tableInfo as $key => $info ){
+			$isRequired = ($info['Null']  == 'No');
+			
+			preg_match('/(int|char|text)(\((\d+)\))?\s?(unsigned)?/', $info['Type'], $tmp);
+
+			$min = null;
+			$max = null;
+
+			switch( $tmp[1] ){
+				case 'int':
+					$type = 'int';
+					$max =  (10 ^ $tmp[3] ) - 1 ;
+					break;
+				case 'char':
+				case 'text':
+				default:
+					$type = 'str';
+					if ( array_key_exists( 3, $tmp )){
+						$max = $tmp[3];
+					}
+					break;
+			}
+
+			$ff = new SQuickFormField( $key, $isRequired, $type, $min, $max );
+			$ff->value = $this->$key;
+			$form->addField( $ff );
+		}
+
+		return $form;
 	}
 
 	public function importFromArray( $array ){
