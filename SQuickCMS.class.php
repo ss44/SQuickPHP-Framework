@@ -10,9 +10,6 @@
  * @created 20-Oct-2011
  */
 
-require_once( dirname(__FILE__).'/SQuickForm.class.php');
-require_once( dirname(__FILE__).'/SQuickFormField.class.php');
-
 interface SQuickCMSInterface{
 	
 	public function load( $id );
@@ -115,7 +112,7 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 		}
 
 		$db = new SQuickDB();
-		$contentRows = $db->getAll( $q );
+		$contentRows = (array) $db->getAll( $q );
 
 		foreach ( $contentRows as &$content ){
 			$content = $content + unserialize( $content[ $contentField ] );
