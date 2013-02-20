@@ -54,6 +54,7 @@
  			
  			case 'clean':
  				return $this->clean;	
+ 			
  			case 'isValid':
  				return ( (is_null($this->clean)  && !$this->isRequired) || (!is_null($this->clean)) );
 
@@ -142,6 +143,39 @@
  		return $str;
  	}
  	
+ 
+ 	/**
+ 	 * Gets a hidden field for this given field.
+ 	 * @return String that can be used to create a text field
+ 	 */
+ 	public function getHiddenField( $attributes = null ){
+ 		$str = "<input type='hidden' ";
+ 		$str .= "name='$this->elementName' ";
+ 		$str .= "value='".$this->value."' "; 
+
+ 		if ( is_array($attributes) ) {
+ 			$this->addAttribute( $attributes );
+ 		}
+ 		
+ 		$atr = $this->getAttrStr();
+ 		
+ 		$str .= $atr;
+ 		$str .= " />";
+ 		
+ 		return $str;
+ 	}
+ 	
+ 	public function getTextArea( $attributes = null ){
+ 		if ( is_array($attributes) ) {
+ 			$this->addAttribute( $attributes );
+ 		}
+
+ 		$str = "<textarea name = '{$this->elementName}'";
+ 		$str .= $this->getAttrStr();
+		$str .= '>'. $this->value .'</textarea>';
+
+		return $str;
+ 	} 	
  	
  	/**
  	 * Gets a password field for this given field.
