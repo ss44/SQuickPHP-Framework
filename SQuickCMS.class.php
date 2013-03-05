@@ -24,6 +24,8 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 	protected $fields = array();
 	protected $section = null;
 	protected $id = null;
+	
+	public static $_contentCache = array();
 
 	public function __construct( $section){
 		parent::__construct();
@@ -100,25 +102,30 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 
 	public static function getContent( $section, $contentField = 'content', $limit = null, $start = null){
 
-	
-		$q = static::getContentQuery( $section );
+		$cache = &self::$_contentCache;
 
-		if (is_numeric($limit)){
-			$q->addLimit( $limit );
+		if ( !array_key_exists( $section, $cache ) ){
+			$q = static::getContentQuery( $section );
+
+			if (is_numeric($limit)){
+				$q->addLimit( $limit );
+			}
+
+			if (is_numeric( $start )){
+				$q->addOffset( $start );
+			}
+
+			$db = new SQuickDB();
+			$contentRows = (array) $db->getAll( $q );
+
+			foreach ( $contentRows as &$content ){
+				$content = $content + unserialize( $content[ $contentField ] );
+			}
+
+			$cache[ $section ] = $contentRows;
 		}
 
-		if (is_numeric( $start )){
-			$q->addOffset( $start );
-		}
-
-		$db = new SQuickDB();
-		$contentRows = (array) $db->getAll( $q );
-
-		foreach ( $contentRows as &$content ){
-			$content = $content + unserialize( $content[ $contentField ] );
-		}
-
-		return $contentRows;
+		return $cache[ $section ]; 
 	}
 }
 /*

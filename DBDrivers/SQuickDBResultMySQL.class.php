@@ -16,6 +16,13 @@ class SQuickDBResultMySQL extends SQuickDBResult{
 
 
 	public function current (){
+		
+		if ( parent::getHelperObj() ) {
+			$helper = $this->getHelperObj();
+			$tmp = new $helper();
+			$tmp->importSQuickDBResultRow( $this->row );
+			return $tmp;
+		}
 		return $this->row;
 	}
 

@@ -586,9 +586,9 @@ function SQuickAutoLoader( $class ){
 		$filePaths = array(
 			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
-			'interfaceFileName' => __DIR__.'/'.$class.'interface.php',
+			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
 			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
-			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'interface.php'
+			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'.interface.php'
 		);
 		
 		foreach ( $filePaths as $path ){
