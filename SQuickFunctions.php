@@ -152,6 +152,8 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str:lower':
 		case 'str:upper':
 		case 'str:md5':
+		case 'postalcode':
+		
 
 
 			if ($type == 'str:lower'){
@@ -187,9 +189,12 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 					case 'email':
 						$arg1 = '/^[a-zA-Z][\w\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$/';
 						break;
+					case 'postalcode':
+						$arg1 = '/[A-Z]\d[A-z][\s\-]?\d[A-Z]\d$/i';
+						break;
 				}
-				$valid = preg_match( $arg1, $var );
 
+				$valid = preg_match( $arg1, $var );
 				if (!$valid){
 					return null;
 				}
@@ -581,15 +586,17 @@ function SQuickAutoLoader( $class ){
 	if ( substr( $class, 0, strlen('squick')) == "SQuick"){
 		
 		$filePaths = array(
+			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
-			'interfaceFileName' => __DIR__.'/'.$class.'interface.php',
+			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
 			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
-			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'interface.php'
+			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'.interface.php'
 		);
-
+		
 		foreach ( $filePaths as $path ){
-			if ( file_exists( $path ) )
+			if ( file_exists( $path ) ){
 				require_once( $path );
+			}
 		}
 	}
 
