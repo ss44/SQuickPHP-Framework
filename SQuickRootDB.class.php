@@ -48,7 +48,7 @@ abstract class SQuickRootDB implements ArrayAccess, SQuickDBResultRow{
 		}
 
 		if ( method_exists($this, '_afterLoad')){
-			$this->_beforeSave();
+			$this->_afterLoad();
 		}
 
 	}
@@ -57,10 +57,10 @@ abstract class SQuickRootDB implements ArrayAccess, SQuickDBResultRow{
 		$this->_data = array_fill_keys ( array_keys( $this->_tableInfo), null );
 		$this->_originalData = $this->_data;
 	}
+	
 	public function loadFromArray( $array ){
 		$this->_resetData();
 		$this->importArray( $array, false );
-		$this->_originalData = $this->_data;
 
 		if ( method_exists($this, '_afterLoad')){
 			$this->_afterLoad();
@@ -100,10 +100,14 @@ abstract class SQuickRootDB implements ArrayAccess, SQuickDBResultRow{
 			$this->_data[ $this->_primaryKey ] = $id;
 		}
 
-		if ( method_exists($this, '_afterSave') ) {
+		if ( $this->_isNew && method_exists( $this, '_afterCreate') ){
+			$this->_afterCreate();
+		}elseif ( method_exists($this, '_afterSave') ) {
 			$this->_afterSave();
 		}
-		
+
+		// Update the old data history with the new data
+
 	}
 	
 	public function __set( $key, $value ){
