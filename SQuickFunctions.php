@@ -6,8 +6,6 @@
  * @modified 29-May-2009
  */
 
-namespace SQuick;
-
 /**
  * Outputs basic debug info with / pre tags attached.
  * @param mixed $var  The variable to output.
