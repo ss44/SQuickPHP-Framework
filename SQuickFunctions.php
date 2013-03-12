@@ -504,7 +504,7 @@ if (!function_exists('redirect')){
  * @param string $siteIni The site ini to use.
  * @return returns an array of the parsed config file.
  */
-function loadSQuickIniFile( $siteIni ){
+function loadSQuickIniFile( $siteIni, $setConstants = false ){
 
 	$config = parse_ini_file( $siteIni, true );
 
@@ -571,6 +571,19 @@ function loadSQuickIniFile( $siteIni ){
 			}
 		}
 	}
+
+	// Set the constants for all our variables in the form of SECTION_VAR_NAME
+	if ( $setConstants ){
+		foreach ( $config as $title => $vars ){
+			foreach ( $vars as $sVarName => $sValue ){
+				$cName = strtoupper( $title . '_' . $sVarName );
+				if ( !defined($cName) ){
+					define( $cName, $sValue );
+				}
+			}
+		}
+	}
+
 	return $config;
 }
 

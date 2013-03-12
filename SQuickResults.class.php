@@ -158,12 +158,12 @@ class SQuickResults{
 	public function getResults(){
 		//If we are using the cache'd results then just return the data
 		if  ($this->_useCache){
-			return $this->_truncatedData;
+			return (array) $this->_truncatedData;
 		}
 		
 		//Otherwise proccess the data array and then return
 		$this->process();
-		return $this->_truncatedData;
+		return (array) $this->_truncatedData;
 	}
 
 	public function setOrderBy( $fieldName ){
