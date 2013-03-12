@@ -7,7 +7,7 @@
  * @created Apr 30, 2010
  */
  
- class SQuickFormField implements ArrayAccess{
+ class SQuickFormField implements ArrayAccess, Iterator{
  	
  	protected $_form = null;
  	protected $value = null;
@@ -18,6 +18,8 @@
  	protected $error = null;
  	protected $attributes = array();
  	protected $normalFields = array();
+ 	
+ 	protected $iteratorKey = null;
 
  	/**
  	 * Creates a new SQuickFormField object with basic options
@@ -127,9 +129,14 @@
  	 * @return String that can be used to create a text field
  	 */
  	public function getTextField( $attributes = null ){
+ 		$value = $this->value;
+ 		if ( is_array($this->value) ){
+ 			$value = $this->current();
+ 		}
+
  		$str = "<input type='text' ";
  		$str .= "name='$this->elementName' ";
- 		$str .= "value='".$this->value."' "; 
+ 		$str .= "value='".$value."' "; 
 
  		if ( is_array($attributes) ) {
  			$this->addAttribute( $attributes );
@@ -149,9 +156,14 @@
  	 * @return String that can be used to create a text field
  	 */
  	public function getHiddenField( $attributes = null ){
+ 		$value = $this->value;
+ 		if ( is_array($this->value) ){
+ 			$value = $this->current();
+ 		}
+
  		$str = "<input type='hidden' ";
  		$str .= "name='$this->elementName' ";
- 		$str .= "value='".$this->value."' "; 
+ 		$str .= "value='".$value."' "; 
 
  		if ( is_array($attributes) ) {
  			$this->addAttribute( $attributes );
@@ -166,13 +178,18 @@
  	}
  	
  	public function getTextArea( $attributes = null ){
+ 		$value = $this->value;
+ 		if ( is_array($this->value) ){
+ 			$value = $this->current();
+ 		}
+
  		if ( is_array($attributes) ) {
  			$this->addAttribute( $attributes );
  		}
 
  		$str = "<textarea name = '{$this->elementName}'";
  		$str .= $this->getAttrStr();
-		$str .= '>'. $this->value .'</textarea>';
+		$str .= '>'. $value .'</textarea>';
 
 		return $str;
  	} 	
@@ -182,9 +199,14 @@
  	 * @return String that represents an input field for a password field.
  	 */
 	public function getPasswordField( $attributes = array() ){
+		$value = $this->value;
+ 		if ( is_array($this->value) ){
+ 			$value = $this->current();
+ 		}
+
 		$str = "<input type='password' ";
  		$str .= "name='$this->elementName' ";
- 		$str .= "value='".$this->value."' "; 
+ 		$str .= "value='".$value."' "; 
  		
  		if ( is_array($attributes) ) {
  			$this->addAttribute( $attributes );
@@ -204,6 +226,7 @@
  	 * @return String that represents a select field.
  	 */
  	public function getSelectField( $attributes = array() ){
+
  		$str = "<select name='$this->elementName' ";
 
  		if ( is_array( $attributes )){
@@ -213,8 +236,11 @@
  		$str .= $this->getAttrStr();
  		$str .= ">";
 
+ 		$selectedValues = (array) $this->value;
+
  		foreach ( $this->normalFields as $key => $value ){
- 			$str .= "<option name='{$key}' ". ( $key == $this->value ? 'SELECTED' : '' ) .">$value</option>"; 
+ 			
+ 			$str .= "<option name='{$key}' ". ( in_array($key, $selectedValues) ? 'SELECTED' : '' ) .">$value</option>"; 
  		}
 
  		$str .= '</select>';
@@ -228,10 +254,13 @@
  			$this->addAttribute( $attributes );
  		}
 
+ 		$selectedValues = (array) $this->value;
+
+
  		$str = '';
  		foreach ( $this->normalFields as $key=>$field ){
  			$str .= "<label><input type='radio' name='{$this->elementName}' value='{$key}' ";
- 			$str .= ($key == $this->value) ? ' CHECKED ' : '';
+ 			$str .= (in_array($key, $selectedValues)) ? ' CHECKED ' : '';
  			$str .= ' />';
  			$str .= "{$field}</label>";
 	 	}
@@ -307,5 +336,47 @@
 
  	public function offsetUnset( $key ){
  		unset( $this->attributes[$name] );
+ 	}
+
+ 	/** Iterator implementation **/
+ 	public function current(){
+ 		if (!is_array( $this->value ) ){
+ 			return $this->value;
+ 		}
+
+ 		return current( $this->value );
+ 	}
+
+ 	public function key(){
+ 		if (!is_array( $this->value ) ){
+ 			return null;
+ 		}
+
+ 		return key( $this->value );
+
+ 	}
+
+ 	public function next(){
+ 		if (!is_array( $this->value ) ){
+ 			return $this->value;
+ 		}
+ 		
+ 		return next( $this->value );
+ 	}
+
+ 	public function rewind(){
+ 		if (!is_array( $this->value ) ){
+ 			return $this->value;
+ 		}
+
+ 		return reset( $this->value );
+ 	}
+
+ 	public function valid(){
+ 		if ( !is_array( $this->value ) ){
+ 			return false;
+ 		}
+
+ 		return key( $this->value ) !== null;
  	}
 }

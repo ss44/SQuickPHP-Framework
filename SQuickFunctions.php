@@ -143,6 +143,17 @@ if (!function_exists('dim')){
 function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	$checks = false;
 
+	if ( preg_match( '/(.*)\:array$/', $type, $tmp  ) ){
+		// Cast the var as an array
+		$var = (array) $var;
+
+		foreach ( $var as &$cleaned ){
+			$cleaned = cleanVar( $cleaned, $tmp[1], $arg1, $arg2 );
+		}
+
+		return $var;
+	}
+
 	switch ($type){
 		case 'email':
 			$arg1 = 'email';
@@ -151,8 +162,6 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str:upper':
 		case 'str:md5':
 		case 'postalcode':
-		
-
 
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
@@ -480,12 +489,12 @@ if (!function_exists('redirect')){
 	 * Redirects the user and if there was output then displays a click here to continue link.
 	 *
 	 * @param String $url to redirect to.
-	 *//*
+	 */
 	function redirect( $url ){
 
 		header("Location: $url ");
 		exit;
-	}*/
+	}
 }
 
 /**
