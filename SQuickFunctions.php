@@ -162,7 +162,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str:upper':
 		case 'str:md5':
 		case 'postalcode':
-
+		case 'date':
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
 			}elseif( $type == "str:upper" ){
@@ -188,7 +188,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 				//Treat like a regex
 				switch ($arg1){
 					case 'date':
-						$arg1 = '/^\d{1,2}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{2,4}\s?$/';
+						$arg1 = '/^\d{1,2,4}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{1,2,4}\s?$/';
 						break;
 					case 'zipcode':
 						$arg1 = '/^[0-9]{5}$/';
