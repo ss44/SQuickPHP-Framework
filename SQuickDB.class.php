@@ -221,6 +221,7 @@ class SQuickDB{
 			//If not found then check settings from config file
 			$siteIni = SQUICK_INI_FILE;
 			$config = loadSQuickIniFile( $siteIni );
+
 			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
 
 			if (array_key_exists('type', $dbSettings)) $this->_sdbConfig->type = $dbSettings['type'];

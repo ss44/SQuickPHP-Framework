@@ -12,8 +12,8 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
-$tmp = register_shutdown_function('SQuickCleanShutdown');;
-$tmp = set_error_handler ('SQuickCleanError', E_ALL);
+$tmp = register_shutdown_function(__NAMESPACE__.'\\SQuickCleanShutdown');;
+$tmp = set_error_handler (__NAMESPACE__.'\\SQuickCleanError', E_ALL);
 ini_set('display_errors', 0);
 
 /**
@@ -143,6 +143,17 @@ if (!function_exists('dim')){
 function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	$checks = false;
 
+	if ( preg_match( '/(.*)\:array$/', $type, $tmp  ) ){
+		// Cast the var as an array
+		$var = (array) $var;
+
+		foreach ( $var as &$cleaned ){
+			$cleaned = cleanVar( $cleaned, $tmp[1], $arg1, $arg2 );
+		}
+
+		return $var;
+	}
+
 	switch ($type){
 		case 'email':
 			$arg1 = 'email';
@@ -151,9 +162,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str:upper':
 		case 'str:md5':
 		case 'postalcode':
-		
-
-
+		case 'date':
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
 			}elseif( $type == "str:upper" ){
@@ -179,7 +188,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 				//Treat like a regex
 				switch ($arg1){
 					case 'date':
-						$arg1 = '/^\d{1,2}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{2,4}\s?$/';
+						$arg1 = '/^\d{1,2,4}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{1,2,4}\s?$/';
 						break;
 					case 'zipcode':
 						$arg1 = '/^[0-9]{5}$/';
@@ -495,7 +504,7 @@ if (!function_exists('redirect')){
  * @param string $siteIni The site ini to use.
  * @return returns an array of the parsed config file.
  */
-function loadSQuickIniFile( $siteIni ){
+function loadSQuickIniFile( $siteIni, $setConstants = false ){
 
 	$config = parse_ini_file( $siteIni, true );
 
@@ -562,6 +571,19 @@ function loadSQuickIniFile( $siteIni ){
 			}
 		}
 	}
+
+	// Set the constants for all our variables in the form of SECTION_VAR_NAME
+	if ( $setConstants ){
+		foreach ( $config as $title => $vars ){
+			foreach ( $vars as $sVarName => $sValue ){
+				$cName = strtoupper( $title . '_' . $sVarName );
+				if ( !defined($cName) ){
+					define( $cName, $sValue );
+				}
+			}
+		}
+	}
+
 	return $config;
 }
 
@@ -586,9 +608,9 @@ function SQuickAutoLoader( $class ){
 		$filePaths = array(
 			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
-			'interfaceFileName' => __DIR__.'/'.$class.'interface.php',
+			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
 			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
-			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'interface.php'
+			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'.interface.php'
 		);
 		
 		foreach ( $filePaths as $path ){
@@ -600,4 +622,4 @@ function SQuickAutoLoader( $class ){
 
 }
 
-spl_autoload_register('SQuickAutoLoader');
+spl_autoload_register(__NAMESPACE__.'\\SQuickAutoLoader');

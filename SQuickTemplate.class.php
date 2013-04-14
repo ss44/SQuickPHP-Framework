@@ -10,6 +10,7 @@ require_once( dirname(__FILE__) .'/externals/Savant3.php');
 
 class SQuickTemplate extends Savant3{
  	
+
 	/**
 	 * @var String name of the wrapper file to use.
 	 */
@@ -19,6 +20,17 @@ class SQuickTemplate extends Savant3{
 	 * @var String The path of where templates are stored.
 	 */ 
 	protected $_path = null;
+
+	/**
+	 * @var Array The js path
+	 */
+	protected $_js = array();
+
+	/**
+	 * @var Array the css path
+	 */
+	protected $_css = array();
+
 
 	/**
 	 * Sets the wrapper file to use.
@@ -42,6 +54,22 @@ class SQuickTemplate extends Savant3{
 	 */
 	public function setPath( $path, $config ){
 		$this->_path = realpath($path);
+	}
+
+	public function addJS( $jsPath ){
+		$this->_js[] = $jsPath;
+	}
+	
+	public function getJS(){
+		return $this->_js;
+	}
+
+	public function getCSS(){
+		return $this->_css;
+	}
+
+	public function addCSS($cssPath ){
+		$this->_css[] = $cssPath;
 	}
 
 	/**

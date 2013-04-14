@@ -7,7 +7,7 @@
  * @created 13-Nov-2010
  */
 
-abstract class SQuickRootDB implements ArrayAccess{
+abstract class SQuickRootDB implements ArrayAccess, SQuickDBResultRow{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;
@@ -15,9 +15,11 @@ abstract class SQuickRootDB implements ArrayAccess{
 	protected $_data = null;
 	protected $_originalData = null;
 	protected $_isNew = true;
-	protected $_db = null;
 	protected $_id = null;
 	protected $_normal = array();
+	protected $_db = null;
+
+	public static $_dbInstance = null;
 
 	public function __construct( $keyId = null ){
 		
@@ -199,6 +201,12 @@ abstract class SQuickRootDB implements ArrayAccess{
 	 */
 	public function useDB( SQuickDB $db ){
 		$this->_db = $db;
+
+		self::$_dbInstance = $db;
+	}
+
+	public static function getDBInstance(){
+		return self::$_dbInstance;
 	}
 
 	public function offsetExists( $key ){
@@ -219,6 +227,10 @@ abstract class SQuickRootDB implements ArrayAccess{
 
 	public function offsetUnset( $key ){
 
+	}
+
+	public function importSQuickDBResultRow( $row ){
+		$this->importFromArray( $row );
 	}
 }
 

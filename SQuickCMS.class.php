@@ -18,15 +18,19 @@ interface SQuickCMSInterface{
 	public static function getContentQuery( $section );
 	
 }
-abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
+abstract class SQuickCMS implements SQuickCMSInterface{
 		
 	//A 2D array of simpleForms where the key is the section name.
 	protected $fields = array();
 	protected $section = null;
 	protected $id = null;
+	protected static $_db = null;
+	protected $url = null;
+
+	public static $_contentCache = array();
 
 	public function __construct( $section){
-		parent::__construct();
+		self::$_db = new SQuickDB();
 		$this->setSection( $section );
 	}
 
@@ -49,7 +53,7 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 		}
 
 		$fieldData = unserialize( $content );
-
+		
 		foreach ( $fieldData as $key=>$value ){
 			if (array_key_exists( $key, $fields )){
 				$fields[ $key ]->value = $value;
@@ -63,7 +67,7 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 			SQuickCMSException::InvalidSection();
 	}
 
-	public Function serializeFields(){
+	public function serializeFields(){
 		$this->requireSection();
 				
 		$fields = (array) $this->fields[ $this->section ]->getFormFields();
@@ -90,6 +94,14 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 		$this->id = $id;
 	}
 
+	public function setURL( $url ){
+		$this->url = $url;
+	}
+
+	public function getURL(){
+		return $this->url;
+	}
+	
 	public function validate( $array ){
 		if (!$this->section || !array_key_exists($this->section, $this->fields))
 			SQuickCMSException::InvalidSection();
@@ -100,25 +112,34 @@ abstract class SQuickCMS extends SQuickDB implements SQuickCMSInterface{
 
 	public static function getContent( $section, $contentField = 'content', $limit = null, $start = null){
 
-	
-		$q = static::getContentQuery( $section );
+		$cache = &self::$_contentCache;
 
-		if (is_numeric($limit)){
-			$q->addLimit( $limit );
+		if ( !array_key_exists( $section, $cache ) ){
+			$q = static::getContentQuery( $section );
+
+			if (is_numeric($limit)){
+				$q->addLimit( $limit );
+			}
+
+			if (is_numeric( $start )){
+				$q->addOffset( $start );
+			}
+			
+			if ( is_null( self::$_db ) ){
+				self::$_db = new SQuickDB();
+			}
+
+			$db = self::$_db;
+			$contentRows = (array) $db->getAll( $q );
+
+			foreach ( $contentRows as &$content ){
+				$content = $content + unserialize( $content[ $contentField ] );
+			}
+
+			$cache[ $section ] = $contentRows;
 		}
 
-		if (is_numeric( $start )){
-			$q->addOffset( $start );
-		}
-
-		$db = new SQuickDB();
-		$contentRows = (array) $db->getAll( $q );
-
-		foreach ( $contentRows as &$content ){
-			$content = $content + unserialize( $content[ $contentField ] );
-		}
-
-		return $contentRows;
+		return $cache[ $section ]; 
 	}
 }
 /*

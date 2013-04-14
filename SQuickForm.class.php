@@ -44,9 +44,17 @@ class SQuickForm implements ArrayAccess{
 		
 		//Loop over all our form fields and validate each from the data that we got back. 
 		foreach ($this->formFields as $key=>$formField){
+			$fieldName = $key;
+			$isArray = false;
+
+			// If we are expecting an array then lets treat it as an array
+			if ( preg_match( '/(.*)\[\]$/', $key, $tmp )) {
+				$fieldName = $tmp[1];
+				$isArray = true;
+			}
 
 			//Check to see if the field we are trying to access has been sent in the data and set if it has. 
-			$formField->value = array_key_exists($key, $data) ? $data[$key] : null; 
+			$formField->value = array_key_exists($fieldName, $data) ? $data[$fieldName] : null; 
 			
 			//If any of the fields are invalid then all is not good.
 			if ( !$formField->isValid ){
