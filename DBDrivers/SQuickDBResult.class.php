@@ -3,7 +3,10 @@
 /**
  * Abstract parent class that all SQuickDB result types will extend.
  */
-abstract class SQuickDBResult implements Iterator{
+
+namespace SQuick\DB;
+
+abstract class Result implements Iterator{
 
 	protected $_objToUse = null;
 

@@ -6,7 +6,9 @@
  * @created 13-Oct-2012
  */
 
-class SQuickDBDriverMySQL extends SQuickDBDriver{
+namespace SQuick\DB\
+
+class MySQL extends DBDriver{
 		
 	public function getAll( SQuickQuery $q ){
 		$this->checkConnection();

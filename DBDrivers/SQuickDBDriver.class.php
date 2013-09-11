@@ -5,8 +5,9 @@
  * @author ss <ss@ss44.ca>
  * @created 13-Oct-2012
  */
+namespace SQuick\DB;
 
-abstract class SQuickDBDriver{
+abstract class Driver{
 	
 	protected $connection = null;
 	protected $config = null;

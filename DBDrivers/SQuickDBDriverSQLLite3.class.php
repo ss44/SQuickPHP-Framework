@@ -5,7 +5,9 @@
   * @author ss <ss@ss44.ca>
   */
 
-class SQuickDBSqlite3 extends SQuickDBDriver{
+namespace SQuick\DB;
+
+class SQuickDBSqlite3 extends DBDriver{
 
 
  	public function getAll( SQuickQuery $q ){

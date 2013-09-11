@@ -3,7 +3,9 @@
  * DB Configuration class to store appropriate DB Properties
  */
 
-class SQuickDBConfig{
+namespace SQuick\DB;
+
+class Config{
 	public $type = '';
 	public $name = '';
 	public $user = '';

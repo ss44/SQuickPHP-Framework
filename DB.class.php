@@ -34,7 +34,7 @@ class DB{
 			$__SQUICK_CONFIG = $GLOBALS['__SQUICK_CONFIG'];
 
 		$this->_DBCONFIG = (!is_null($_CONFIG) && is_array($__SQUICK_CONFIG) && array_key_exists('SQuickDB', $__SQUICK_CONFIG)) ? $__SQuick_CONFIG['DB'] : $_CONFIG; 
-		$this->_sdbConfig = new SQuickDBConfig();
+		$this->_sdbConfig = new DBConfig();
 
 		$this->connect();
 	}
@@ -82,7 +82,7 @@ class DB{
 	 */
 	public function delete(SQuickQuery $q, $overRide = false){
 		if (is_null($this->connection)) $this->connect();
-		if ( !$overRide && empty($q->wheres) ) throw new SQuickDBException ("No where set for delete. Must set override to continue.");
+		if ( !$overRide && empty($q->wheres) ) throw new SQuick\DBException ("No where set for delete. Must set override to continue.");
 		$this->queryChanges( $q );
 
 		return $this->_driver->delete($q);
@@ -259,11 +259,5 @@ class DB{
 
 	protected function queryChanges( SQuickQuery $q ){
 		$q->setDBType( $this->_sdbConfig->type );
-	}
-}
-
-class SQuickDBException extends SQuickException{
-	public function __construct( $message = null){
-		parent::__construct( $message );
 	}
 }

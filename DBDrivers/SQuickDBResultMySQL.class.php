@@ -3,7 +3,9 @@
  * Represents a SQuickDBResult iterator for SQLite
  */
 
-class SQuickDBResultMySQL extends SQuickDBResult{
+namespace SQuick\DB;
+
+class ResultMySQL extends Result{
 
 	protected $result = null;
 	protected $counter = 0;
