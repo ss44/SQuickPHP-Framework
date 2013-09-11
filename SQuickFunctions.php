@@ -605,6 +605,16 @@ function SQuickAutoLoader( $class ){
 	
 	if ( substr( $class, 0, strlen('squick')) == "SQuick"){
 		
+		// If it looks like a namespace then remove that from the equation
+		$classStr = explode('\\', $class);
+			
+		// If it breaks apart string then unset the first part
+		if ( count( $classStr) > 1 ){
+			
+			unset( $classStr[0] );
+			$class = join( '/', $classStr );
+		}
+
 		$filePaths = array(
 			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
@@ -618,6 +628,9 @@ function SQuickAutoLoader( $class ){
 				require_once( $path );
 			}
 		}
+	}
+	else{
+		oops($class);
 	}
 
 }
