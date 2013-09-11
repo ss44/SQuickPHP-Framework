@@ -8,10 +8,12 @@
  * @created 13-Dec-2008
  */
 
+namespace SQuick;
+
 // Cache the table structure
 $_SQuickDBTableStructures = array();
 
-class SQuickDB{
+class DB{
 
 
 	protected $_sdbConfig = null;

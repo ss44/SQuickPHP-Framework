@@ -6,9 +6,11 @@
  * @created 10-Oct-2011
  */
 
+namespace SQuick;
+
 require_once( dirname(__FILE__) .'/externals/Savant3.php');
 
-class SQuickTemplate extends Savant3{
+class Template extends \Savant3{
  	
 
 	/**

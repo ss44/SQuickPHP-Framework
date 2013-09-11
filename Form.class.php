@@ -4,7 +4,10 @@
  * 
  * @author Shajinder Singh <ss@ss44.ca>
  */
-class SQuickForm implements ArrayAccess{
+
+namespace SQuick;
+
+class Form implements ArrayAccess{
 	
 	protected $formFields = array(); 
 	protected $errors = array();

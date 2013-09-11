@@ -6,9 +6,10 @@
  * @author Shajinder Singh <ss@ss44.ca>
  * @created 04-July-2008
  */
-require_once( dirname(__FILE__).'/SQuickException.class.php' );
 
-class SQuickImage{
+namespace SQuick;
+
+class Image{
 	protected $image = null;
 	protected $imageInfo = null;
 	//protected $newImage = null;

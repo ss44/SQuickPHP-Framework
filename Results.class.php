@@ -6,9 +6,9 @@
  * @created May-21-2010
  */
 
-require_once( dirname( __FILE__ ).'/SQuickDB.class.php' );
+namespace SQuick;
 
-class SQuickResults{
+class Results{
 	
 	//Use this value as the primary key.
 	protected $_primaryKey = null;

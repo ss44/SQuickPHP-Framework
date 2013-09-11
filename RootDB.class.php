@@ -7,7 +7,9 @@
  * @created 13-Nov-2010
  */
 
-abstract class SQuickRootDB implements ArrayAccess, SQuickDBResultRow{
+namespace SQuick;
+
+abstract class RootDB implements ArrayAccess, SQuickDBResultRow{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;

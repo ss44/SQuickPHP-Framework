@@ -10,7 +10,9 @@
  * @created 20-Oct-2011
  */
 
-interface SQuickCMSInterface{
+namespace SQuick;
+
+interface CMSInterface{
 	
 	public function load( $id );
 	public function save();
@@ -18,7 +20,8 @@ interface SQuickCMSInterface{
 	public static function getContentQuery( $section );
 	
 }
-abstract class SQuickCMS implements SQuickCMSInterface{
+
+abstract class CMS implements CMSInterface{
 		
 	//A 2D array of simpleForms where the key is the section name.
 	protected $fields = array();

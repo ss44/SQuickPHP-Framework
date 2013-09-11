@@ -3,7 +3,10 @@
  * SQuickData exception
  * @author SSingh <ss@ss44.ca>
  */
-class SQuickDataException extends SQuickException{
+
+namespace SQuick;
+
+class DataException extends SQuickException{
 	
 	public function __construct( $errorMessage = "" ){
 		

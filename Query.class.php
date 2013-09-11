@@ -8,7 +8,9 @@
  * @created 26-June-2008
  */
 
-class SQuickQuery{
+namespace SQuick;
+
+class Query{
 
 	public $tables = array();
 	public $columns = array();
