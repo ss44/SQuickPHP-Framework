@@ -6,11 +6,11 @@
  * @created 13-Oct-2012
  */
 
-namespace SQuick\DB\
+namespace SQuick\DB;
 
-class MySQL extends DBDriver{
+class DriverMySQL extends Driver{
 		
-	public function getAll( SQuickQuery $q ){
+	public function getAll( \SQuick\Query $q ){
 		$this->checkConnection();
 		$r = mysql_query($q->getSelect(), $this->connection);
 
@@ -25,7 +25,7 @@ class MySQL extends DBDriver{
 			return $result;
 		}
 	}
-	public function getRow( SQuickQuery $q ){
+	public function getRow( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);
@@ -43,7 +43,7 @@ class MySQL extends DBDriver{
 		return $result;
 	}
 
-	public function getColumn( SQuickQuery $q ){
+	public function getColumn( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);
@@ -56,7 +56,7 @@ class MySQL extends DBDriver{
 		return $result;
 	}
 
-	public function getOne( SQuickQuery $q ){
+	public function getOne( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);
@@ -69,7 +69,7 @@ class MySQL extends DBDriver{
 		return $result;
 	}
 
-	public function getAssoc( SQuickQuery $q ){
+	public function getAssoc( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);
@@ -86,44 +86,44 @@ class MySQL extends DBDriver{
 		}
 	}
 
-	public function getResult( SQuickQuery $q ){
+	public function getResult( \SQuick\Query $q ){
 		$this->checkConnection();
 		$r = mysql_query($q->getSelect(), $this->connection);
 
 		if ($r === false ){
-			throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
+			throw new DBException( "Unable to perform query: " . mysql_error() );
 		}
 
-		return new SQuickDBResultMySQL( $r );
+		return new ResultMySQL( $r );
 	}
 
-	public function update( SQuickQuery $q ){
+	public function update( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		$result = mysql_query($q->getUpdate(), $this->connection);
 		return $result;
 	}
 
-	public function insert( SQuickQuery $q ){
+	public function insert( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		$result = mysql_query($q->getInsert(), $this->connection);
 		
 		if (!$result){
-			throw new SQuickDBException( mysql_error( $this->connection ));
+			throw new DBException( mysql_error( $this->connection ));
 		}
 		
 		$this->_lastID = mysql_insert_id($this->connection);
 		return $this->_lastID;
 	}
 
-	public function delete( SQuickQuery $q ){
+	public function delete( \SQuick\Query $q ){
 		$this->checkConnection();
 		$result = mysql_query( $q->getDelete(), $this->connection);
 		return $result;
 	}
 
-	public function upsert( SQuickQuery $q ){
+	public function upsert( \SQuick\Query $q ){
 		$this->checkConnection();
 
 		try{
@@ -142,7 +142,7 @@ class MySQL extends DBDriver{
 		}
 	}
 
-	public function exec( SQuickQuery $q ){
+	public function exec( \SQuick\Query $q ){
 		$this->checkConnection();
 		$result = mysql_query( $q->getQuery(), $this->connection);
 

@@ -9,7 +9,7 @@
 
 namespace SQuick;
 
-abstract class RootDB implements ArrayAccess, SQuickDBResultRow{
+abstract class RootDB implements \ArrayAccess, DB\ResultRow{
 	
 	protected $_table = null;
 	protected $_primaryKey = null;
@@ -36,7 +36,7 @@ abstract class RootDB implements ArrayAccess, SQuickDBResultRow{
 	
 	public function load( $loadParams ){
 		
-		$q = new SQuickQuery();
+		$q = new Query();
 		$q->addTable( $this->_table );
 	
 		foreach ( $loadParams as $field=>$val ){
@@ -76,7 +76,7 @@ abstract class RootDB implements ArrayAccess, SQuickDBResultRow{
 			$this->_beforeSave();
 		}
 
-		$q = new SQuickQuery();
+		$q = new Query();
 		$q->addTable( $this->_table );
 		$q->addFields( $this->_data );
 
@@ -199,9 +199,21 @@ abstract class RootDB implements ArrayAccess, SQuickDBResultRow{
 	}
 
 	/**
+	 * Fetches an item - from cache.
+	 * @param mixed $id
+	 * @param RootDB An Instance of the root db object.
+	 */
+	public static function fetch( $loadParams ){
+		//$str = get_class( $this );
+		//dim( get_class( $this ) );
+		// $this->load( $loadParams );
+		//return self 
+	}
+
+	/**
 	 * Use the following db instance.
 	 */
-	public function useDB( SQuickDB $db ){
+	public function useDB( DB $db ){
 		$this->_db = $db;
 
 		self::$_dbInstance = $db;

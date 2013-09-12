@@ -6,7 +6,7 @@
 
 namespace SQuick\DB;
 
-abstract class Result implements Iterator{
+abstract class Result implements \Iterator{
 
 	protected $_objToUse = null;
 

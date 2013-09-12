@@ -629,9 +629,6 @@ function SQuickAutoLoader( $class ){
 			}
 		}
 	}
-	else{
-		oops($class);
-	}
 
 }
 

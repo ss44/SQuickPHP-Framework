@@ -13,22 +13,22 @@ abstract class Driver{
 	protected $config = null;
 	public  $lastInsertID = null;
 
-	public function __construct( SQuickDBConfig $config ){
+	public function __construct( Config $config ){
 		$this->config = $config;
 	}
 
-	abstract public function getAll( SQuickQuery $q );
-	abstract public function getRow( SQuickQuery $q );
-	abstract public function getColumn( SQuickQuery $q );
-	abstract public function getOne( SQuickQuery $q );
-	abstract public function getAssoc( SQuickQuery $q );
-	abstract public function getResult( SQuickQuery $q );
+	abstract public function getAll( \SQuick\Query $q );
+	abstract public function getRow( \SQuick\Query $q );
+	abstract public function getColumn( \SQuick\Query $q );
+	abstract public function getOne( \SQuick\Query $q );
+	abstract public function getAssoc( \SQuick\Query $q );
+	abstract public function getResult( \SQuick\Query $q );
 
-	abstract public function update( SQuickQuery $q );
-	abstract public function insert( SQuickQuery $q );
-	abstract public function delete( SQuickQuery $q );
-	abstract public function upsert( SQuickQuery $q );
-	abstract public function exec( SQuickQuery $q );
+	abstract public function update( \SQuick\Query $q );
+	abstract public function insert( \SQuick\Query $q );
+	abstract public function delete( \SQuick\Query $q );
+	abstract public function upsert( \SQuick\Query $q );
+	abstract public function exec( \SQuick\Query $q );
 
 	abstract public function getTableStructure( $tableName );
 

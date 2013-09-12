@@ -7,7 +7,7 @@
 
 namespace SQuick\DB;
 
-class SQuickDBSqlite3 extends DBDriver{
+class DriverSqlite3 extends DBDriver{
 
 
  	public function getAll( SQuickQuery $q ){
