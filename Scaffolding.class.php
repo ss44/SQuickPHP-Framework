@@ -31,41 +31,147 @@ class Scaffolding{
 		$path = $_SERVER['REQUEST_URI'];
 		$pathArray = array_slice( explode( '/', $path ), 1);
 
-		if ( empty($pathArray) || !$pathArray[0] ){
-			$pathArray[0] = 'index';
+		$pathArray = array_filter( $pathArray );
+		
+		// If we fail throw an error that no valid controller library file found. 
+		if ( !$this->_triggerController( $pathArray ) ){
+			throw new ScaffoldingException('No valid controller lib found.');			
 		}
 
-		$className = strtolower(str_replace(array(' ', '-',), '_', $pathArray[0]));
 
-		$filePath = $this->_controllerPath.'/'.strtolower($className.'.controller.class.php');
+	}
 
-		// Load the appropriate class.
-		if ( file_exists( $filePath ) ){
+	/**
+	 * Searches a folder path to find if a valid controller exists.
+	 * Rules for finding a controller:
+	 *
+	 *  - index.controller.class.php -> index
+	 *	- index.controller.class -> $arg[0]
+	 * 	- <$arg[0].controller.class.php -> $arg[1] | index
+	 *  - <$arg[0]>/<$arg[1]>.controller.class.php
+	 *  
+	 * @param Mixed folder structure passed as a mixed array in sequence of folders / classes to look for.
+	 * @return bool True if appropriate class was found and loaded. Otherwise return false.
+	 */ 
+	protected function _triggerController( $folderPath, $additionalPath = '' ){
+
+		// If we find a parent class then load the appropriate class and try to show the appropriate 404.
+		$possibleClass = null;
+
+		// There is no folder path then only test we can do is look for an index.controller.php
+		if ( empty($folderPath) ){
 			
-			require_once( $filePath );
-			$className = $this->_namespace.'\\'.$className;
+			// Test 1 - index.controller.class.php -> index
+			$classFileName = "{$this->_controllerPath}/{$additionalPath}index.controller.class.php";
+			$className = "$this->_namespace\index";			
 
-			if ( class_exists($className) ){
-				if ( array_key_exists(1, $pathArray ) && !is_null( $pathArray[1] ) && !empty($pathArray[1])  ){
-					
-					$methodName = strtolower( $pathArray[1] );
-					
-					// Check if function exists
-					if ( method_exists( $className,  $methodName ) ){
-						$vars = array_splice($pathArray, 2);
-						$class = new $className();
-						call_user_func_array( array( $class, $methodName ), $vars );
-						exit;
-					}
-				}else{
+			if ( file_exists( $classFileName ) ) {
+
+				require_once( $classFileName );
+
+				if ( method_exists( $className, 'index' ) ){			
 					$class = new $className();
 					$class->index();
-					exit;
+
+					return true;
+				}else{
+					$possibleClass = $className;	
 				}
+			}
+
+		}
+		// We have a key so lets start our tests.
+		else {
+			
+			// Test 2 - index.controller.class -> $arg[0]
+			$classFileName = "{$this->_controllerPath}/{$additionalPath}index.controller.class.php";
+			if ( file_exists( $classFileName ) ){
+				
+				require_once( $classFileName );
+				$methodName = str_replace( array('-'), '_', $folderPath[0] );
+				$className = "$this->_namespace\index";			
+
+				if ( method_exists( $className, $methodName ) ){
+					$class = new $className();
+					$params = array_slice( $folderPath, 1);
+					call_user_func( array($class, $methodName), $params );
+
+					return true;
+				}
+				elseif ( class_exists( $className ) ){
+					$possibleClass = $className;
+				}
+			}
+
+			// Test 3 - <$arg[0].controller.class.php -> $arg[1] | index
+			// Try and autoload
+			$classFileName = "{$this->_controllerPath}/{$additionalPath}{$folderPath[0]}.controller.class.php";
+			$className = "{$this->_namespace}\\{$folderPath[0]}";
+			$methodName = array_key_exists(1, $folderPath) ? str_replace( array('-'), '_', $folderPath[1] ) : 'index';
+
+			if ( file_exists( $classFileName ) ){
+
+				// Try and load the appropriate controller class.
+				require_once( $classFileName );
+
+				// if there is second argument use that as the page 
+				// otherwise look for an index.
+
+				if ( method_exists($className, $methodName ) ){
+					
+					$class = new $className();
+					$params = array_slice( $folderPath, 2);
+					
+					// Trigger appropriate class, method with paramaters.
+					call_user_func( array($class, $methodName), $params );
+
+					return true;
+				}elseif ( class_exists($className ) ){ 
+					$possibleClass = $className;
+				}
+			}
+
+			// Test 4 - <$arg[0]>/<$arg[0]>.controller.class.php -> $arg[1]
+			$classFileName = "{$this->_controllerPath}/{$additionalPath}{$folderPath[0]}/index.controller.class.php";
+
+			if ( file_exists( $classFileName )  ){
+				
+				// Try and load the appropriate controller class.
+				require_once( $classFileName );
+
+				if ( method_exists( $className, $methodName ) ){
+					return true;
+				}/*elseif ( class_exists( $className ) ){
+					$possibleClass = $className
+				}*/
+			}
+
+			// Test 3 - <$arg[0]>/<$arg[1]>.controller.class.php
+			$dirPath = "{$this->_controllerPath}/{$additionalPath}{$folderPath[0]}";
+			oops($dirPath, 1);
+			oops( is_dir( $dirPath ), 1 );
+
+			if ( is_dir( $dirPath ) ){
+				
+				$additionalPath = $additionalPath . $folderPath[0].'/';
+				unset($folderPath[0]);
+				oops( $folderPath );
+				// Jump into rabbit hole and get recursive.
+				return $this->_fetchController( $folderPath, $additionalPath );
+
 			}
 		}
 
-		throw new ScaffoldingException('No valid controller lib found.');
-	}
+		// Couldn't find an appropriate method to display
+		// show a 404.
+		if ( is_subclass_of( $possibleClass, '\\SQuick\\Controller' ) ){
+			$class = new $possibleClass();
+			call_user_func( array($class, 'display404') );
+			
+			return true;
+		}
 
+		return false;
+
+	}
 }
