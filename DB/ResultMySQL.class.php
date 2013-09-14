@@ -29,6 +29,11 @@ class ResultMySQL extends Result{
 	}
 
 	public function key (){
+		if ( $this->_keyField && parent::getHelperObj() ){
+			$obj = $this->current();
+			return $obj->{$this->_keyField};
+		}
+
 		return $this->counter;
 	}
 
