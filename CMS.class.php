@@ -129,7 +129,7 @@ abstract class CMS implements CMSInterface{
 			}
 			
 			if ( is_null( self::$_db ) ){
-				self::$_db = new SQuickDB();
+				self::$_db = new DB();
 			}
 
 			$db = self::$_db;
