@@ -240,9 +240,13 @@ public function getPasswordField( $attributes = array() ){
 
 		$selectedValues = (array) $this->value;
 
+ 		if ( array_key_exists('default', $attributes ) ){
+ 			$str .= '<option>'.$attributes['default'].'</option>';
+ 		}
+
 		foreach ( $this->normalFields as $key => $value ){
 			
-			$str .= "<option name='{$key}' ". ( in_array($key, $selectedValues) ? 'SELECTED' : '' ) .">$value</option>"; 
+ 			$str .= "<option value='{$key}' ". ( in_array($key, $selectedValues) ? 'SELECTED' : '' ) .">$value</option>"; 
 		}
 
 		$str .= '</select>';
@@ -258,8 +262,9 @@ public function getPasswordField( $attributes = array() ){
 
 		$selectedValues = (array) $this->value;
 
-
 		$str = '';
+
+
 		foreach ( $this->normalFields as $key=>$field ){
 			$str .= "<label><input type='radio' name='{$this->elementName}' value='{$key}' ";
 			$str .= (in_array($key, $selectedValues)) ? ' CHECKED ' : '';
