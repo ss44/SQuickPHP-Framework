@@ -53,6 +53,7 @@ abstract class RootDB implements \ArrayAccess, DB\ResultRow{
 			$this->_afterLoad();
 		}
 
+		$this->_originalData = $this->_data;
 	}
 
 	protected function _resetData(){
@@ -67,6 +68,8 @@ abstract class RootDB implements \ArrayAccess, DB\ResultRow{
 		if ( method_exists($this, '_afterLoad')){
 			$this->_afterLoad();
 		}
+
+		$this->_originalData = $this->_data;
 
 	}
 	
