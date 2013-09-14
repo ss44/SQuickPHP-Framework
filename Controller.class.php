@@ -6,5 +6,9 @@
 namespace SQuick;
 
 abstract class Controller{
-	
+
+	// Handle the 404
+	public function display404(){
+		echo '<h1>404 File Not Found</h1>';
+	}
 }
