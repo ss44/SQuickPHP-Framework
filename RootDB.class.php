@@ -135,7 +135,7 @@ abstract class RootDB implements \ArrayAccess, DB\ResultRow{
 	
 	public function __get( $key ){
 		if (!array_key_exists( $key, $this->_data )) 
-			throw new SQuickDataException("Invalid $key. Does not exist in data");
+			throw new DataException("Invalid $key. Does not exist in data");
 
 		return $this->_data[ $key ];
 	}

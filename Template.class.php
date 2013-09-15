@@ -8,10 +8,12 @@
 
 namespace SQuick;
 
-require_once( dirname(__FILE__) .'/externals/Savant3.php');
-
-class Template extends \Savant3{
- 	
+class Template{
+	
+	/**
+	 * @var \SQuick\Template\Driver $_driver
+	 */ 	
+	protected $_driver = null;
 
 	/**
 	 * @var String name of the wrapper file to use.
@@ -23,16 +25,11 @@ class Template extends \Savant3{
 	 */ 
 	protected $_path = null;
 
-	/**
-	 * @var Array The js path
-	 */
-	protected $_js = array();
-
-	/**
-	 * @var Array the css path
-	 */
-	protected $_css = array();
-
+	public function __construct( \SQuick\Template\Config $config = null ){
+		
+		// Hardcode the driver for now.
+		$this->_driver = new Template\DriverSavant3();
+	}
 
 	/**
 	 * Sets the wrapper file to use.
@@ -48,30 +45,29 @@ class Template extends \Savant3{
 	 * @return String
 	 */
 	public function getWrapper(){
-		return ( !is_null( $this->_path ) ) ? $this->_path .'/'. $this->_wrapper : $this->_wrapper ;
+		//return ( !is_null( $this->_path ) ) ? $this->_path .'/'. $this->_wrapper : $this->_wrapper ;
+		return $this->_wrapper;
 	}
 
 	/**
 	 * Sets the home template path.
 	 */
-	public function setPath( $path, $config ){
+	public function setPath( $path ){
 		$this->_path = realpath($path);
+		$this->_driver->setPath( $this->_path );
 	}
 
 	public function addJS( $jsPath ){
-		$this->_js[] = $jsPath;
+		$this->_driver->addJS( $jsPath );
 	}
 	
-	public function getJS(){
-		return $this->_js;
-	}
-
-	public function getCSS(){
-		return $this->_css;
-	}
-
 	public function addCSS($cssPath ){
-		$this->_css[] = $cssPath;
+		$this->_driver->addCSS( $cssPath );
+
+	}
+
+	public function fetch( $tpl ){
+		return $this->_driver->fetch( $tpl );
 	}
 
 	/**
@@ -84,21 +80,24 @@ class Template extends \Savant3{
 	public function display( $tpl = null, $includeWrapper = true ){
 		
 		if ( $this->_path ){
-			$tpl = $this->_path . '/'. $tpl;
+			// $tpl = $this->_path . '/'. $tpl;
 		}
 
 		try{
 			if ( $this->getWrapper() && $includeWrapper){
-				$value = $this->fetch( $tpl ) ;
+				$value = $this->fetch( $tpl );
 				$this->_content = $value;
-				parent::display( $this->getWrapper() );
+				$this->_driver->display( $this->getWrapper() );
 			}else{
-				parent::display( $tpl );
+				$this->_driver->display( $tpl );
 			}
 		}catch( Exception $e ){
 			die( $e->getMessage() );
 		}
-		
+	}
+
+	public function __set( $key, $var ){
+		$this->_driver->__set( $key, $var );
 	}
 	
  }

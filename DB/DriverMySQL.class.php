@@ -43,7 +43,7 @@ class DriverMySQL extends Driver{
 		return $result;
 	}
 
-	public function getColumn( \SQuick\Query $q ){
+	public function getColumn( \SQuick\Query $q, $column ){
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);

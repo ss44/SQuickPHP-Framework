@@ -17,14 +17,15 @@ class ResultMySQL extends Result{
 	}
 
 
-	public function current (){
-		
+	public function current(){
+
 		if ( parent::getHelperObj() ) {
 			$helper = $this->getHelperObj();
 			$tmp = new $helper();
 			$tmp->importSQuickDBResultRow( $this->row );
 			return $tmp;
 		}
+
 		return $this->row;
 	}
 
@@ -42,7 +43,6 @@ class ResultMySQL extends Result{
 
 		if ( $this->row !== false )
 			$this->counter++;
-
 	}
 
 	public function rewind(){

@@ -51,10 +51,11 @@ class Scaffolding{
 	 *  - <$arg[0]>/<$arg[1]>.controller.class.php
 	 *  
 	 * @param Mixed folder structure passed as a mixed array in sequence of folders / classes to look for.
+	 * @param String Appends current contorllers schema with new folder depth.
+	 * @param String Appends current namespace to the current name space.
 	 * @return bool True if appropriate class was found and loaded. Otherwise return false.
 	 */ 
-	protected function _triggerController( $folderPath, $additionalPath = '' ){
-
+	protected function _triggerController( $folderPath, $additionalPath = '', $additionalNS = ''){
 		// If we find a parent class then load the appropriate class and try to show the appropriate 404.
 		$possibleClass = null;
 
@@ -63,7 +64,7 @@ class Scaffolding{
 			
 			// Test 1 - index.controller.class.php -> index
 			$classFileName = "{$this->_controllerPath}/{$additionalPath}index.controller.class.php";
-			$className = "$this->_namespace\index";			
+			$className = "$this->_namespace{$additionalNS}\index";			
 
 			if ( file_exists( $classFileName ) ) {
 
@@ -89,7 +90,7 @@ class Scaffolding{
 				
 				require_once( $classFileName );
 				$methodName = str_replace( array('-'), '_', $folderPath[0] );
-				$className = "$this->_namespace\index";			
+				$className = "$this->_namespace{$additionalNS}\index";			
 
 				if ( method_exists( $className, $methodName ) ){
 					$class = new $className();
@@ -106,9 +107,9 @@ class Scaffolding{
 			// Test 3 - <$arg[0].controller.class.php -> $arg[1] | index
 			// Try and autoload
 			$classFileName = "{$this->_controllerPath}/{$additionalPath}{$folderPath[0]}.controller.class.php";
-			$className = "{$this->_namespace}\\{$folderPath[0]}";
+			$className = "{$this->_namespace}{$additionalNS}\\{$folderPath[0]}";
 			$methodName = array_key_exists(1, $folderPath) ? str_replace( array('-'), '_', $folderPath[1] ) : 'index';
-
+			
 			if ( file_exists( $classFileName ) ){
 
 				// Try and load the appropriate controller class.
@@ -116,7 +117,6 @@ class Scaffolding{
 
 				// if there is second argument use that as the page 
 				// otherwise look for an index.
-
 				if ( method_exists($className, $methodName ) ){
 					
 					$class = new $className();
@@ -141,23 +141,21 @@ class Scaffolding{
 
 				if ( method_exists( $className, $methodName ) ){
 					return true;
-				}/*elseif ( class_exists( $className ) ){
-					$possibleClass = $className
-				}*/
+				}elseif ( class_exists( $className ) ){
+					$possibleClass = $className;
+				}
 			}
 
 			// Test 3 - <$arg[0]>/<$arg[1]>.controller.class.php
 			$dirPath = "{$this->_controllerPath}/{$additionalPath}{$folderPath[0]}";
-			oops($dirPath, 1);
-			oops( is_dir( $dirPath ), 1 );
 
 			if ( is_dir( $dirPath ) ){
-				
-				$additionalPath = $additionalPath . $folderPath[0].'/';
-				unset($folderPath[0]);
-				oops( $folderPath );
+				$addToPath = array_shift($folderPath);
+				$additionalPath = $additionalPath . $addToPath .'/';
+				$addToNameSpace = '\\'.ucfirst(strtolower($addToPath));
+
 				// Jump into rabbit hole and get recursive.
-				return $this->_fetchController( $folderPath, $additionalPath );
+				return $this->_triggerController( $folderPath, $additionalPath, $addToNameSpace );
 
 			}
 		}

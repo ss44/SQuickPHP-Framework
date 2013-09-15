@@ -619,10 +619,8 @@ function SQuickAutoLoader( $class ){
 			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
 			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
-			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
-			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'.interface.php'
 		);
-		
+
 		foreach ( $filePaths as $path ){
 			if ( file_exists( $path ) ){
 				require_once( $path );

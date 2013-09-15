@@ -157,9 +157,10 @@ class DB{
 		$q = clone $old;
 				
 		$this->queryChanges( $q );
-		$q->addColumn( $column );
 
-		return $this->_driver->getColumn();
+		// $q->addColumn( $column );
+
+		return $this->_driver->getColumn( $q, $column );
 	}
 
 	public function getOne( Query $q){

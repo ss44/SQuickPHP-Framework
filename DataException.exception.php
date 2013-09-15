@@ -6,7 +6,7 @@
 
 namespace SQuick;
 
-class DataException extends SQuickException{
+class DataException extends Exception{
 	
 	public function __construct( $errorMessage = "" ){
 		
