@@ -48,13 +48,17 @@ class Results{
 	 * Creates a new instance of the viewer
 	 * @return unknown_type
 	 */
-	public function __construct(){
-		global $__SQuick_CONFIG;
-
-		$this->_db = new SQuickDB();
+	public function __construct( DB $db = null ){
 		
+		if ( !is_null($db) ){
+			$this->setDB( $db );
+		}
 	}
 	
+	public function setDB( DB $db ){
+		$this->_db = $db;
+	}
+
 	/**
 	 * Adds a field to our table. Uses headerColumn to determine the clean name for a field.
 	 * Fields are displayed in the order they are added. Field names are unique and in the case
@@ -85,7 +89,7 @@ class Results{
 	 */
 	public function setData( &$data ){
 		//If its an instance of SQuick query then load data from that object
-		if ( $data instanceof SQuickQuery ){
+		if ( $data instanceof Query ){
 			$this->_data = null;
 			$this->_query = clone $data;
 		}else{
@@ -98,11 +102,11 @@ class Results{
 		//@NOTE For now rely completely on the fact that class needs the $_GET
 		
 		//If they are using the query then we just need to add a limit in the query
-		if ($this->_query instanceof SQuickQuery){
+		if ($this->_query instanceof Query){
 			$this->_totalPages = ceil( $this->_db->getCount( $this->_query ) / $this->_resultsPerPage );
 			$this->_query->addLimit( $this->_resultsPerPage );
 			$this->_query->addOffset( $this->_resultsPerPage * ($this->_currentPage - 1) );
-			$this->_truncatedData = $this->_db->getAll( $this->_query );
+			$this->_truncatedData = $this->_db->getResult( $this->_query );
 		}else{
 			//@TODO add array splicing code here.
 			$this->_truncatedData = $this->_data;
@@ -155,7 +159,7 @@ class Results{
 		return $this->_fieldMappings;
 	}
 	
-	public function getResults(){
+	public function getResults( $helper = null ){
 		//If we are using the cache'd results then just return the data
 		if  ($this->_useCache){
 			return (array) $this->_truncatedData;
@@ -163,7 +167,12 @@ class Results{
 		
 		//Otherwise proccess the data array and then return
 		$this->process();
-		return (array) $this->_truncatedData;
+
+		if ( !is_null($helper) ){
+			$this->_truncatedData->setHelperObj( $helper );
+		}
+
+		return $this->_truncatedData;
 	}
 
 	public function setOrderBy( $fieldName ){

@@ -54,6 +54,11 @@ class Template{
 	 */
 	public function setPath( $path ){
 		$this->_path = realpath($path);
+		
+		if ( $this->_path === false){
+			throw TemplateException::InvalidPath( $path );
+		}
+
 		$this->_driver->setPath( $this->_path );
 	}
 

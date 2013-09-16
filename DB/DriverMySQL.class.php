@@ -15,7 +15,7 @@ class DriverMySQL extends Driver{
 		$r = mysql_query($q->getSelect(), $this->connection);
 
 		if ($r === false ){
-			throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
+			throw new \SQuick\DBException( "Unable to perform query: " . mysql_error() );
 		}
 
 		if ($r !== false && mysql_num_rows($r) > 0){
@@ -31,7 +31,7 @@ class DriverMySQL extends Driver{
 		$r = mysql_query($q->getSelect(), $this->connection);
 
 		if ($r === false || is_null($r) ) {
-			throw new SQuickDBException( "Unable to perform query: " . mysql_error() );
+			throw new \SQuick\DBException( "Unable to perform query: " . mysql_error() );
 		}
 		
 		$result = null;
@@ -79,7 +79,7 @@ class DriverMySQL extends Driver{
 				if (array_key_exists($key, $row)){
 					$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
 				}else{
-					throw new SQuickDBException('Invalid key. Not found in result.');
+					throw new \SQuick\DBException('Invalid key. Not found in result.');
 				}
 			}
 			return $result;
@@ -91,7 +91,7 @@ class DriverMySQL extends Driver{
 		$r = mysql_query($q->getSelect(), $this->connection);
 
 		if ($r === false ){
-			throw new DBException( "Unable to perform query: " . mysql_error() );
+			throw new \SQuick\DBException( "Unable to perform query: " . mysql_error() );
 		}
 
 		return new ResultMySQL( $r );
@@ -110,7 +110,7 @@ class DriverMySQL extends Driver{
 		$result = mysql_query($q->getInsert(), $this->connection);
 		
 		if (!$result){
-			throw new DBException( mysql_error( $this->connection ));
+			throw new \SQuick\DBException( mysql_error( $this->connection ));
 		}
 		
 		$this->_lastID = mysql_insert_id($this->connection);
@@ -147,7 +147,7 @@ class DriverMySQL extends Driver{
 		$result = mysql_query( $q->getQuery(), $this->connection);
 
 		if ( $result === false)
-			throw new SQuickDBException( mysql_error( $this->connection ) ) ;
+			throw new \SQuick\DBException( mysql_error( $this->connection ) ) ;
 
 		return $result;
 	}
@@ -169,7 +169,7 @@ class DriverMySQL extends Driver{
 		mysql_select_db($this->config->name, $this->connection);
 
 		if (!$this->connection) 
-			throw new SQuickDBException("Unable to connect to DB.");
+			throw new \SQuick\DBException("Unable to connect to DB.");
 
 	}
 

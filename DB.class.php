@@ -83,7 +83,7 @@ class DB{
 	 */
 	public function delete(Query $q, $overRide = false){
 		if (is_null($this->connection)) $this->connect();
-		if ( !$overRide && empty($q->wheres) ) throw new SQuick\DBException ("No where set for delete. Must set override to continue.");
+		if ( !$overRide && empty($q->wheres) ) throw new DBException ("No where set for delete. Must set override to continue.");
 		$this->queryChanges( $q );
 
 		return $this->_driver->delete($q);
@@ -219,7 +219,7 @@ class DB{
 			$this->_sdbConfig->path = array_key_exists('path', $this->_DBCONFIG) ? $this->_DBCONFIG['path'] : null;
 			$this->_sdbConfig->name = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
 			$this->_sdbConfig->user = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
-			$this->_sdbConfig->pass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['pass'] : null;
+			$this->_sdbConfig->pass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['password'] : null;
 			$this->_sdbConfig->flags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
 		}elseif(defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE)){
 			//If not found then check settings from config file
@@ -227,7 +227,7 @@ class DB{
 			$config = loadSQuickIniFile( $siteIni );
 
 			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
-
+			
 			if (array_key_exists('type', $dbSettings)) $this->_sdbConfig->type = $dbSettings['type'];
 			if (array_key_exists('path', $dbSettings)) $this->_sdbConfig->path = $dbSettings['path'];
 			if (array_key_exists('name', $dbSettings)) $this->_sdbConfig->name = $dbSettings['name'];
@@ -235,7 +235,7 @@ class DB{
 			if (array_key_exists('password', $dbSettings)) $this->_sdbConfig->pass = $dbSettings['password'];
 			if (array_key_exists('flags', $dbSettings)) $this->_sdbConfig->flags = $config['flags'];	
 		}else{
-			throw new SQuickDBException('No db settings provided.');
+			throw new DBException('No db settings provided.');
 		}
 
 		//Try loading db if unable to load throw an exception.
@@ -247,7 +247,7 @@ class DB{
 				$this->_driver = new sdb\DriverSQLLite3(  $this->_sdbConfig );
 				break;
 			default:
-				throw new SQuickDBException('Invalid/Unsupported database type.');
+				throw new DBException('Invalid/Unsupported database type.');
 		}
 	}
 

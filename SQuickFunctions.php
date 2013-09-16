@@ -620,7 +620,7 @@ function SQuickAutoLoader( $class ){
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
 			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
 		);
-
+		
 		foreach ( $filePaths as $path ){
 			if ( file_exists( $path ) ){
 				require_once( $path );
