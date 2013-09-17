@@ -21,7 +21,7 @@ abstract class Driver{
 	abstract public function getRow( \SQuick\Query $q );
 	abstract public function getColumn( \SQuick\Query $q, $column );
 	abstract public function getOne( \SQuick\Query $q );
-	abstract public function getAssoc( \SQuick\Query $q );
+	abstract public function getAssoc( \SQuick\Query $q, $key, $value = null );
 	abstract public function getResult( \SQuick\Query $q );
 
 	abstract public function update( \SQuick\Query $q );

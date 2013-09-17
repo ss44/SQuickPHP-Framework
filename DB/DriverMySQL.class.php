@@ -69,7 +69,7 @@ class DriverMySQL extends Driver{
 		return $result;
 	}
 
-	public function getAssoc( \SQuick\Query $q ){
+	public function getAssoc( \SQuick\Query $q, $key, $value = null ){
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);

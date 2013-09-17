@@ -209,7 +209,7 @@ class DB{
 	public function getAssoc(Query $q, $key, $value = null){
 		$result = array();
 		$this->queryChanges( $q );
-		return $this->_driver->getAssoc($q);
+		return $this->_driver->getAssoc($q, $key, $value );
 	}
 	
 	protected function connect(){
