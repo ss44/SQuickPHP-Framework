@@ -77,7 +77,16 @@ class DriverMySQL extends Driver{
 		if (mysql_num_rows($r) > 0){
 			while( $row = mysql_fetch_assoc($r)){
 				if (array_key_exists($key, $row)){
-					$result[ $row[$key] ] = $value && array_key_exists($value, $row) ? $row[$value] : $row;
+					
+					if ( is_null( $value ) ){
+						$result[ $row[$key] ][] = $row;	
+					}
+					elseif ( array_key_exists( $value, $row ) ){
+						$result[ $row[$key] ] = $row[$value];	
+					}else{
+						throw new \SQuick\DBException("Invalid value - $value. Not part of returned results");
+					}
+					
 				}else{
 					throw new \SQuick\DBException('Invalid key. Not found in result.');
 				}
