@@ -38,7 +38,7 @@ abstract class RootDB implements \ArrayAccess, DB\ResultRow{
 		
 		$q = new Query();
 		$q->addTable( $this->_table );
-	
+		
 		foreach ( $loadParams as $field=>$val ){
 			$q->addWhere( $field, $val );
 		}
@@ -207,10 +207,14 @@ abstract class RootDB implements \ArrayAccess, DB\ResultRow{
 	 * @param RootDB An Instance of the root db object.
 	 */
 	public static function fetch( $loadParams ){
-		//$str = get_class( $this );
-		//dim( get_class( $this ) );
-		// $this->load( $loadParams );
-		//return self 
+		
+		//@Todo load from cache if already instantiated
+		$className = get_called_class();
+		
+		$tmp = new $className();
+		$tmp->load( $loadParams );
+		
+		return $tmp;
 	}
 
 	/**
