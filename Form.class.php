@@ -1,13 +1,13 @@
 <?php
 /**
- * A form handler that handles multiple SQuickFormFields.
+ * A form handler that handles multiple FormFields.
  * 
  * @author Shajinder Singh <ss@ss44.ca>
  */
 
 namespace SQuick;
 
-class Form implements ArrayAccess{
+class Form implements \ArrayAccess{
 	
 	protected $formFields = array(); 
 	protected $errors = array();
@@ -25,12 +25,12 @@ class Form implements ArrayAccess{
     /**
      * Adds a field to our form.
      * 
-     * @param SQuickFormField $SQuickFormField A SQuick form field object that we want to 
+     * @param FormField $FormField A SQuick form field object that we want to 
      * 	add to our form validation.
      */
-    public function addField( SQuickFormField $SQuickFormField ){
-    	$this->formFields[ $SQuickFormField->name ] = $SQuickFormField;
-    	$this->formFields[ $SQuickFormField->name ]->setform ( $this );
+    public function addField( FormField $FormField ){
+    	$this->formFields[ $FormField->name ] = $FormField;
+    	$this->formFields[ $FormField->name ]->setform ( $this );
     }
     
    /**

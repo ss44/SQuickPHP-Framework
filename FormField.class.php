@@ -9,7 +9,7 @@
  
 namespace SQuick;
 
-class FormField implements ArrayAccess, Iterator{
+class FormField implements \ArrayAccess, \Iterator{
 	
 	protected $_form = null;
 	protected $value = null;
@@ -321,7 +321,7 @@ public function getPasswordField( $attributes = array() ){
 	 * @param SQuickForm $form
 	 * @return unknown_type
 	 */
-	public function setForm( SQuickForm $form ){
+	public function setForm( Form $form ){
 		$this->_form = $form;
 	}
 
