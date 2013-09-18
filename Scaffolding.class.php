@@ -95,7 +95,8 @@ class Scaffolding{
 				if ( method_exists( $className, $methodName ) ){
 					$class = new $className();
 					$params = array_slice( $folderPath, 1);
-					call_user_func( array($class, $methodName), $params );
+					
+					call_user_func_array( array($class, $methodName), $params );
 
 					return true;
 				}
@@ -123,7 +124,7 @@ class Scaffolding{
 					$params = array_slice( $folderPath, 2);
 					
 					// Trigger appropriate class, method with paramaters.
-					call_user_func( array($class, $methodName), $params );
+					call_user_func_array( array($class, $methodName), $params );
 
 					return true;
 				}elseif ( class_exists($className ) ){ 
