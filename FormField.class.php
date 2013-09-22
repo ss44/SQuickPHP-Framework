@@ -152,6 +152,27 @@ class FormField implements \ArrayAccess, \Iterator{
 		return $str;
 	}
 	
+	public function getTextFieldDate( $format, $attributes = null ){
+		$value = $this->value;
+		if ( is_array($this->value) ){
+			$value = $this->current();
+		}
+
+		$str = "<input type='text' ";
+		$str .= "name='$this->elementName' ";
+		$str .= "value='".date($format, $value)."' "; 
+
+		if ( is_array($attributes) ) {
+			$this->addAttribute( $attributes );
+		}
+		
+		$atr = $this->getAttrStr();
+		
+		$str .= $atr;
+		$str .= " />";
+		
+		return $str;		
+	}
 
 	/**
 	 * Gets a hidden field for this given field.
