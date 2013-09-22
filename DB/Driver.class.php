@@ -31,6 +31,7 @@ abstract class Driver{
 	abstract public function exec( \SQuick\Query $q );
 
 	abstract public function getTableStructure( $tableName );
+	abstract public function parseEnum( $fieldInfo );
 
 	abstract public function connect();
 } 

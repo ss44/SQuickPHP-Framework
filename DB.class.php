@@ -16,7 +16,6 @@ $_SQuickDBTableStructures = array();
 
 class DB{
 
-
 	protected $_sdbConfig = null;
 	protected $connection = null;
 	protected $_DBCONFIG = null;
@@ -259,7 +258,24 @@ class DB{
 		return $this->_lastID;
 	}
 
-	protected function queryChanges( \SQuick\Query $q ){
+	protected function queryChanges( Query $q ){
 		$q->setDBType( $this->_sdbConfig->type );
+	}
+
+	/**
+	 * Retrieves the enum properties for a given field.
+	 * @param String The table containing the ENUM field.
+	 * @param String The field who'se enum to retrieve.
+	 */
+	public function getEnum( $table, $field ){
+
+		$table = $this->getTableStructure( $table );
+
+		if ( !array_key_exists( $field, $table ) ){
+			throw new DBException("Field $field does not exist");
+		}
+
+		return $this->_driver->parseEnum( $table[ $field ] );
+		
 	}
 }

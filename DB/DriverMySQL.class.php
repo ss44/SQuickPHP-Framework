@@ -187,4 +187,31 @@ class DriverMySQL extends Driver{
 			$this->connect();
 	}
 
+	/**
+	 * Parses an enum value from a given field.
+	 * @param String 
+	 */
+	public function parseEnum( $fieldInfo ){
+
+		if ( !array_key_exists( 'Type', $fieldInfo ) ){
+			throw DBException::invalidEnumKey('Unable to process ENUM field. Missing Type definition.');
+		}
+
+		if ( !preg_match('/^enum\((.*)\)?\)$/', $fieldInfo['Type'], $tmp ) ) {
+			throw DBException::invalidEnumKey('Field does not appear to be of type ENUM');
+		}
+
+		$csv = $tmp[1];
+		$values = str_getcsv( $csv, ',', '\'' );
+
+
+		// Appropriate key index for mysql starts at 1 so up the keys by 1.
+		$fixedKeyArray = array();
+		foreach ( $values as $key => $value ){
+			$fixedKeyArray[ $key + 1 ] = $value;
+		}
+
+		return $fixedKeyArray;
+
+	}
 }
