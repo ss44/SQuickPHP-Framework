@@ -38,10 +38,6 @@ abstract class DataObj implements \ArrayAccess{
 	}
 	
 	public function __get( $key ){
-		
-		if (!array_key_exists( $key, $this->_data ) ) 
-			throw new DataException("Invalid $key. Does not exist in data");
-
 
 		$methodName = "_get_{$key}";
 
@@ -49,6 +45,9 @@ abstract class DataObj implements \ArrayAccess{
 		if ( method_exists( $this, $methodName ) ){
 			return call_user_func( array( $this, $methodName ) );
 		}
+		
+		if (!array_key_exists( $key, $this->_data ) ) 
+			throw new DataException("Invalid $key. Does not exist in data");
 		
 		return $this->_data[ $key ];
 	}
