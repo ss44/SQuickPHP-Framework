@@ -95,9 +95,10 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 			$id = $this->_db->insert($q);
 			$this->{$this->_primaryKey} = $id;
 		}else{
-			$id = $this->_db->update($q);	
+			$this->_db->update($q);
+			$id = $this->{$this->_primaryKey};
 		}
-		
+
 		$this->_id = $id;
 
 		if ( !is_array( $this->_primaryKey ) ){
