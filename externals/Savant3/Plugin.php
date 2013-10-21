@@ -64,4 +64,3 @@ abstract class Savant3_Plugin {
 		}
 	}
 }
-?>

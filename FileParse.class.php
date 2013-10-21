@@ -247,4 +247,3 @@ class FileParse{
 		$this->excludeTypes = array();
 	}
 }
-?>
