@@ -33,11 +33,11 @@ abstract class CMS implements CMSInterface{
 	public static $_contentCache = array();
 
 	public function __construct( $section){
-		self::$_db = new SQuickDB();
+		self::$_db = new DB();
 		$this->setSection( $section );
 	}
 
-	public function addSection( $sectionName, SQuickForm $fields ){
+	public function addSection( $sectionName, Form $fields ){
 		$this->fields[ $sectionName ] = $fields;
 	}
 
