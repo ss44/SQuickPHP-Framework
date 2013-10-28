@@ -137,9 +137,13 @@ class FormField implements \ArrayAccess, \Iterator{
 		}
 
 		$str = "<input type='text' ";
-		$str .= "name='$this->elementName' ";
-		$str .= "value='".$value."' "; 
 
+		if ( !array_key_exists( 'name', $attributes ) ){
+			$str .= "name='$this->elementName' ";
+		}
+
+		$str .= "value='".$value."' "; 
+		//dim( $attributes );
 		if ( is_array($attributes) ) {
 			$this->addAttribute( $attributes );
 		}
@@ -159,7 +163,12 @@ class FormField implements \ArrayAccess, \Iterator{
 		}
 
 		$str = "<input type='text' ";
-		$str .= "name='$this->elementName' ";
+		
+		if ( !array_key_exists( 'name', $attributes ) ){
+			$str .= "name='{$this->elementName}' ";
+		}
+
+
 		$str .= "value='".date($format, $value)."' "; 
 
 		if ( is_array($attributes) ) {
@@ -185,7 +194,11 @@ class FormField implements \ArrayAccess, \Iterator{
 		}
 
 		$str = "<input type='hidden' ";
-		$str .= "name='$this->elementName' ";
+		
+		if ( !array_key_exists( 'name', $attributes ) ){
+			$str .= "name='{$this->elementName}' ";
+		}
+
 		$str .= "value='".$value."' "; 
 
 		if ( is_array($attributes) ) {
@@ -210,7 +223,13 @@ class FormField implements \ArrayAccess, \Iterator{
 			$this->addAttribute( $attributes );
 		}
 
-		$str = "<textarea name = '{$this->elementName}'";
+		$str = "<textarea ";
+
+		if ( !array_key_exists( 'name', $attributes ) ){
+			$str .= "name='{$this->elementName}' ";
+		}
+
+
 		$str .= $this->getAttrStr();
 	$str .= '>'. $value .'</textarea>';
 
@@ -227,8 +246,13 @@ public function getPasswordField( $attributes = array() ){
 			$value = $this->current();
 		}
 
-	$str = "<input type='password' ";
-		$str .= "name='$this->elementName' ";
+		$str = "<input type='password' ";
+		
+		if ( !array_key_exists( 'name', $attributes ) ){
+			$str .= "name='{$this->elementName}' ";
+		}
+
+
 		$str .= "value='".$value."' "; 
 		
 		if ( is_array($attributes) ) {
@@ -250,7 +274,11 @@ public function getPasswordField( $attributes = array() ){
 	 */
 	public function getSelectField( $attributes = array() ){
 
-		$str = "<select name='$this->elementName' ";
+		$str = "<select ";
+
+		if ( !array_key_exists( 'name', $attributes ) ){
+			$str .= "name='{$this->elementName}' ";
+		}
 
 		if ( is_array( $attributes )){
 			$this->addAttribute( $attributes );
@@ -287,7 +315,13 @@ public function getPasswordField( $attributes = array() ){
 
 
 		foreach ( $this->normalFields as $key=>$field ){
-			$str .= "<label><input type='radio' name='{$this->elementName}' value='{$key}' ";
+			$str .= "<label><input type='radio' ";
+			
+			if ( !array_key_exists( 'name', $attributes ) ){
+				$str .= "name='{$this->elementName}' ";
+			}
+
+			$str .= "value='{$key}' ";
 			$str .= (in_array($key, $selectedValues)) ? ' CHECKED ' : '';
 			$str .= ' />';
 			$str .= "{$field}</label>";
@@ -318,12 +352,12 @@ public function getPasswordField( $attributes = array() ){
 	}
 	
 	public function getAttrStr(){
-	$str = '';
-		
-	foreach ($this->attributes as $name => $val ){
-			$str = "$name = '".join( ' ', $val )."'"; 
+		$str = '';
+
+		foreach ($this->attributes as $name => $val ){
+			$str .= "$name = '".join( ' ', $val )."' "; 
 		}
-		
+
 		return $str; 
 	}
 	
@@ -335,6 +369,10 @@ public function getPasswordField( $attributes = array() ){
 	 */
 	public function setNormalFields( $fields ){
 		$this->normalFields = $fields;
+	}
+
+	public function getNormalFields(){
+		return $this->normalFields;
 	}
 
 	/**
