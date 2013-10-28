@@ -62,7 +62,7 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 	
 	public function loadFromArray( $array ){
 		$this->_resetData();
-		$this->importArray( $array, false );
+		$this->importFromArray( $array, false );
 
 		if ( method_exists($this, '_afterLoad')){
 			$this->_afterLoad();
@@ -95,9 +95,10 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 			$id = $this->_db->insert($q);
 			$this->{$this->_primaryKey} = $id;
 		}else{
-			$id = $this->_db->update($q);	
+			$this->_db->update($q);
+			$id = $this->{$this->_primaryKey};
 		}
-		
+
 		$this->_id = $id;
 
 		if ( !is_array( $this->_primaryKey ) ){

@@ -12,7 +12,7 @@ class DBException extends Exception{
 	}
 
 	public static function invalidEnumKey( $message ){
-		return self::( $message, self::INVALID_ENUM_KEY );
+		return parent::__construct( $message, self::INVALID_ENUM_KEY );
 	}
 
 	public static function invalidField( $message ){

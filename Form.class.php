@@ -116,4 +116,3 @@ class SQuickFormException extends Exception{
 	} 	
 } 
 
-?>

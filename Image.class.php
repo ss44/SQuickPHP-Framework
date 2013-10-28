@@ -139,5 +139,3 @@ class Image{
 class SQuickImageException extends SQuickException{
 
 }
-
-?>
