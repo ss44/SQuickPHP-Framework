@@ -162,7 +162,6 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 		case 'str:upper':
 		case 'str:md5':
 		case 'postalcode':
-
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
 			}elseif( $type == "str:upper" ){
@@ -212,10 +211,10 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 			}
 
 			return (string) $var;
+
 		case 'date':
-			$arg1 = '/^(\d{1,2})[-\/\.]\s?(\d{1,2})[-\/\.]\s?(\d{2,4})\s?$/';
-			if (!preg_match($arg1, $var, $tmp)) return null;
-			return mktime(0, 0, 0, $tmp[2], $tmp[1], $tmp[3]);
+			$time = strtotime( $var ); 
+			return $time !== false ? $time : null;
 
 		case 'dec':
 		case 'float':
@@ -233,6 +232,10 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 
 		case 'bool':
 			return (boolean) $var;
+
+		case 'array':
+			if ( !is_array( $var ) ) return null;
+			return $var;
 	}
 }
 
@@ -507,7 +510,7 @@ if (!function_exists('redirect')){
 function loadSQuickIniFile( $siteIni, $setConstants = false ){
 
 	$config = parse_ini_file( $siteIni, true );
-
+	
 	//If server is defined then get our server modes.
 	$servers = array();
 	$currentSite = array_key_exists( 'current_site', $config) ? $config['current_site'] : null;
@@ -619,6 +622,7 @@ function SQuickAutoLoader( $class ){
 			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
 			'classFileName' => __DIR__.'/'.$class.'.class.php',
 			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
+			'traitFileName' => __DIR__.'/'.$class.'.trait.php',
 		);
 		
 		foreach ( $filePaths as $path ){
@@ -628,6 +632,10 @@ function SQuickAutoLoader( $class ){
 		}
 	}
 
+}
+
+function __e( $var ){
+	echo $var;
 }
 
 spl_autoload_register(__NAMESPACE__.'\\SQuickAutoLoader');
