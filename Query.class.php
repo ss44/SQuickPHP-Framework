@@ -214,12 +214,19 @@ class Query{
 			$field = $pair['field'];
 			$value = $pair['value'];
 				
+			//If value is null then store is as null;
+			if ( is_null($value) ){
+				$value = 'null';
+				$pair['escape'] = false;
+			}
+
 			$fields .= '`'.$this->escape($field).'`';
 				
 			if ($pair['escape'])
-				$values .= (is_numeric($value) || is_bool($value)) ? $value : '\''.$this->escape($value).'\'';
+				// Can't use is_numeric since strings which look like numeric hex will pass.
+				$values .= (is_int($value) || is_float($value) || is_bool($value)) ? $value : '\''.$this->escape($value).'\'';
 			else
-			$values .= $value;
+				$values .= $value;
 			/*
 			 if (is_numeric($value))
 				$values .= $value;
@@ -262,7 +269,14 @@ class Query{
 			
 			if (is_null($value))  $str .= "$field = NULL";
 			elseif (is_numeric($value)) $str .= $field.'='.$value;
-			else $str .= $field.'='.'\''.$this->escape($value).'\'';
+			else{
+				if ( (bool) $pair['escape'] ){
+					$str .= $field.'='.'\''.$this->escape($value).'\'';
+				}
+				else{
+					$str .= $field.'='.$value;
+				}
+			} 
 				
 			if ($x < $count){
 				$str .= ', ';
