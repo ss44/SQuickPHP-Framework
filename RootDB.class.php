@@ -186,6 +186,7 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 
 
 	public function importSQuickDBResultRow( $row ){
+		$this->loadFromArray( $row );
 		$this->importFromArray( $row );
 	}
 }
