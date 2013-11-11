@@ -47,12 +47,13 @@ class DriverMySQL extends Driver{
 		$this->checkConnection();
 
 		$r = mysql_query($q->getSelect(), $this->connection);
-
+		$result = array();
 		if (mysql_num_rows($r) > 0){
 			while ($row = mysql_fetch_assoc($r)){
 				$result[] = $row[ $column ];
 			}
 		}
+
 		return $result;
 	}
 
