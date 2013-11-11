@@ -240,13 +240,15 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 }
 
 function cleanArrayKey($key, $array){
-	if (!array_key_exists( $key, $array )) return null;
+	$array = (array) $array;
+
+	if (!array_key_exists( $key, $array ))
+		return null;
 
 	$args = func_get_args();
 	$type = isset($args[2]) ? $args[2] : null;
 	$arg1 = isset($args[3]) ? $args[3] : null;
 	$arg2 = isset($args[4]) ? $args[4] : null;
-
 
 	return cleanVar( $array[$key], $type, $arg1, $arg2);
 }
@@ -521,8 +523,10 @@ function loadSQuickIniFile( $siteIni, $setConstants = false ){
 	}
 
 	//Determine which instance the site is currently running.
-	foreach ( $servers as $key=>$serverList ){
-		foreach (explode(',', $serverList) as $server ){
+	foreach ( $servers as $key => $serverList ){
+		$slist = explode(',', $serverList);
+
+		foreach ( $slist as $server ){
 			if (isset($_SERVER) && array_key_exists('SERVER_NAME', $_SERVER) ){
 				$serverName = $_SERVER['SERVER_NAME'];
 				$found = strpos( strtolower($server), strtolower($serverName) );
@@ -534,7 +538,7 @@ function loadSQuickIniFile( $siteIni, $setConstants = false ){
 			}
 
 			//If we found it then ue that key.
-			if ( $found !== false){
+			if ( $found === 0){
 				$currentSite = $key;
 				break 2;
 			}
