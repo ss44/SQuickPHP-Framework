@@ -48,7 +48,7 @@ abstract class DataObj implements \ArrayAccess{
 		
 		if (!array_key_exists( $key, $this->_data ) ) 
 			throw new DataException("Invalid $key. Does not exist in data");
-		
+
 		return $this->_data[ $key ];
 	}
 	public function offsetExists( $key ){
@@ -56,11 +56,16 @@ abstract class DataObj implements \ArrayAccess{
 	}
 
 	public function offsetGet( $key ){
-		$key = 'normal_'.strtolower( $key );
-
-		if ( method_exists( $this, $key) ){
-			return call_user_func( array($this, $key) );
+		$keyMethod = 'normal_'.strtolower( $key );
+		
+		if ( method_exists( $this, $keyMethod) ){
+			return call_user_func( array($this, $keyMethod) );
 		}
+
+		if ( array_key_exists( $key, $this->_normal ) ){
+			return $this->_normal[ $key ];
+		}
+		
 	}
 
 
@@ -75,11 +80,19 @@ abstract class DataObj implements \ArrayAccess{
 
 	public function importFromArray( $array ){
 		
-		foreach ( $this->_data as $key => $data ){
-			if ( array_key_exists( $key, $array ) ){
-				$this->_data[ $key ] = $array[ $key ];
+		foreach ( $array as $key => $value ){
+			if ( array_key_exists( $key, $this->_data ) ){
+				$this->_data[ $key ] = $value;
+			}else{
+				$this->_normal[ $key ] = $value;
 			}
 		}
+
+		// foreach ( $this->_data as $key => $data ){
+		// 	if ( array_key_exists( $key, $array ) ){
+		// 		$this->_data[ $key ] = $array[ $key ];
+		// 	}
+		// }
 
 	}
 
