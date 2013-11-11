@@ -131,11 +131,16 @@ class FormField implements \ArrayAccess, \Iterator{
 	 * @return String that can be used to create a text field
 	 */
 	public function getTextField( $attributes = null ){
+		$attributes = (array) $attributes;
+
 		$value = $this->value;
+		
 		if ( is_array($this->value) ){
 			$value = $this->current();
 		}
+		
 
+		
 		$str = "<input type='text' ";
 
 		if ( !array_key_exists( 'name', $attributes ) ){
@@ -157,7 +162,10 @@ class FormField implements \ArrayAccess, \Iterator{
 	}
 	
 	public function getTextFieldDate( $format, $attributes = null ){
+		$attributes = (array) $attributes;
+
 		$value = $this->value;
+		
 		if ( is_array($this->value) ){
 			$value = $this->current();
 		}
@@ -188,7 +196,10 @@ class FormField implements \ArrayAccess, \Iterator{
 	 * @return String that can be used to create a text field
 	 */
 	public function getHiddenField( $attributes = null ){
+		$attributes = (array) $attributes;
+
 		$value = $this->value;
+		
 		if ( is_array($this->value) ){
 			$value = $this->current();
 		}
@@ -214,6 +225,8 @@ class FormField implements \ArrayAccess, \Iterator{
 	}
 	
 	public function getTextArea( $attributes = null ){
+		$attributes = (array) $attributes;
+
 		$value = $this->value;
 		if ( is_array($this->value) ){
 			$value = $this->current();
@@ -240,8 +253,11 @@ class FormField implements \ArrayAccess, \Iterator{
 	 * Gets a password field for this given field.
 	 * @return String that represents an input field for a password field.
 	 */
-public function getPasswordField( $attributes = array() ){
-	$value = $this->value;
+	public function getPasswordField( $attributes = array() ){
+		$attributes = (array) $attributes;
+
+		$value = $this->value;
+		
 		if ( is_array($this->value) ){
 			$value = $this->current();
 		}
@@ -273,6 +289,7 @@ public function getPasswordField( $attributes = array() ){
 	 * @return String that represents a select field.
 	 */
 	public function getSelectField( $attributes = array() ){
+		$attributes = (array) $attributes;
 
 		$str = "<select ";
 
@@ -304,8 +321,9 @@ public function getPasswordField( $attributes = array() ){
 	}
 
 	public function getRadioFields( $attributes = array() ){
-		
-	if ( is_array( $attributes )){
+		$attributes = (array) $attributes;
+
+		if ( is_array( $attributes )){
 			$this->addAttribute( $attributes );
 		}
 
@@ -325,10 +343,10 @@ public function getPasswordField( $attributes = array() ){
 			$str .= (in_array($key, $selectedValues)) ? ' CHECKED ' : '';
 			$str .= ' />';
 			$str .= "{$field}</label>";
- 	}
+ 		}
 
 
- 	return $str;
+ 		return $str;
 	}
 
 	/**
