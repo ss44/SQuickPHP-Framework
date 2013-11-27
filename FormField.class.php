@@ -34,16 +34,25 @@ class FormField implements \ArrayAccess, \Iterator{
 	 * @param Additional arguments are the same as SQuickValidate(); 
 	 */
 	public function __construct( $elementName, $required = false){
-	$this->elementName = $elementName;
-	$this->isRequired = $required;
+		$this->elementName = $elementName;
+		$this->setRequired( $required );
+
+		if (func_num_args() > 2){
+			$args = func_get_args();
+			call_user_func_array( array($this, 'setValidationRule'), array_splice($args, 2) );
+		}
+	}
 	
-	if (func_num_args() > 2){
+	public function setValidationRule(){
 		$arguments = func_get_args();
-		$numOfArguments = func_num_args()-2;
-		$this->validateArguments = array_slice( $arguments, 2, $numOfArguments);
+		$this->validateArguments = $arguments;
+
 	}
+
+	public function setRequired( $isRequired ){
+		$this->isRequired = $isRequired;
 	}
-	
+
 	public function __get( $key ){
 		switch ( $key ){
 			
@@ -110,8 +119,8 @@ class FormField implements \ArrayAccess, \Iterator{
 		$cleanParams[] = $value;
 		$cleanParams = array_merge( $cleanParams, $this->validateArguments );
 
-			//Set the clean value.
-			$this->clean = call_user_func_array( 'cleanVar',  $cleanParams);
+		//Set the clean value.
+		$this->clean = call_user_func_array( 'cleanVar',  $cleanParams);
 	}
 	
 	// If value is not empty but is not clean then show an error for invalid field.
