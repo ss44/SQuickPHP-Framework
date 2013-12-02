@@ -310,8 +310,9 @@ class Query{
 		$counter = 0;
 		$currentGroup = 0;
 		$endedGroup = true;
-		//print_r($this->wheres);
+		
 		foreach ($this->wheres as $where){
+			
 			if ($where['group'] > $currentGroup){
 				$str .= '(';
 				$boolType = $this->whereGroups[ $where['group'] ];
@@ -323,6 +324,9 @@ class Query{
 				$currentGroup = $where['group'];
 				$endedGroup = true;
 			}
+
+			// If operator is like then don't 
+
 			//@TODO this statement needs fixing
 			if (is_null($where['value'])){
 				$str .= $where['field'];
@@ -335,7 +339,9 @@ class Query{
 					$str .= $where['operator'] . ' null';
 				}
 			}
-			elseif (is_numeric($where['value'])) $str .= $where['field'] . $where['operator'] . $where['value'];
+			elseif (is_numeric($where['value'])){
+				$str .= $where['field'] .' ' . $where['operator'] . ' ' . $where['value'];
+			}
 			elseif (is_array($where['value'])){
 				//array_walk($where, 'mysql_escape_string');
 				//TODO do a type check using typeof() to determine if is a real int instead checking if is numeric
@@ -345,7 +351,10 @@ class Query{
 				$obj = $where['value'];
 				$str .= $where['field'] . ' IN (' . $where['value']->getSelect(). ')';
 			}
-			else $str .= $where['field'] . ' ' . $where['operator'] . " '" . $this->escape($where['value'])."'";
+			else{
+				$str .= $where['field'] . ' ' . $where['operator'] . " '" . $this->escape($where['value'])."'";
+			}
+
 			$counter++;
 			if ($counter != $numberOfItems){
 				$str .= " $boolType ";
