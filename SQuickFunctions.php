@@ -97,13 +97,15 @@ if (!function_exists('dim')){
 
 		for ($x = 1; $x < $level; $x++){
 			if (isset($dbg[$x])){
-				$file = $dbg[$x]['file'];
-				$line = $dbg[$x]['line'];
+				if ( array_key_exists('file', $dbg[$x]) ){
+					$file = $dbg[$x]['file'];
+					$line = $dbg[$x]['line'];
 
-				if (PHP_SAPI == "cli" || $isAjax || $logFile){
-					echo "\t$file @ $line \n";
-				}else{
-					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+					if (PHP_SAPI == "cli" || $isAjax || $logFile){
+						echo "\t$file @ $line \n";
+					}else{
+						echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+					}
 				}
 			}
 		}
@@ -155,8 +157,10 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	}
 
 	switch ($type){
+		
 		case 'email':
-			$arg1 = 'email';
+			return filter_var( $var, FILTER_VALIDATE_EMAIL ) !== false ? $var : null;
+
 		case 'str':
 		case 'str:lower':
 		case 'str:upper':
