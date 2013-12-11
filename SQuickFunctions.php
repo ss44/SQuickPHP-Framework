@@ -12,9 +12,11 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
+
 $tmp = register_shutdown_function(__NAMESPACE__.'\\SQuickCleanShutdown');;
 $tmp = set_error_handler (__NAMESPACE__.'\\SQuickCleanError', E_ALL);
 ini_set('display_errors', 0);
+define('SQUICK_TIME_START', microtime(true) );
 
 /**
  * Debug tools
@@ -24,7 +26,7 @@ if (!function_exists('oops')){
 
 		// If they have defined a log file always use that.
 		$logFile = defined('SQUICK_LOG_FILE') ? SQUICK_LOG_FILE : $logFile;
-
+		$time = microtime(true) - SQUICK_TIME_START;
 		$dbg = debug_backtrace();
 
 		$file = $dbg[0]['file'];
@@ -35,9 +37,9 @@ if (!function_exists('oops')){
 		ob_start();
 
 		if (PHP_SAPI == "cli" || $isAjax || $logFile){
-			echo "\n-- $file @ $line --\n";
+			echo "\n-- $file @ $line [{$time} ms] --\n";
 		}else{
-			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+			echo "<pre><H1>". $file ." @ ". $line . "[{$time} ms]"."</H1>";
 		}
 
 		for ($x = 1; $x < $level; $x++){
@@ -46,9 +48,9 @@ if (!function_exists('oops')){
 				$line = $dbg[$x]['line'];
 
 				if (PHP_SAPI == "cli" || $isAjax || $logFile){
-					echo "\t-- $file @ $line --\n";
+					echo "\t-- $file @ $line [{$time} ms] --\n";
 				}else{
-					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+					echo "<center><H3>". $file ." @ ". $line . '[{$time} ms]' . "</H3></center>";
 				}
 			}
 		}
@@ -85,26 +87,28 @@ if (!function_exists('dim')){
 
 		$file = $dbg[0]['file'];
 		$line = $dbg[0]['line'];
+		$time = microtime(true) - SQUICK_TIME_START;
 
 		$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 		ob_start();
 
 		if (PHP_SAPI == "cli" || $isAjax || $logFile){
-			echo "\n-- $file @ $line --\n";
+			echo "\n-- $file @ $line [{$time} ms] --\n";
 		}else{
-			echo "<pre><H1>". $file ." @ ". $line ."</H1>";
+			echo "<pre><H1>". $file ." @ ". $line . "[{$time} ms]" . "</H1>";
 		}
 
 		for ($x = 1; $x < $level; $x++){
 			if (isset($dbg[$x])){
+
 				if ( array_key_exists('file', $dbg[$x]) ){
 					$file = $dbg[$x]['file'];
 					$line = $dbg[$x]['line'];
 
 					if (PHP_SAPI == "cli" || $isAjax || $logFile){
-						echo "\t$file @ $line \n";
+						echo "\t$file @ $line [{$time} ms]\n";
 					}else{
-						echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+						echo "<center><H3>". $file ." @ ". $line . "[{$time} ms] " . "</H3></center>";
 					}
 				}
 			}
@@ -465,6 +469,7 @@ function SQuickCleanShutdown(){
 	if ($errorLogFile){
 		$contents = ob_get_contents();
 		$fh = fopen( $errorLogFile, 'a');
+		oops($contents);
 		fwrite($fh, $contents);
 		fclose($fh);
 	}else{
@@ -500,11 +505,11 @@ if (!function_exists('redirect')){
 	 *
 	 * @param String $url to redirect to.
 	 */
-	function redirect( $url ){
+	/* function redirect( $url ){
 
 		header("Location: $url ");
 		exit;
-	}
+	} */
 }
 
 /**
