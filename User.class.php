@@ -7,9 +7,9 @@
  * Basic table structure should be
  * 
  */
+namespace SQuick;
 
-
-class SQuickUser extends SQuickRootDB{
+class User extends RootDB{
 	protected $_userTable = null; // Name of the table that we want to read user information from
 	protected $_usernameField = null; //The field which we want to treat as the username field.
 	protected $_passwordField = null; //The field that we want to read the password from.

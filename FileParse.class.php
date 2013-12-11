@@ -20,8 +20,9 @@
  * @modified 10-July-2009
  */
 
+namespace SQuick;
 
-class simpleFileParse{
+class FileParse{
 
 	protected $folders = array();
 	protected $files = array();
@@ -246,4 +247,3 @@ class simpleFileParse{
 		$this->excludeTypes = array();
 	}
 }
-?>

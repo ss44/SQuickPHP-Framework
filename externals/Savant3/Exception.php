@@ -26,4 +26,3 @@
 
 class Savant3_Exception extends Exception {
 }
-?>

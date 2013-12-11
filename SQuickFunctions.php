@@ -12,9 +12,9 @@
  * @param bool $showVarDump By default uses a print_r unless specified to use var_dump
  */
 
-// $tmp = register_shutdown_function('SQuickCleanShutdown');;
-$tmp = set_error_handler ('SQuickCleanError', 0);
-ini_set('display_errors', -1);
+$tmp = register_shutdown_function(__NAMESPACE__.'\\SQuickCleanShutdown');;
+$tmp = set_error_handler (__NAMESPACE__.'\\SQuickCleanError', E_ALL);
+ini_set('display_errors', 0);
 
 /**
  * Debug tools
@@ -97,13 +97,15 @@ if (!function_exists('dim')){
 
 		for ($x = 1; $x < $level; $x++){
 			if (isset($dbg[$x])){
-				$file = $dbg[$x]['file'];
-				$line = $dbg[$x]['line'];
+				if ( array_key_exists('file', $dbg[$x]) ){
+					$file = $dbg[$x]['file'];
+					$line = $dbg[$x]['line'];
 
-				if (PHP_SAPI == "cli" || $isAjax || $logFile){
-					echo "\t$file @ $line \n";
-				}else{
-					echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+					if (PHP_SAPI == "cli" || $isAjax || $logFile){
+						echo "\t$file @ $line \n";
+					}else{
+						echo "<center><H3>". $file ." @ ". $line ."</H3></center>";
+					}
 				}
 			}
 		}
@@ -143,14 +145,27 @@ if (!function_exists('dim')){
 function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 	$checks = false;
 
+	if ( preg_match( '/(.*)\:array$/', $type, $tmp  ) ){
+		// Cast the var as an array
+		$var = (array) $var;
+
+		foreach ( $var as &$cleaned ){
+			$cleaned = cleanVar( $cleaned, $tmp[1], $arg1, $arg2 );
+		}
+
+		return $var;
+	}
+
 	switch ($type){
+		
 		case 'email':
-			$arg1 = 'email';
+			return filter_var( $var, FILTER_VALIDATE_EMAIL ) !== false ? $var : null;
+
 		case 'str':
 		case 'str:lower':
 		case 'str:upper':
 		case 'str:md5':
-
+		case 'postalcode':
 
 			if ($type == 'str:lower'){
 				$var = strtolower( $var );
@@ -177,7 +192,7 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 				//Treat like a regex
 				switch ($arg1){
 					case 'date':
-						$arg1 = '/^\d{1,2}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{2,4}\s?$/';
+						$arg1 = '/^\d{1,2,4}[-\/\.]\s?\d{1,2}[-\/\.]\s?\d{1,2,4}\s?$/';
 						break;
 					case 'zipcode':
 						$arg1 = '/^[0-9]{5}$/';
@@ -185,9 +200,12 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 					case 'email':
 						$arg1 = '/^[a-zA-Z][\w\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$/';
 						break;
+					case 'postalcode':
+						$arg1 = '/[A-Z]\d[A-z][\s\-]?\d[A-Z]\d$/i';
+						break;
 				}
-				$valid = preg_match( $arg1, $var );
 
+				$valid = preg_match( $arg1, $var );
 				if (!$valid){
 					return null;
 				}
@@ -198,10 +216,10 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 			}
 
 			return (string) $var;
+
 		case 'date':
-			$arg1 = '/^(\d{1,2})[-\/\.]\s?(\d{1,2})[-\/\.]\s?(\d{2,4})\s?$/';
-			if (!preg_match($arg1, $var, $tmp)) return null;
-			return mktime(0, 0, 0, $tmp[2], $tmp[1], $tmp[3]);
+			$time = strtotime( $var ); 
+			return $time !== false ? $time : null;
 
 		case 'dec':
 		case 'float':
@@ -219,17 +237,23 @@ function cleanVar($var, $type = 'str', $arg1 = null, $arg2 = null){
 
 		case 'bool':
 			return (boolean) $var;
+
+		case 'array':
+			if ( !is_array( $var ) ) return null;
+			return $var;
 	}
 }
 
 function cleanArrayKey($key, $array){
-	if (!array_key_exists( $key, $array )) return null;
+	$array = (array) $array;
+
+	if (!array_key_exists( $key, $array ))
+		return null;
 
 	$args = func_get_args();
 	$type = isset($args[2]) ? $args[2] : null;
 	$arg1 = isset($args[3]) ? $args[3] : null;
 	$arg2 = isset($args[4]) ? $args[4] : null;
-
 
 	return cleanVar( $array[$key], $type, $arg1, $arg2);
 }
@@ -490,10 +514,10 @@ if (!function_exists('redirect')){
  * @param string $siteIni The site ini to use.
  * @return returns an array of the parsed config file.
  */
-function loadSQuickIniFile( $siteIni ){
+function loadSQuickIniFile( $siteIni, $setConstants = false ){
 
 	$config = parse_ini_file( $siteIni, true );
-
+	
 	//If server is defined then get our server modes.
 	$servers = array();
 	$currentSite = array_key_exists( 'current_site', $config) ? $config['current_site'] : null;
@@ -504,8 +528,10 @@ function loadSQuickIniFile( $siteIni ){
 	}
 
 	//Determine which instance the site is currently running.
-	foreach ( $servers as $key=>$serverList ){
-		foreach (explode(',', $serverList) as $server ){
+	foreach ( $servers as $key => $serverList ){
+		$slist = explode(',', $serverList);
+
+		foreach ( $slist as $server ){
 			if (isset($_SERVER) && array_key_exists('SERVER_NAME', $_SERVER) ){
 				$serverName = $_SERVER['SERVER_NAME'];
 				$found = strpos( strtolower($server), strtolower($serverName) );
@@ -517,7 +543,7 @@ function loadSQuickIniFile( $siteIni ){
 			}
 
 			//If we found it then ue that key.
-			if ( $found !== false){
+			if ( $found === 0){
 				$currentSite = $key;
 				break 2;
 			}
@@ -557,6 +583,19 @@ function loadSQuickIniFile( $siteIni ){
 			}
 		}
 	}
+
+	// Set the constants for all our variables in the form of SECTION_VAR_NAME
+	if ( $setConstants ){
+		foreach ( $config as $title => $vars ){
+			foreach ( $vars as $sVarName => $sValue ){
+				$cName = strtoupper( $title . '_' . $sVarName );
+				if ( !defined($cName) ){
+					define( $cName, $sValue );
+				}
+			}
+		}
+	}
+
 	return $config;
 }
 
@@ -578,19 +617,34 @@ function SQuickAutoLoader( $class ){
 	
 	if ( substr( $class, 0, strlen('squick')) == "SQuick"){
 		
-		$filePaths = array(
-			'classFileName' => __DIR__.'/'.$class.'.class.php',
-			'interfaceFileName' => __DIR__.'/'.$class.'interface.php',
-			'dbClassFileName' => __DIR__.'/DBDrivers/'.$class.'.class.php',
-			'dbInterfaceFileName' => __DIR__.'/DBDrivers/'.$class.'interface.php'
-		);
+		// If it looks like a namespace then remove that from the equation
+		$classStr = explode('\\', $class);
+			
+		// If it breaks apart string then unset the first part
+		if ( count( $classStr) > 1 ){
+			
+			unset( $classStr[0] );
+			$class = join( '/', $classStr );
+		}
 
+		$filePaths = array(
+			'exceptionFileName' => __DIR__.'/'.$class.'.exception.php',
+			'classFileName' => __DIR__.'/'.$class.'.class.php',
+			'interfaceFileName' => __DIR__.'/'.$class.'.interface.php',
+			'traitFileName' => __DIR__.'/'.$class.'.trait.php',
+		);
+		
 		foreach ( $filePaths as $path ){
-			if ( file_exists( $path ) )
+			if ( file_exists( $path ) ){
 				require_once( $path );
+			}
 		}
 	}
 
 }
 
-spl_autoload_register('SQuickAutoLoader');
+function __e( $var ){
+	echo $var;
+}
+
+spl_autoload_register(__NAMESPACE__.'\\SQuickAutoLoader');

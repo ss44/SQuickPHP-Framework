@@ -6,7 +6,9 @@
  * @created 30-Jan-2011
  */
 
-class SQuickException extends Exception{
+namespace SQuick;
+
+class Exception extends \Exception{
  	
  	const MISSING_PARAMS = 1000;
  	const INVALID_PARAMS = 1001;
