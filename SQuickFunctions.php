@@ -505,11 +505,11 @@ if (!function_exists('redirect')){
 	 *
 	 * @param String $url to redirect to.
 	 */
-	/* function redirect( $url ){
+	 function redirect( $url ){
 
 		header("Location: $url ");
 		exit;
-	} */
+	} 
 }
 
 /**
