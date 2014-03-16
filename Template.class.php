@@ -27,7 +27,11 @@ class Template{
 
 	public function __construct( \SQuick\Template\Config $config = null ){
 		// Hardcode the driver for now.
-		$this->_driver = new Template\DriverSavant3();
+		//$this->_driver = new Template\DriverSavant3();
+	}
+
+	public function setDriver( $driver ){
+		$this->_driver = $driver;
 	}
 
 	/**
@@ -104,4 +108,7 @@ class Template{
 		$this->_driver->__set( $key, $var );
 	}
 	
+	public function setCachePath( $path ){
+		$this->_driver->setCachePath( $path );
+	}
  }

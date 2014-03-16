@@ -50,5 +50,8 @@ class DriverSmarty3 extends \SQuick\Template\Driver{
 		$this->_js[] = $path;
 	}
 
+	public function setCachePath( $path ){
+		$this->_smarty->setCompiledir( $path );
+	}
 	
 }

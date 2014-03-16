@@ -13,5 +13,5 @@ abstract class Driver{
 	public abstract function setPath( $path );
 	public abstract function addCSS( $path );
 	public abstract function addJS( $path );
-
+	public abstract function setCachePath( $path );
 }

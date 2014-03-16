@@ -40,4 +40,6 @@ class DriverSavant3 extends \SQuick\Template\Driver{
 	public function addJS( $path ){
 		$this->_savant->_js[] = $path;
 	}
+
+	public function setCachePath( $path ){}
 }
