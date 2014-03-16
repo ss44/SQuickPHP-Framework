@@ -655,5 +655,5 @@ function __e( $var ){
 spl_autoload_register(__NAMESPACE__.'\\SQuickAutoLoader');
 
 if ( defined( 'SQUICK_INI_FILE') ){
-	SQuick\Config::loadConfig();
+	SQuick\Config::loadConfig( SQUICK_INI_FILE );
 }
