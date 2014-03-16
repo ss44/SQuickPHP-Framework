@@ -3,9 +3,14 @@
  * Common config for Templating.
  */
  
-namespace \SQuick\Template;
+namespace SQuick\Template;
 
 class Config{
-	public $engine;
-	public $cache;
+	
+	use \SQuick\ConfigTrait;
+
+	public function __construct(){
+		$this->setConfig( 'driver', null );
+		$this->setconfig( 'cache', null );
+	}	
 }
