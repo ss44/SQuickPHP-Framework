@@ -26,9 +26,6 @@ class Template{
 	protected $_path = null;
 
 	public function __construct( \SQuick\Template\Config $config = null ){
-		
-	dim( $config );
-
 		// Hardcode the driver for now.
 		$this->_driver = new Template\DriverSavant3();
 	}
