@@ -22,8 +22,16 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 
 	public static $_dbInstance = null;
 
-	public function __construct( $keyId = null ){
+
+
+	public function __construct( $keyId = null, DB $db = null ){
 		
+		if ( is_null( $db ) ){
+			$db = new DB();
+		}
+
+		$this->useDB( $db );
+
 		$this->_tableInfo = $this->_db->getTableStructure( $this->_table );
 
 		$this->_resetData();
