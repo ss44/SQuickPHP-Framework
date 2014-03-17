@@ -16,10 +16,9 @@ $_SQuickDBTableStructures = array();
 
 class DB{
 
-	protected $_sdbConfig = null;
+	protected $_config = null;
 	protected $connection = null;
-	protected $_DBCONFIG = null;
-
+	
 	protected $_driver = null;
 
 	protected $_lastID = null;
@@ -27,14 +26,13 @@ class DB{
 	//Some db engines use objects for thease cases we can store those classes in here.
 	protected $_dbObj = null;
 	
-	public function __construct( $_CONFIG = null){
-		$__SQUICK_CONFIG = null;
+	public function __construct( sdb\Config $config = null ){
 
-		if ( array_key_exists( '__SQUICK_CONFIG', $GLOBALS) )
-			$__SQUICK_CONFIG = $GLOBALS['__SQUICK_CONFIG'];
+		if ( is_null( $config ) ){
+			$config = Config::getConfig('DB', 'SQuick\DB\Config');
+		}
 
-		$this->_DBCONFIG = (!is_null($_CONFIG) && is_array($__SQUICK_CONFIG) && array_key_exists('SQuickDB', $__SQUICK_CONFIG)) ? $__SQuick_CONFIG['DB'] : $_CONFIG; 
-		$this->_sdbConfig = new sdb\Config();
+		$this->_config = $config;
 
 		$this->connect();
 	}
@@ -212,39 +210,18 @@ class DB{
 	}
 	
 	protected function connect(){
-		if (is_array($this->_DBCONFIG)){
-			//Try to load settings from array
-			$this->_sdbConfig->type = array_key_exists('type', $this->_DBCONFIG) ? $this->_DBCONFIG['type'] : null;
-			$this->_sdbConfig->path = array_key_exists('path', $this->_DBCONFIG) ? $this->_DBCONFIG['path'] : null;
-			$this->_sdbConfig->name = array_key_exists('name', $this->_DBCONFIG) ? $this->_DBCONFIG['name'] : null;
-			$this->_sdbConfig->user = array_key_exists('user', $this->_DBCONFIG) ? $this->_DBCONFIG['user'] : null;
-			$this->_sdbConfig->pass = array_key_exists('password', $this->_DBCONFIG) ? $this->_DBCONFIG['password'] : null;
-			$this->_sdbConfig->flags = array_key_exists('flags', $this->_DBCONFIG) ? $this->_DBCONFIG['flags'] : null;
-		}elseif(defined('SQUICK_INI_FILE') && file_exists(SQUICK_INI_FILE)){
-			//If not found then check settings from config file
-			$siteIni = SQUICK_INI_FILE;
-			$config = loadSQuickIniFile( $siteIni );
-
-			$dbSettings = array_key_exists('DB', $config) ? $config['DB'] : array();
-			
-			if (array_key_exists('type', $dbSettings)) $this->_sdbConfig->type = $dbSettings['type'];
-			if (array_key_exists('path', $dbSettings)) $this->_sdbConfig->path = $dbSettings['path'];
-			if (array_key_exists('name', $dbSettings)) $this->_sdbConfig->name = $dbSettings['name'];
-			if (array_key_exists('user', $dbSettings)) $this->_sdbConfig->user = $dbSettings['user'];
-			if (array_key_exists('password', $dbSettings)) $this->_sdbConfig->pass = $dbSettings['password'];
-			if (array_key_exists('flags', $dbSettings)) $this->_sdbConfig->flags = $config['flags'];	
-		}else{
-			throw new DBException('No db settings provided.');
-		}
 
 		//Try loading db if unable to load throw an exception.
-		switch ($this->_sdbConfig->type){
+		switch ( $this->_config->getConfig('type') ){
+			
 			case 'mysql':
-				$this->_driver = new sdb\DriverMySQL( $this->_sdbConfig );
+				$this->_driver = new sdb\DriverMySQL( $this->_config );
 				break;
+			
 			case 'sqlite3':
-				$this->_driver = new sdb\DriverSQLLite3(  $this->_sdbConfig );
+				$this->_driver = new sdb\DriverSQLLite3(  $this->_config );
 				break;
+				
 			default:
 				throw new DBException('Invalid/Unsupported database type.');
 		}
@@ -259,7 +236,7 @@ class DB{
 	}
 
 	protected function queryChanges( Query $q ){
-		$q->setDBType( $this->_sdbConfig->type );
+		$q->setDBType( $this->_config->type );
 	}
 
 	/**

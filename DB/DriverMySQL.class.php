@@ -175,11 +175,12 @@ class DriverMySQL extends Driver{
 	}
 
 	public function connect(){
-		$this->connection = mysql_connect($this->config->path, $this->config->user, $this->config->pass);
+		$this->connection = mysql_connect($this->config->path, $this->config->user, $this->config->password );
 		mysql_select_db($this->config->name, $this->connection);
 
-		if (!$this->connection) 
+		if (!$this->connection){
 			throw new \SQuick\DBException("Unable to connect to DB.");
+		}
 
 	}
 
