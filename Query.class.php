@@ -157,7 +157,7 @@ class Query{
 	}
 
 	public function addLimit( $value ){
-		$this->limit = (is_int($value)) ? $value : null;
+		$this->limit = (is_numeric($value)) ? (int) $value : null;
 	}
 
 	public function addOffset( $value ){
@@ -176,13 +176,20 @@ class Query{
 		if (!$this->tables) return false;
 		else $str .= $this->prepareTables();
 
-		if ($this->joins) $str .= ' '.$this->prepareJoins();
+		if ($this->joins)
+			$str .= ' '.$this->prepareJoins();
 
-		if ($this->wheres) $str .= ' '.$this->prepareWhere();
+		if ($this->wheres)
+			$str .= ' '.$this->prepareWhere();
 
-		if ($this->groups) $str .= ' '.$this->prepareGroup();
-		if ($this->havings) $str .= ' '.$this->prepareHaving();
-		if ($this->orders) $str .= ' ' . $this->prepareOrders();
+		if ($this->groups)
+			$str .= ' '.$this->prepareGroup();
+
+		if ($this->havings)
+			$str .= ' '.$this->prepareHaving();
+
+		if ($this->orders)
+			$str .= ' ' . $this->prepareOrders();
 
 		if (!is_null($this->limit)) $str .= ' LIMIT '.$this->limit;
 		if (!is_null($this->offset)) $str .= ' OFFSET '. $this->offset;
