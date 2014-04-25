@@ -16,6 +16,9 @@ class DriverSmarty3 extends \SQuick\Template\Driver{
 		$this->_smarty = new \Smarty();
 		// $this->_savant->_js = array();
 		// $this->_savant->_css = array();
+
+		$this->_smarty->registerFilter( 'variable', array('\SQuick\Template\DriverSmarty3', 'escFilter') );
+		$this->_smarty->registerPlugin( 'modifier', 'json', 'json_encode');
 	}
 
 	public function __set( $key, $var ){
@@ -53,5 +56,12 @@ class DriverSmarty3 extends \SQuick\Template\Driver{
 	public function setCachePath( $path ){
 		$this->_smarty->setCompiledir( $path );
 	}
-	
+
+	public static function escFilter($content,$smarty) { 
+   		return htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+   	}
+
+   	public static function json( $str ){
+   		return json_encode( $str );
+   	}
 }
