@@ -197,5 +197,10 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 		$this->loadFromArray( $row );
 		$this->importFromArray( $row );
 	}
+
+	public function __wakeup(){
+		$this->_db = new DB();
+		self::$_dbInstance = $this->_db;
+	}
 }
 
