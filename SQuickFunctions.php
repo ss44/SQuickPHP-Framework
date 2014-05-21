@@ -527,9 +527,21 @@ function loadSQuickIniFile( $siteIni, $setConstants = false ){
 	$servers = array();
 	$currentSite = array_key_exists( 'current_site', $config) ? $config['current_site'] : null;
 
+	// Standarize the config by making all sections and keys lowercase
+	$configNew = array();
+	foreach( $config as $sectionName => $values ){
+		$configNew[ strtolower( $sectionName ) ] = array();
+
+		foreach( $values as $option => $value ){
+			$configNew[ strtolower( $sectionName ) ][ strtolower( $option ) ] = $value;			
+		}
+	}
+
+	$config = $configNew;
+
 	//If current site is null then no need to read the server variable.
-	if (is_null($currentSite) && array_key_exists('SERVER', $config)){
-		$servers = $config['SERVER'];
+	if (is_null($currentSite) && array_key_exists('server', $config)){
+		$servers = $config['server'];
 	}
 
 	//Determine which instance the site is currently running.
@@ -564,6 +576,8 @@ function loadSQuickIniFile( $siteIni, $setConstants = false ){
 			if (preg_match('/^(.*)_'.$currentSite.'$/i', $key, $tmp)){
 				// If we have a general catch all name already, then replace it's values with those of our newly found key.
 				// By merging over the new values over the old ones.
+				// $tmp[1] = strtoupper( $tmp[1] );
+
 				if ( array_key_exists( $tmp[1], $config) ){
 					$config[ $tmp[1] ] = array_merge($config[ $tmp[1] ], $config[ $key ]);
 				}
@@ -588,7 +602,7 @@ function loadSQuickIniFile( $siteIni, $setConstants = false ){
 			}
 		}
 	}
-
+	
 	// Set the constants for all our variables in the form of SECTION_VAR_NAME
 	if ( $setConstants ){
 		foreach ( $config as $title => $vars ){

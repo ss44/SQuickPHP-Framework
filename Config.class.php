@@ -30,7 +30,7 @@ class Config{
 
 		$instances = self::loadConfig( $configFile );
 
-		$configSection = strtoupper($configSection);
+		$configSection = strtolower($configSection);
 		
 		$configObj = null;
 
