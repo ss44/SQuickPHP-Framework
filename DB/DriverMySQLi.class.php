@@ -27,6 +27,8 @@ class DriverMySQLi extends Driver{
 		$this->checkConnection();
 
 		$r = $this->exec( $q->getSelect() );
+		
+		$result = null;
 
 		if ( $r->num_rows > 0 ){
 			$result = $r->fetch_assoc();
@@ -100,13 +102,14 @@ class DriverMySQLi extends Driver{
 	public function update( \SQuick\Query $q ){
 		$this->checkConnection();
 
-		$result = mysql_query($q->getUpdate(), $this->connection);
+		$result = $this->exec( $q->getUpdate() );
+
 		return $result;
 	}
 
 	public function insert( \SQuick\Query $q ){
 		$this->checkConnection();
-		$this->setEscape( array( $this, ) );
+		
 		$result = $this->exec( $q->getInsert() );
 		
 		$this->_lastID = $this->connection->insert_id;
@@ -214,6 +217,6 @@ class DriverMySQLi extends Driver{
 	}
 
 	public function escape( $var ){
-		return $this->connection->string_escape( $var );
+		return $this->connection->real_escape_string( $var );
 	}
 }
