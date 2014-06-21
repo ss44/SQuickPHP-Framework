@@ -153,4 +153,8 @@ class DriverSqlite3 extends DBDriver{
 	public function connect( $config ){
 
 	}
+
+	public function escape( $var ){
+		SQLite3::escapeString( $value );
+	}
 }

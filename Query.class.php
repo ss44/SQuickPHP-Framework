@@ -22,11 +22,13 @@ class Query{
 	public $orders = array();
 	public $whereGroups = array();
 	public $whereGroupCounter = 0;
+
 	protected $limit = null;
 	protected $offset = null;
 	protected $_dbType = null;
-
 	protected $_query = null;
+	protected $_escapeMethod = null;
+
 
 	public function __construct( $query = null ){
 		$this->whereGroups[0] = 'AND';
@@ -442,11 +444,19 @@ class Query{
 	
 	protected function prepareFields(){}
 
+	public function setEscape( $escapeMethod ){
+		$this->_escapeMethod = $escapeMethod;
+	}
+
 	/**
 	 * Escapes a string based on the escape method set in this class.
 	 */
 	protected function escape( $value ){
 		
+		if ( $this->_escapeMethod ){
+			return call_user_func( $this->_escapeMethod, $value );
+		}
+
 		switch ($this->_dbType){
 			case 'mysql':
 				return mysql_real_escape_string( $value );

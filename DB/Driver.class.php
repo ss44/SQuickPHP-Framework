@@ -32,7 +32,6 @@ abstract class Driver{
 
 	abstract public function getTableStructure( $tableName );
 	abstract public function parseEnum( $fieldInfo );
-
 	abstract public function connect();
-} 
-
+	abstract public function escape( $var );
+}

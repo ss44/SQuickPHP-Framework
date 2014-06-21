@@ -16,6 +16,9 @@ class ResultMySQLi extends Result{
 		$this->next();
 	}
 
+	public function escape( $var ){
+		return $ths->connection->escape_string( $var );
+	}
 
 	public function current(){
 

@@ -106,7 +106,7 @@ class DriverMySQLi extends Driver{
 
 	public function insert( \SQuick\Query $q ){
 		$this->checkConnection();
-
+		$this->setEscape( array( $this, ) );
 		$result = $this->exec( $q->getInsert() );
 		
 		$this->_lastID = $this->connection->insert_id;
@@ -211,6 +211,9 @@ class DriverMySQLi extends Driver{
 		}
 
 		return $fixedKeyArray;
+	}
 
+	public function escape( $var ){
+		return $this->connection->string_escape( $var );
 	}
 }

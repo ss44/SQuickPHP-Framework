@@ -25,7 +25,8 @@ class DB{
 
 	//Some db engines use objects for thease cases we can store those classes in here.
 	protected $_dbObj = null;
-	
+
+
 	public function __construct( sdb\Config $config = null ){
 
 		if ( is_null( $config ) ){
@@ -209,6 +210,10 @@ class DB{
 		return $this->_driver->getAssoc($q, $key, $value );
 	}
 	
+	public function escape( $var ){
+		return $this->_driver->escape( $var );
+	}
+
 	protected function connect(){
 
 		//Try loading db if unable to load throw an exception.
@@ -238,6 +243,7 @@ class DB{
 
 	protected function queryChanges( Query $q ){
 		$q->setDBType( $this->_config->type );
+		$q->setEscape( array($this, 'escape') );
 	}
 
 	/**
