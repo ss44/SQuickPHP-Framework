@@ -128,7 +128,7 @@ class DriverSqlite3 extends DBDriver{
 		
 		return $this->update( $q)
 	}
-	public function exec( SQuickQuery $q ){
+	public function exec( $q ){
 		if (is_null($this->_dbObj)) $this->connect();
 		@$result = $this->_dbObj->exec( $q->getQuery() );
 		

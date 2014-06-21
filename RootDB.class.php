@@ -22,8 +22,6 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 
 	public static $_dbInstance = null;
 
-
-
 	public function __construct( $keyId = null, DB $db = null ){
 		
 		if ( is_null( $db ) ){
@@ -194,8 +192,9 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 
 
 	public function importSQuickDBResultRow( $row ){
+		
 		$this->loadFromArray( $row );
-		$this->importFromArray( $row );
+		// $this->importFromArray( $row );
 	}
 
 	public function __wakeup(){

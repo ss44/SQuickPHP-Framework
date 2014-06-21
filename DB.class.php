@@ -215,7 +215,8 @@ class DB{
 		switch ( $this->_config->getConfig('type') ){
 			
 			case 'mysql':
-				$this->_driver = new sdb\DriverMySQL( $this->_config );
+			case 'mysqli':
+				$this->_driver = new sdb\DriverMySQLi( $this->_config );
 				break;
 			
 			case 'sqlite3':

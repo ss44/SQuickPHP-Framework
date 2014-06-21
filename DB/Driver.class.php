@@ -28,7 +28,7 @@ abstract class Driver{
 	abstract public function insert( \SQuick\Query $q );
 	abstract public function delete( \SQuick\Query $q );
 	abstract public function upsert( \SQuick\Query $q );
-	abstract public function exec( \SQuick\Query $q );
+	abstract public function exec( $q );
 
 	abstract public function getTableStructure( $tableName );
 	abstract public function parseEnum( $fieldInfo );
