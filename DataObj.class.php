@@ -82,7 +82,8 @@ abstract class DataObj implements \ArrayAccess{
 		
 		foreach ( $array as $key => $value ){
 			if ( array_key_exists( $key, $this->_data ) ){
-				$this->_data[ $key ] = $value;
+				// $this->_data[ $key ] = $value;
+				$this->$key = $value;
 			}else{
 				$this->_normal[ $key ] = $value;
 			}

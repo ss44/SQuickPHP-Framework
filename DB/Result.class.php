@@ -11,6 +11,15 @@ abstract class Result implements \Iterator{
 	protected $_objToUse = null;
 	protected $_keyField = null;
 
+	protected $_db = null;
+
+	protected $result;
+
+	public function __construct( \SQuick\DB $db, $result ){
+		$this->_db = $db;
+		$this->result = $result;
+	}
+
 	public function setHelperObj( $className ){
 		$this->_objToUse = $className;
 	}

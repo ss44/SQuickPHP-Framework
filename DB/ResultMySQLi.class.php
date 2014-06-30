@@ -7,12 +7,11 @@ namespace SQuick\DB;
 
 class ResultMySQLi extends Result{
 
-	protected $result = null;
 	protected $counter = 0;
 	protected $row = null;
 
-	public function __construct( $result ){
-		$this->result = $result;
+	public function __construct( $db, $result ){
+		parent::__construct( $db, $result );		
 		$this->next();
 	}
 
@@ -24,7 +23,10 @@ class ResultMySQLi extends Result{
 
 		if ( parent::getHelperObj() ) {
 			$helper = $this->getHelperObj();
+			
 			$tmp = new $helper();
+			$tmp->useDB( $this->_db );
+
 			$tmp->importSQuickDBResultRow( $this->row );
 			return $tmp;
 		}

@@ -95,8 +95,7 @@ class DriverMySQLi extends Driver{
 	public function getResult( \SQuick\Query $q ){
 		$this->checkConnection();
 		$r = $this->exec( $q->getSelect() );
-
-		return new ResultMySQLi( $r );
+		return new ResultMySQLi( $this->getDB(), $r );
 	}
 
 	public function update( \SQuick\Query $q ){

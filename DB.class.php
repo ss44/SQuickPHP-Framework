@@ -221,11 +221,11 @@ class DB{
 			
 			case 'mysql':
 			case 'mysqli':
-				$this->_driver = new sdb\DriverMySQLi( $this->_config );
+				$this->_driver = new sdb\DriverMySQLi( $this->_config, $this );
 				break;
 			
 			case 'sqlite3':
-				$this->_driver = new sdb\DriverSQLLite3(  $this->_config );
+				$this->_driver = new sdb\DriverSQLLite3(  $this->_config, $this );
 				break;
 				
 			default:

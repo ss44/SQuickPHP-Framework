@@ -11,10 +11,13 @@ abstract class Driver{
 	
 	protected $connection = null;
 	protected $config = null;
+	protected $db = null;
+
 	public  $lastInsertID = null;
 
-	public function __construct( Config $config ){
+	public function __construct( Config $config, $db ){
 		$this->config = $config;
+		$this->db = $db;
 	}
 
 	abstract public function getAll( \SQuick\Query $q );
@@ -34,4 +37,8 @@ abstract class Driver{
 	abstract public function parseEnum( $fieldInfo );
 	abstract public function connect();
 	abstract public function escape( $var );
+
+	public function getDB(){
+		return $this->db;
+	}
 }

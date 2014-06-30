@@ -186,7 +186,7 @@ abstract class RootDB extends DataObj implements DB\ResultRow{
 		self::$_dbInstance = $db;
 	}
 
-	public static function getDBInstance(){
+	public static function getDB(){
 		return self::$_dbInstance;
 	}
 
