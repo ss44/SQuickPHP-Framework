@@ -194,6 +194,10 @@ class DB{
 		
 		$tmpData = $this->getRow($tmpQuery);
 		
+		if (!is_array($tmpData) ){
+			return 0;
+		}
+
 		return reset($tmpData);
 	}
 	
